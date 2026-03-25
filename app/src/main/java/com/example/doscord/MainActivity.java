@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void newMethod() {
+    public void openRegisterActivity() {
 
     }
 }
