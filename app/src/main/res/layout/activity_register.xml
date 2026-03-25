@@ -37,35 +37,50 @@
         app:srcCompat="@drawable/back" />
 
     <FrameLayout
+        android:id="@+id/blackBar"
         android:layout_width="0dp"
-        android:layout_height="50dp"
+        android:layout_height="48dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="24dp"
         android:background="@drawable/input_background"
-        android:foregroundGravity="clip_horizontal"
-        android:outlineProvider="none"
-        app:layout_constraintCircleRadius="5dp"
+        android:padding="4dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title1" >
+        app:layout_constraintTop_toBottomOf="@+id/title1">
+
+        <View
+            android:id="@+id/selector"
+            android:layout_width="160dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:background="@drawable/bg_gray_rounded" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:paddingStart="2dp"
-            android:paddingTop="2dp"
-            android:paddingEnd="2dp"
-            android:paddingBottom="2dp"
-            android:weightSum="2">
+            android:orientation="horizontal">
 
-            <View
-                android:id="@+id/btBg"
+            <Button
+                android:id="@+id/btnPhone"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Phone"
+                android:gravity="center"
+                android:textAllCaps="false"
+                android:background="@android:color/transparent"/>
+
+            <Button
+                android:id="@+id/btnEmail"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Email"
+                android:gravity="center"
+                android:textAllCaps="false"
+                android:background="@android:color/transparent"/>
+
         </LinearLayout>
     </FrameLayout>
 
