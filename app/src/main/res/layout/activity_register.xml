@@ -8,14 +8,27 @@
     android:background="#1c1d23"
     tools:context=".RegisterActivity">
 
+    <ImageButton
+        android:id="@+id/regBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/back"
+        android:onClick="backToHome"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/back" />
+
     <TextView
-        android:id="@+id/title1"
+        android:id="@+id/regTitle"
         android:layout_width="272dp"
         android:layout_height="44dp"
-        android:layout_marginTop="76dp"
+        android:layout_marginTop="60dp"
         android:gravity="center"
         android:letterSpacing="0.02"
-        android:text="Enter phone or email"
+        android:text="@string/phoneOrMail"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -23,37 +36,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
-        android:id="@+id/imageButton2"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="10dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="Back"
-        android:onClick="backToHome"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/back" />
-
     <FrameLayout
-        android:id="@+id/blackBar"
+        android:id="@+id/regBar"
         android:layout_width="0dp"
         android:layout_height="48dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginEnd="20dp"
         android:background="@drawable/input_background"
-        android:padding="4dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title1">
+        app:layout_constraintTop_toBottomOf="@+id/regTitle">
 
         <View
-            android:id="@+id/selector"
+            android:id="@+id/regSelector"
             android:layout_width="160dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
+            android:layout_margin="4dp"
             android:background="@drawable/bg_gray_rounded" />
 
         <LinearLayout
@@ -62,26 +64,97 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btnPhone"
+                android:id="@+id/regPhone"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Phone"
+                android:background="@android:color/transparent"
                 android:gravity="center"
+                android:text="@string/phone"
                 android:textAllCaps="false"
-                android:background="@android:color/transparent"/>
+                android:textColor="#FFFFFF" />
 
             <Button
-                android:id="@+id/btnEmail"
+                android:id="@+id/regEmail"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Email"
+                android:background="@android:color/transparent"
                 android:gravity="center"
+                android:text="@string/email"
                 android:textAllCaps="false"
-                android:background="@android:color/transparent"/>
+                android:textColor="#FFFFFF" />
 
         </LinearLayout>
     </FrameLayout>
+
+    <TextView
+        android:id="@+id/label1"
+        android:layout_width="200dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:letterSpacing="0.02"
+        android:text="@string/phone_number"
+        android:textColor="#B7B7B7"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/regBar" />
+
+    <EditText
+        android:id="@+id/phoneOrEmail"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/input_background"
+        android:ems="10"
+        android:hint="@string/phone_number"
+        android:inputType="phone"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#767676"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/label1"
+        tools:ignore="TextFields" />
+
+    <Button
+        android:id="@+id/regNext"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:alpha="0.5"
+        android:backgroundTint="#5865f2"
+        android:enabled="false"
+        android:text="@string/next"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/phoneOrEmail" />
+
+    <TextView
+        android:id="@+id/label2"
+        android:layout_width="369dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="7dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="7dp"
+        android:letterSpacing="0.02"
+        android:text="Unable to register using phone number. Please register with an e-mail address."
+        android:textColor="#D37070"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/regNext" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

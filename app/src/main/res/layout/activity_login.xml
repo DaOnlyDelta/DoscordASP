@@ -15,9 +15,9 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
-        android:backgroundTint="#1E2B8C"
+        android:backgroundTint="#5865f2"
         android:onClick="loginReq"
-        android:text="Log In"
+        android:text="@string/login"
         android:textColor="@color/white"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,11 +32,45 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:letterSpacing="0.02"
-        android:text="Password"
+        android:text="@string/password"
         android:textColor="#999898"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/emailOrUsername" />
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView4">
+
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toStartOf="@id/passwordEye"
+            android:background="@drawable/input_background"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:paddingStart="15dp"
+            android:paddingEnd="48dp"
+            android:textSize="16sp" />
+
+        <ImageButton
+            android:id="@+id/passwordEye"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@android:color/transparent"
+            android:onClick="showPass"
+            android:src="@drawable/eye_closed" />
+    </RelativeLayout>
 
     <ImageButton
         android:id="@+id/imageButton"
@@ -45,7 +79,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
         android:background="@android:color/transparent"
-        android:contentDescription="Back"
+        android:contentDescription="@string/back"
         android:onClick="backToHome"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -58,7 +92,7 @@
         android:layout_marginTop="55dp"
         android:gravity="center"
         android:letterSpacing="0.02"
-        android:text="Welcome back!"
+        android:text="@string/welcome_back"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -74,7 +108,7 @@
         android:layout_marginTop="-5dp"
         android:gravity="center"
         android:letterSpacing="0.02"
-        android:text="We're so excited to see you again"
+        android:text="@string/we_re_so_excited_to_see_you_again"
         android:textColor="#A2A2A2"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -89,7 +123,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
         android:letterSpacing="0.02"
-        android:text="Email or Username"
+        android:text="@string/email_or_username"
         android:textColor="#999898"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -110,54 +144,22 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        tools:ignore="TextFields" />
 
-    <FrameLayout
-        android:id="@+id/frameLayout"
-        android:layout_width="0dp"
-        android:layout_height="45dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView4">
-
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/input_background"
-            android:ems="10"
-            android:inputType="text|textPassword"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:textSize="16sp" />
-
-        <ImageButton
-            android:id="@+id/passwordEye"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_marginStart="356dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="Back"
-            android:onClick="showPass"
-            app:srcCompat="@drawable/eye_open" />
-
-    </FrameLayout>
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="217dp"
         android:layout_height="30dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="3dp"
         android:clickable="true"
         android:gravity="center|left"
         android:onClick="forgotPassword"
         android:text="Forgot your password?"
         android:textColor="#3B9FDC"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/frameLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/relativeLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
