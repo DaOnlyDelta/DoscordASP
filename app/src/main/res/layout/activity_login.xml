@@ -8,72 +8,8 @@
     android:background="#202024"
     tools:context=".LoginActivity">
 
-    <Button
-        android:id="@+id/login2"
-        android:layout_width="0dp"
-        android:layout_height="55dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
-        android:backgroundTint="#5865f2"
-        android:onClick="loginReq"
-        android:text="@string/login"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="100dp"
-        android:layout_height="22dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:letterSpacing="0.02"
-        android:text="@string/password"
-        android:textColor="#999898"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/emailOrUsername" />
-
-    <RelativeLayout
-        android:id="@+id/relativeLayout"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView4">
-
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toStartOf="@id/passwordEye"
-            android:background="@drawable/input_background"
-            android:hint="@string/password"
-            android:inputType="textPassword"
-            android:paddingStart="15dp"
-            android:paddingEnd="48dp"
-            android:textSize="16sp" />
-
-        <ImageButton
-            android:id="@+id/passwordEye"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:background="@android:color/transparent"
-            android:onClick="showPass"
-            android:src="@drawable/eye_closed" />
-    </RelativeLayout>
-
     <ImageButton
-        android:id="@+id/imageButton"
+        android:id="@+id/logBack"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"
@@ -86,10 +22,10 @@
         app:srcCompat="@drawable/back" />
 
     <TextView
-        android:id="@+id/welcomeBack"
-        android:layout_width="272dp"
-        android:layout_height="44dp"
-        android:layout_marginTop="55dp"
+        android:id="@+id/logTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
         android:gravity="center"
         android:letterSpacing="0.02"
         android:text="@string/welcome_back"
@@ -102,35 +38,36 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/subTitle"
-        android:layout_width="280dp"
-        android:layout_height="37dp"
-        android:layout_marginTop="-5dp"
+        android:id="@+id/logSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:gravity="center"
         android:letterSpacing="0.02"
         android:text="@string/we_re_so_excited_to_see_you_again"
         android:textColor="#A2A2A2"
         android:textSize="14sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/welcomeBack" />
+        app:layout_constraintTop_toBottomOf="@+id/logTitle" />
 
     <TextView
-        android:id="@+id/textView3"
-        android:layout_width="200dp"
-        android:layout_height="22dp"
+        android:id="@+id/logLabel1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
         android:letterSpacing="0.02"
-        android:text="@string/email_or_username"
+        android:text="Email or Phone Number"
         android:textColor="#999898"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/subTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/logSubtitle" />
 
     <EditText
-        android:id="@+id/emailOrUsername"
+        android:id="@+id/LogMailOrPhone"
         android:layout_width="0dp"
         android:layout_height="45dp"
         android:layout_marginStart="20dp"
@@ -144,22 +81,86 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/logLabel1"
         tools:ignore="TextFields" />
+
+    <TextView
+        android:id="@+id/logLabel2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:letterSpacing="0.02"
+        android:text="@string/password"
+        android:textColor="#999898"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/LogMailOrPhone" />
+
+    <RelativeLayout
+        android:id="@+id/logPassContainer"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logLabel2">
+
+        <EditText
+            android:id="@+id/logPassword"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/input_background"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:paddingStart="15dp"
+            android:paddingEnd="48dp"
+            android:textSize="16sp" />
+
+        <ImageButton
+            android:id="@+id/logPassEye"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="8dp"
+            android:background="@android:color/transparent"
+            android:onClick="showPass"
+            android:src="@drawable/eye_closed" />
+    </RelativeLayout>
 
 
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="217dp"
-        android:layout_height="30dp"
+        android:id="@+id/forgotPass"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="3dp"
+        android:layout_marginTop="5dp"
         android:clickable="true"
         android:gravity="center|left"
         android:onClick="forgotPassword"
         android:text="Forgot your password?"
         android:textColor="#3B9FDC"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/relativeLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/logPassContainer" />
+
+    <Button
+        android:id="@+id/logNext"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:backgroundTint="#5865f2"
+        android:onClick="loginReq"
+        android:text="@string/login"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/forgotPass" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

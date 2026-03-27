@@ -68,8 +68,8 @@ public class RegisterActivity extends AppCompatActivity {
         );
 
         // References
-        TextView label = findViewById(R.id.label1);
-        EditText input = findViewById(R.id.phoneOrEmail);
+        TextView label = findViewById(R.id.regLabel);
+        EditText input = findViewById(R.id.legPhoneOrEmail);
 
         // Use arrays to allow mutation inside lambdas
         final String[] phoneText = {""};
@@ -140,11 +140,10 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void toDisplayReg(View v) {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, regDisplayActivity.class);
         startActivity(intent);
     }
-    public void backToHome(View v) {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+    public void finish(View v) {
+        finish();
     }
 }

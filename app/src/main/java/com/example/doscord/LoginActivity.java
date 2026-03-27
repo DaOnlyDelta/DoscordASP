@@ -1,21 +1,17 @@
 package com.example.doscord;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
-import kotlin.NotImplementedError;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -34,22 +30,19 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        passwordEditText = findViewById(R.id.password);
-        eyeButton = findViewById(R.id.passwordEye);
+        passwordEditText = findViewById(R.id.logPassword);
+        eyeButton = findViewById(R.id.logPassEye);
     }
 
-    public void backToHome(View v) {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-    }
+    public void finish(View v) { finish(); }
 
     public void forgotPassword(View v) {
         // Forgot password code placeholder
     }
 
     public void loginReq(View v) {
-        String emailOrUsername = ((EditText) findViewById(R.id.emailOrUsername)).getText().toString();
-        String password = ((EditText) findViewById(R.id.password)).getText().toString();
+        String emailOrUsername = ((EditText) findViewById(R.id.LogMailOrPhone)).getText().toString();
+        String password = ((EditText) findViewById(R.id.logPassword)).getText().toString();
 
         // Handle the req to the db here
     }
