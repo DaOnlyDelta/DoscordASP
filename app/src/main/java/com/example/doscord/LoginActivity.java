@@ -1,11 +1,16 @@
 package com.example.doscord;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -14,9 +19,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class LoginActivity extends AppCompatActivity {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-    public static final String BASE_URL = "https://doscord-api.duckdns.org/";
+public class LoginActivity extends AppCompatActivity {
 
     private EditText passwordEditText;
     private ImageButton eyeButton;
@@ -44,48 +51,112 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void loginReq(View v) {
-        String identifier = ((EditText) findViewById(R.id.LogMailOrPhone)).getText().toString().trim();
-        String password = ((EditText) findViewById(R.id.logPassword)).getText().toString().trim();
+        // 1. UI Lockdown & References
+        final Button loginBtn = findViewById(R.id.btnLogin);
+        final LinearLayout loadingDots = findViewById(R.id.loadingDots);
+        final EditText emailInput = findViewById(R.id.LogMailOrPhone);
+        final EditText passInput = findViewById(R.id.logPassword);
 
-        // 1. Initialize Retrofit
-        okhttp3.OkHttpClient client = new okhttp3.OkHttpClient.Builder()
-                .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .build();
+        String identifier = emailInput.getText().toString().trim();
+        String password = passInput.getText().toString().trim();
 
-        retrofit2.Retrofit retrofit = new retrofit2.Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .client(client) // Force the timeout
-                .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
-                .build();
+        if (identifier.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        ApiService apiService = retrofit.create(ApiService.class);
+        // 2. Lock UI & Close keyboard
+        startDotsAnimation();
+        loginBtn.setTextColor(android.graphics.Color.TRANSPARENT);
+        loadingDots.setVisibility(View.VISIBLE);
+        loginBtn.setEnabled(false);
 
-        // 2. Prepare the Request
+        emailInput.setEnabled(false);
+        passInput.setEnabled(false);
+        closeKeyboard();
+
+        // 3. Execute (Using the class-level apiService initialized in onCreate)
         LoginRequest loginRequest = new LoginRequest(identifier, password);
 
-        // 3. Execute the Call
-        Log.d("LOGIN_DEBUG", "Sending: " + identifier + " with pass: " + password);
-        apiService.login(loginRequest).enqueue(new retrofit2.Callback<LoginResponse>() {
+        RetrofitClient.getApiService().login(loginRequest).enqueue(new Callback<LoginResponse>() {
             @Override
-            public void onResponse(@NonNull retrofit2.Call<LoginResponse> call, @NonNull retrofit2.Response<LoginResponse> response) {
+            public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // SUCCESS!
                     String displayName = response.body().user.display_name;
-                    android.widget.Toast.makeText(LoginActivity.this, "Welcome " + displayName, android.widget.Toast.LENGTH_SHORT).show();
-
-                    // TODO: Start your HomeActivity here
+                    Toast.makeText(LoginActivity.this, "Welcome " + displayName, Toast.LENGTH_SHORT).show();
+                    // Intent to HomeActivity goes here
                 } else {
-                    android.widget.Toast.makeText(LoginActivity.this, "Login Failed: Check credentials", android.widget.Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
+                    resetLoginUI(loginBtn, emailInput, passInput);
                 }
             }
 
             @Override
-            public void onFailure(@NonNull retrofit2.Call<LoginResponse> call, @NonNull Throwable t) {
-                Log.e("API_ERROR", "Message: " + t.getMessage()); // Add this!
-                android.widget.Toast.makeText(LoginActivity.this, "Server Error", android.widget.Toast.LENGTH_SHORT).show();
+            public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
+                resetLoginUI(loginBtn, emailInput, passInput);
+                Log.e("STRESS_TEST", "Failure: " + t.getMessage());
+
+                if (t instanceof java.net.SocketTimeoutException) {
+                    Toast.makeText(LoginActivity.this, "Server is busy, try again", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(LoginActivity.this, "Connection Error", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+    }
+
+    private void startDotsAnimation() {
+        final View[] dots = {
+                findViewById(R.id.dot1),
+                findViewById(R.id.dot2),
+                findViewById(R.id.dot3)
+        };
+
+        for (int i = 0; i < dots.length; i++) {
+            final View dot = dots[i];
+
+            // Start at 30% opacity
+            dot.setAlpha(0.3f);
+
+            // Animate from 0.3 (dim) to 1.0 (bright) and back
+            ObjectAnimator animator = ObjectAnimator.ofFloat(dot, "alpha", 0.3f, 1f, 0.3f);
+            animator.setDuration(2000);
+            animator.setStartDelay(i * 500);
+            animator.setRepeatCount(ValueAnimator.INFINITE);
+            animator.setRepeatMode(ValueAnimator.RESTART);
+
+            dot.setTag(animator);
+            animator.start();
+        }
+    }
+
+    private void closeKeyboard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    private void resetLoginUI(Button btn, EditText email, EditText pass) {
+        LinearLayout loadingDots = findViewById(R.id.loadingDots);
+        int[] dotIds = {R.id.dot1, R.id.dot2, R.id.dot3};
+
+        for (int id : dotIds) {
+            View dot = findViewById(id);
+            ObjectAnimator anim = (ObjectAnimator) dot.getTag();
+            if (anim != null) {
+                anim.cancel();
+            }
+            dot.setAlpha(1.0f); // Make sure dots are solid if they ever show up again
+        }
+
+        // Standard UI Reset
+        btn.setEnabled(true);
+        btn.setTextColor(android.graphics.Color.WHITE);
+        loadingDots.setVisibility(View.GONE);
+        email.setEnabled(true);
+        pass.setEnabled(true);
     }
 
     public void showPass(View v) {
