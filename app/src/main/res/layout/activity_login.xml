@@ -16,7 +16,7 @@
         android:layout_marginTop="10dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/back"
-        android:onClick="backToHome"
+        android:onClick="finish"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/back" />

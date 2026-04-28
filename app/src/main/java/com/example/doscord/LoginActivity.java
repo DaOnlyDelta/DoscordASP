@@ -8,12 +8,15 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class LoginActivity extends AppCompatActivity {
+
+    public static final String BASE_URL = "https://doscord-api.duckdns.org/";
 
     private EditText passwordEditText;
     private ImageButton eyeButton;
@@ -41,10 +44,48 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void loginReq(View v) {
-        String emailOrUsername = ((EditText) findViewById(R.id.LogMailOrPhone)).getText().toString();
-        String password = ((EditText) findViewById(R.id.logPassword)).getText().toString();
+        String identifier = ((EditText) findViewById(R.id.LogMailOrPhone)).getText().toString().trim();
+        String password = ((EditText) findViewById(R.id.logPassword)).getText().toString().trim();
 
-        // Handle the req to the db here
+        // 1. Initialize Retrofit
+        okhttp3.OkHttpClient client = new okhttp3.OkHttpClient.Builder()
+                .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                .build();
+
+        retrofit2.Retrofit retrofit = new retrofit2.Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(client) // Force the timeout
+                .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
+                .build();
+
+        ApiService apiService = retrofit.create(ApiService.class);
+
+        // 2. Prepare the Request
+        LoginRequest loginRequest = new LoginRequest(identifier, password);
+
+        // 3. Execute the Call
+        Log.d("LOGIN_DEBUG", "Sending: " + identifier + " with pass: " + password);
+        apiService.login(loginRequest).enqueue(new retrofit2.Callback<LoginResponse>() {
+            @Override
+            public void onResponse(@NonNull retrofit2.Call<LoginResponse> call, @NonNull retrofit2.Response<LoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    // SUCCESS!
+                    String displayName = response.body().user.display_name;
+                    android.widget.Toast.makeText(LoginActivity.this, "Welcome " + displayName, android.widget.Toast.LENGTH_SHORT).show();
+
+                    // TODO: Start your HomeActivity here
+                } else {
+                    android.widget.Toast.makeText(LoginActivity.this, "Login Failed: Check credentials", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull retrofit2.Call<LoginResponse> call, @NonNull Throwable t) {
+                Log.e("API_ERROR", "Message: " + t.getMessage()); // Add this!
+                android.widget.Toast.makeText(LoginActivity.this, "Server Error", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void showPass(View v) {
