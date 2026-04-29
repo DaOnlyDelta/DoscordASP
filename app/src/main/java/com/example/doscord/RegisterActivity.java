@@ -1,5 +1,6 @@
 package com.example.doscord;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -8,6 +9,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -21,7 +23,11 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    public static final String BASE_URL = "https://doscord-api.duckdns.org/";
+    private View selector;
+    private FrameLayout blackBar;
+    private TextView label, warningTxt;
+    private EditText input;
+    private Button btnPhone, btnEmail, nextButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,91 +40,76 @@ public class RegisterActivity extends AppCompatActivity {
             return insets;
         });
 
-        View selector = findViewById(R.id.regSelector);
-        FrameLayout blackBar = findViewById(R.id.regBar);
+        initViews();
+        loadSavedData();
+        setupSelectorWidth();
+        setupListeners();
+    }
 
-        blackBar.post(() -> {
-            ViewGroup.MarginLayoutParams params =
-                    (ViewGroup.MarginLayoutParams) selector.getLayoutParams();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        handlePotentialErrorReturn();
+    }
 
-            int totalWidth = blackBar.getWidth();
+    private void initViews() {
+        selector = findViewById(R.id.regSelector);
+        blackBar = findViewById(R.id.regBar);
+        label = findViewById(R.id.regLabel);
+        input = findViewById(R.id.legPhoneOrEmail);
+        btnPhone = findViewById(R.id.regPhone);
+        btnEmail = findViewById(R.id.regEmail);
+        nextButton = findViewById(R.id.regNext);
+        warningTxt = findViewById(R.id.regWarning);
+    }
 
-            int totalMargins = (params.leftMargin + params.rightMargin) * 2;
-
-            int selectorWidth = (totalWidth - totalMargins) / 2;
-
-            params.width = selectorWidth;
-            selector.setLayoutParams(params);
-        });
-
-        Button btnPhone = findViewById(R.id.regPhone);
-        Button btnEmail = findViewById(R.id.regEmail);
-
-        btnPhone.setOnClickListener(v ->
-                selector.animate()
-                        .translationX(0)
-                        .setDuration(400)
-                        .setInterpolator(new DecelerateInterpolator())
-                        .start());
-
-        btnEmail.setOnClickListener(v ->
-                selector.animate()
-                        .translationX(selector.getWidth())
-                        .setDuration(400)
-                        .setInterpolator(new DecelerateInterpolator())
-                        .start()
-        );
-
-        // References
-        TextView label = findViewById(R.id.regLabel);
-        EditText input = findViewById(R.id.legPhoneOrEmail);
-
-        // Use arrays to allow mutation inside lambdas
-        final String[] phoneText = {""};
-        final String[] emailText = {""};
-
-        // Phone button
-        btnPhone.setOnClickListener(v -> {
-            // Save email text
-            emailText[0] = input.getText().toString();
-
-            // Restore phone text
-            input.setText(phoneText[0]);
-            input.setSelection(input.getText().length());
-
-            label.setText(R.string.phone_number);
-            input.setInputType(InputType.TYPE_CLASS_PHONE);
-            input.setHint(R.string.phone_number);
-
-            selector.animate()
-                    .translationX(0)
-                    .setDuration(200)
-                    .start();
-        });
-
-        // Email button
-        btnEmail.setOnClickListener(v -> {
-            // Save phone text
-            phoneText[0] = input.getText().toString();
-
-            // Restore email text
-            input.setText(emailText[0]);
-            input.setSelection(input.getText().length());
-
-            label.setText(R.string.email);
+    private void loadSavedData() {
+        // Check if we have an email saved
+        if (!RegDataHolder.email.isEmpty() && RegDataHolder.focused == 2) {
+            // Update UI to Email mode immediately (no animation needed yet)
+            input.setText(RegDataHolder.email);
             input.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
             input.setHint(R.string.email);
+            label.setText(R.string.email);
 
-            float moveX = blackBar.getWidth() / 2f;
+            // We need to move the selector to the right position
+            blackBar.post(() -> {
+                float moveX = blackBar.getWidth() / 2f;
+                selector.setTranslationX(moveX);
+            });
+            nextButton.setEnabled(true);
+            nextButton.setAlpha(1.0f);
+        }
+        // Otherwise check if we have a phone saved
+        else if (!RegDataHolder.phone.isEmpty()) {
+            input.setText(RegDataHolder.phone);
+            input.setInputType(InputType.TYPE_CLASS_PHONE);
+            input.setHint(R.string.phone_number);
+            label.setText(R.string.phone_number);
 
-            selector.animate()
-                    .translationX(moveX)
-                    .setDuration(200)
-                    .start();
+            selector.setTranslationX(0);
+            nextButton.setEnabled(true);
+            nextButton.setAlpha(1.0f);
+        }
+
+        // Set selection to end of text
+        input.setSelection(input.getText().length());
+    }
+
+    private void setupSelectorWidth() {
+        blackBar.post(() -> {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) selector.getLayoutParams();
+            int totalWidth = blackBar.getWidth();
+            int totalMargins = (params.leftMargin + params.rightMargin) * 2;
+            params.width = (totalWidth - totalMargins) / 2;
+            selector.setLayoutParams(params);
         });
+    }
 
-        // Button toggling
-        Button nextButton = findViewById(R.id.regNext);
+    private void setupListeners() {
+        btnPhone.setOnClickListener(v -> switchToPhone());
+        btnEmail.setOnClickListener(v -> switchToEmail());
+
         input.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -126,14 +117,11 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 boolean hasText = !s.toString().trim().isEmpty();
-
                 nextButton.setEnabled(hasText);
+                nextButton.animate().alpha(hasText ? 1.0f : 0.5f).setDuration(150).start();
 
-                if (hasText) {
-                    nextButton.setAlpha(1.0f); // fully visible
-                } else {
-                    nextButton.setAlpha(0.5f); // grayed out
-                }
+                // Hide warning when user starts fixing the mistake
+                warningTxt.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -141,11 +129,78 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    private void switchToPhone() {
+        RegDataHolder.email = input.getText().toString().trim();
+        RegDataHolder.focused = 1;
+        input.setText(RegDataHolder.phone);
+        input.setSelection(input.getText().length());
+        input.setInputType(InputType.TYPE_CLASS_PHONE);
+        input.setHint(R.string.phone_number);
+        label.setText(R.string.phone_number);
+
+        selector.animate().translationX(0).setDuration(200).start();
+    }
+
+    private void switchToEmail() {
+        RegDataHolder.phone = input.getText().toString().trim();
+        RegDataHolder.focused = 2;
+        input.setText(RegDataHolder.email);
+        input.setSelection(input.getText().length());
+        input.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        input.setHint(R.string.email);
+        label.setText(R.string.email);
+
+        float moveX = blackBar.getWidth() / 2f;
+        selector.animate().translationX(moveX).setDuration(200).start();
+    }
+
+    private void handlePotentialErrorReturn() {
+        if (RegDataHolder.errorCode == 1) {
+            RegDataHolder.clear();
+            finish();
+        } else if (RegDataHolder.errorCode == 102) {
+            warningTxt.setVisibility(View.VISIBLE);
+            warningTxt.setText(String.format("This %s is already taken!", (RegDataHolder.focused == 1) ? "phone number" : "email"));
+            input.requestFocus();
+            // Show keyboard automatically
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+
+            RegDataHolder.errorCode = 0;
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
     public void toDisplayReg(View v) {
-        Intent intent = new Intent(this, regDisplayActivity.class);
+        String identifier = input.getText().toString().trim();
+
+        if (RegDataHolder.focused == 2) {
+            if (!isValidEmail(identifier)) {
+                warningTxt.setVisibility(View.VISIBLE);
+                warningTxt.setText("Please enter a valid email address!");
+                return;
+            }
+        }
+
+        saveIdentifier();
+        Intent intent = new Intent(this, RegDisplayActivity.class);
         startActivity(intent);
     }
+
     public void finish(View v) {
+        saveIdentifier();
         finish();
+    }
+
+    public void saveIdentifier() {
+        String identifier = input.getText().toString().trim();
+        if (RegDataHolder.focused == 1) {
+            RegDataHolder.phone = identifier;
+        } else {
+            RegDataHolder.email = identifier;
+        }
     }
 }

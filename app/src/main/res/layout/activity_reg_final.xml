@@ -3,102 +3,152 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
+    android:animateLayoutChanges="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#202024"
-    tools:context=".LoginActivity">
+    android:background="#1c1d23"
+    tools:context=".RegFinalActivity">
+
+    <TextView
+        android:id="@+id/regFinalWarning"
+        android:layout_width="369dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="20dp"
+        android:letterSpacing="0.02"
+        android:textColor="@color/red"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.507"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnFinalContainer" />
+
+    <TextView
+        android:id="@+id/regFinalUserWarning"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="20dp"
+        android:letterSpacing="0.02"
+        android:text="@string/usernameWarning"
+        android:textColor="@color/gray"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.507"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/regFinalUsername" />
+
+    <TextView
+        android:id="@+id/regFinalPassWarning"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="20dp"
+        android:letterSpacing="0.02"
+        android:text="@string/passWeak"
+        android:textColor="@color/red"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.507"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/passContainer" />
+
+    <TextView
+        android:id="@+id/regFinalPassWarning2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="20dp"
+        android:letterSpacing="0.02"
+        android:text="@string/passwordWarning"
+        android:textColor="@color/gray"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.507"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/regFinalPassWarning" />
 
     <ImageButton
-        android:id="@+id/logBack"
+        android:id="@+id/regFinalBack"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
         android:background="@android:color/transparent"
-        android:contentDescription="@string/back"
         android:onClick="finish"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/back" />
 
     <TextView
-        android:id="@+id/logTitle"
+        android:id="@+id/regFinalTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="60dp"
-        android:gravity="center"
-        android:letterSpacing="0.02"
-        android:text="@string/welcome_back"
+        android:text="@string/nextCreateAnAccount"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/logSubtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:gravity="center"
-        android:letterSpacing="0.02"
-        android:text="@string/we_re_so_excited_to_see_you_again"
-        android:textColor="#A2A2A2"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logTitle" />
-
-    <TextView
-        android:id="@+id/logLabel1"
+        android:id="@+id/labelUser"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
-        android:letterSpacing="0.02"
-        android:text="Email or Phone Number"
+        android:text="USERNAME"
         android:textColor="#999898"
+        android:textSize="12sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logSubtitle" />
+        app:layout_constraintTop_toBottomOf="@+id/regFinalTitle" />
 
     <EditText
-        android:id="@+id/LogMailOrPhone"
+        android:id="@+id/regFinalUsername"
         android:layout_width="0dp"
         android:layout_height="48dp"
+        android:layout_marginHorizontal="20dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="5dp"
         android:layout_marginEnd="20dp"
         android:background="@drawable/input_background"
-        android:ems="10"
-        android:inputType="text"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:textSize="16sp"
+        android:hint="Username"
+        android:paddingHorizontal="15dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#767676"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logLabel1"
-        tools:ignore="TextFields" />
+        app:layout_constraintTop_toBottomOf="@+id/labelUser" />
 
     <TextView
-        android:id="@+id/logLabel2"
+        android:id="@+id/labelPass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
-        android:letterSpacing="0.02"
-        android:text="@string/password"
+        android:text="PASSWORD"
         android:textColor="#999898"
+        android:textSize="12sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/LogMailOrPhone" />
+        app:layout_constraintTop_toBottomOf="@+id/regFinalUserWarning" />
 
     <RelativeLayout
-        android:id="@+id/logPassContainer"
+        android:id="@+id/passContainer"
         android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"
@@ -106,10 +156,10 @@
         android:layout_marginEnd="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logLabel2">
+        app:layout_constraintTop_toBottomOf="@id/labelPass">
 
         <EditText
-            android:id="@+id/logPassword"
+            android:id="@+id/regFinalPassword"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/input_background"
@@ -120,7 +170,7 @@
             android:textSize="16sp" />
 
         <ImageButton
-            android:id="@+id/logPassEye"
+            android:id="@+id/regFinalEye"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentEnd="true"
@@ -131,50 +181,33 @@
             android:src="@drawable/eye_closed" />
     </RelativeLayout>
 
-
-    <TextView
-        android:id="@+id/forgotPass"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="5dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|left"
-        android:onClick="forgotPassword"
-        android:text="Forgot your password?"
-        android:textColor="#3B9FDC"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logPassContainer" />
-
     <FrameLayout
-        android:id="@+id/buttonContainer"
+        android:id="@+id/btnFinalContainer"
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/forgotPass">
+        app:layout_constraintTop_toBottomOf="@+id/regFinalPassWarning2">
 
         <Button
-            android:id="@+id/btnLogin"
+            android:id="@+id/regFinalNext"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:alpha="0.5"
             android:backgroundTint="#5865f2"
+            android:onClick="registerReq"
+            android:text="Next"
+            android:textAllCaps="false"
             android:textColor="@color/white"
-            android:textSize="18sp"
-            android:onClick="loginReq"
-            android:text="Login" />
+            android:textSize="16sp" />
 
         <LinearLayout
             android:id="@+id/loadingDots"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:orientation="horizontal"
             android:visibility="gone">
 
             <View

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1c1d23"
-    tools:context=".regDisplayActivity">
+    tools:context=".RegDisplayActivity">
 
     <ImageButton
         android:id="@+id/regDBack"
@@ -16,7 +16,7 @@
         android:layout_marginTop="10dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/back"
-        android:onClick="backToHome"
+        android:onClick="finish"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/back" />
@@ -28,6 +28,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:background="@android:color/transparent"
+        android:onClick="skip"
         android:text="Skip"
         android:textColor="#9C7AFF"
         android:textSize="18sp"
@@ -65,7 +66,7 @@
     <EditText
         android:id="@+id/regDDisplayName"
         android:layout_width="0dp"
-        android:layout_height="45dp"
+        android:layout_height="48dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="5dp"
         android:layout_marginEnd="20dp"
@@ -106,6 +107,7 @@
         android:alpha="0.5"
         android:backgroundTint="#5865f2"
         android:enabled="false"
+        android:onClick="openFinalReg"
         android:text="@string/next"
         android:textColor="@color/white"
         android:textSize="18sp"

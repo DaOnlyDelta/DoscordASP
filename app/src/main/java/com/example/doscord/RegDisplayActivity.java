@@ -14,7 +14,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class regDisplayActivity extends AppCompatActivity {
+public class RegDisplayActivity extends AppCompatActivity {
+
+    private EditText input;
+    private Button skipButton, nextButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +31,34 @@ public class regDisplayActivity extends AppCompatActivity {
         });
 
         // Button toggling
-        Button nextButton = findViewById(R.id.regDNext);
-        EditText input = findViewById(R.id.regDDisplayName);
+        initViews();
+        inputToggling();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // AUTO-BACK: If we are returning because of an email/phone error (102) or successful (1),
+        if (RegDataHolder.errorCode == 102 || RegDataHolder.errorCode == 1) {
+            finish();
+        }
+    }
+
+    public void initViews() {
+        nextButton = findViewById(R.id.regDNext);
+        skipButton = findViewById(R.id.regDSkip);
+        input = findViewById(R.id.regDDisplayName);
+
+        if (!RegDataHolder.displayName.isEmpty()) {
+            input.setText(RegDataHolder.displayName);
+            nextButton.setEnabled(true);
+            nextButton.setAlpha(1.0f);
+            skipButton.setEnabled(false);
+            skipButton.setAlpha(0.5f);
+        }
+    }
+
+    public void inputToggling() {
         input.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -37,14 +66,10 @@ public class regDisplayActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 boolean hasText = !s.toString().trim().isEmpty();
-
                 nextButton.setEnabled(hasText);
-
-                if (hasText) {
-                    nextButton.setAlpha(1.0f); // fully visible
-                } else {
-                    nextButton.setAlpha(0.5f); // grayed out
-                }
+                nextButton.animate().alpha(hasText ? 1.0f : 0.5f).setDuration(150).start();
+                skipButton.setEnabled(!hasText);
+                skipButton.animate().alpha(!hasText ? 1.0f : 0.5f).setDuration(150).start();
             }
 
             @Override
@@ -53,19 +78,19 @@ public class regDisplayActivity extends AppCompatActivity {
     }
 
     public void finish(View v) {
+        RegDataHolder.displayName = input.getText().toString().trim();
         finish();
     }
 
     public void skip(View v) {
-        Intent intent = new Intent(this, MainActivity.class);
-        // intent.setDisplayName();
+        Intent intent = new Intent(this, RegFinalActivity.class);
         startActivity(intent);
     }
 
-    public void openRegCreate(View v) {
-        Intent intent = new Intent(this, MainActivity.class);
-        String displayName = ((EditText) findViewById(R.id.regDDisplayName)).getText().toString();
-        // intent.setDisplayName();
+    public void openFinalReg(View v) {
+        RegDataHolder.displayName = input.getText().toString().trim();
+
+        Intent intent = new Intent(this, RegFinalActivity.class);
         startActivity(intent);
     }
 }

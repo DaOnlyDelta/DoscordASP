@@ -87,13 +87,13 @@ public class LoginActivity extends AppCompatActivity {
                     // Intent to HomeActivity goes here
                 } else {
                     Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
-                    resetLoginUI(loginBtn, emailInput, passInput);
+                    resetUI(loginBtn, emailInput, passInput);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
-                resetLoginUI(loginBtn, emailInput, passInput);
+                resetUI(loginBtn, emailInput, passInput);
                 Log.e("STRESS_TEST", "Failure: " + t.getMessage());
 
                 if (t instanceof java.net.SocketTimeoutException) {
@@ -138,7 +138,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void resetLoginUI(Button btn, EditText email, EditText pass) {
+    private void resetUI(Button btn, EditText email, EditText pass) {
         LinearLayout loadingDots = findViewById(R.id.loadingDots);
         int[] dotIds = {R.id.dot1, R.id.dot2, R.id.dot3};
 
@@ -162,14 +162,12 @@ public class LoginActivity extends AppCompatActivity {
     public void showPass(View v) {
         if (isPasswordVisible) {
             // Hide password
-            Log.d("Password Status", "Shown!");
             passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            eyeButton.setImageResource(R.drawable.eye_open);
+            eyeButton.setImageResource(R.drawable.eye_closed);
         } else {
             // Show password
-            Log.d("Password Status", "Hidden!");
             passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            eyeButton.setImageResource(R.drawable.eye_closed);
+            eyeButton.setImageResource(R.drawable.eye_open);
         }
         passwordEditText.setSelection(passwordEditText.getText().length()); // move the cursor to the very end of the text
         isPasswordVisible = !isPasswordVisible; // flip state

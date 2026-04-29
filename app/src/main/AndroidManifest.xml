@@ -15,7 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Doscord">
         <activity
-            android:name=".regDisplayActivity"
+            android:name=".RegFinalActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RegDisplayActivity"
             android:exported="false"
             android:theme="@style/Theme.Doscord" />
         <activity
