@@ -1,4 +1,4 @@
-package com.example.doscord;
+package com.example.doscord.api;
 
 public class CheckRequest {
     private String username;

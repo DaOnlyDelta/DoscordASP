@@ -1,4 +1,4 @@
-package com.example.doscord;
+package com.example.doscord.utils;
 
 public class RegDataHolder {
     public static String email = "";

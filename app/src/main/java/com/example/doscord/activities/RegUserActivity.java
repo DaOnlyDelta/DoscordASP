@@ -1,20 +1,13 @@
-package com.example.doscord;
+package com.example.doscord.activities;
 
-import android.animation.LayoutTransition;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -25,17 +18,25 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.doscord.api.CheckRequest;
+import com.example.doscord.api.CheckResponse;
+import com.example.doscord.R;
+import com.example.doscord.utils.Helpers;
+import com.example.doscord.utils.RegDataHolder;
+import com.example.doscord.api.RegisterRequest;
+import com.example.doscord.api.RegisterResponse;
+import com.example.doscord.api.RetrofitClient;
 import com.google.gson.Gson;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class RegFinalActivity extends AppCompatActivity {
+public class RegUserActivity extends AppCompatActivity {
 
     private EditText userInput, passInput;
     private ImageButton eyeBtn;
-    private TextView userWarningTxt, passStrengthWarning, passWarningTxt, warningTxt;
+    private TextView userWarningTxt, passStrengthWarningTxt, passWarningTxt, warningTxt;
     private boolean isPasswordVisible = false;
     private Button nextBtn;
     private final Handler debounceHandler = new Handler();
@@ -45,7 +46,7 @@ public class RegFinalActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_reg_final);
+        setContentView(R.layout.activity_reg_user);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -53,8 +54,7 @@ public class RegFinalActivity extends AppCompatActivity {
         });
 
         // Smooth layout
-        ((ViewGroup) findViewById(R.id.main)).getLayoutTransition()
-                .enableTransitionType(LayoutTransition.CHANGING);
+        Helpers.smoothLayout(this);
 
         initViews();
         warningTransitions();
@@ -63,14 +63,14 @@ public class RegFinalActivity extends AppCompatActivity {
     }
 
     public void initViews() {
-        userInput = findViewById(R.id.regFinalUsername);
-        passInput = findViewById(R.id.regFinalPassword);
-        eyeBtn = findViewById(R.id.regFinalEye);
-        nextBtn = findViewById(R.id.regFinalNext);
-        userWarningTxt = findViewById(R.id.regFinalUserWarning);
-        passStrengthWarning = findViewById(R.id.regFinalPassWarning);
-        passWarningTxt = findViewById(R.id.regFinalPassWarning2);
-        warningTxt = findViewById(R.id.regFinalWarning);
+        userInput = findViewById(R.id.regUserUserInput);
+        passInput = findViewById(R.id.regUserPassInput);
+        eyeBtn = findViewById(R.id.regUserEyeBtn);
+        nextBtn = findViewById(R.id.regUserNextBtn);
+        userWarningTxt = findViewById(R.id.regUserUserWarning);
+        passStrengthWarningTxt = findViewById(R.id.regUserPassWarning);
+        passWarningTxt = findViewById(R.id.regUserPassWarning2);
+        warningTxt = findViewById(R.id.regUserWarning);
 
         userInput.setText(RegDataHolder.username);
         passInput.setText(RegDataHolder.password);
@@ -78,11 +78,11 @@ public class RegFinalActivity extends AppCompatActivity {
 
         if (RegDataHolder.isValid) {
             userWarningTxt.setText(R.string.usernameAvailable);
-            userWarningTxt.setTextColor(ContextCompat.getColor(RegFinalActivity.this, R.color.green));
+            userWarningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.green));
         }
 
         if (!RegDataHolder.password.isEmpty()) {
-            checkPasswordStrength(RegDataHolder.password);
+            updatePassWarning(RegDataHolder.password);
         }
 
         checkButton();
@@ -94,7 +94,7 @@ public class RegFinalActivity extends AppCompatActivity {
                 userWarningTxt.setVisibility(View.VISIBLE);
             } else {
                 // Your color logic
-                int redColor = ContextCompat.getColor(RegFinalActivity.this, R.color.red);
+                int redColor = ContextCompat.getColor(RegUserActivity.this, R.color.red);
                 if (userWarningTxt.getCurrentTextColor() != redColor) {
                     userWarningTxt.setVisibility(View.GONE);
                 }
@@ -106,30 +106,16 @@ public class RegFinalActivity extends AppCompatActivity {
                 passWarningTxt.setVisibility(View.VISIBLE);
                 // Show strength if not empty
                 if (!passInput.getText().toString().trim().isEmpty()) {
-                    passStrengthWarning.setVisibility(View.VISIBLE);
+                    passStrengthWarningTxt.setVisibility(View.VISIBLE);
                 }
             } else {
-                int redColor = ContextCompat.getColor(RegFinalActivity.this, R.color.red);
-                if (passStrengthWarning.getCurrentTextColor() != redColor) {
-                    passStrengthWarning.setVisibility(View.GONE);
+                int redColor = ContextCompat.getColor(RegUserActivity.this, R.color.red);
+                if (passStrengthWarningTxt.getCurrentTextColor() != redColor) {
+                    passStrengthWarningTxt.setVisibility(View.GONE);
                 }
                 passWarningTxt.setVisibility(View.GONE);
             }
         });
-    }
-
-    public void showPass(View v) {
-        if (isPasswordVisible) {
-            // Hide password
-            passInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            eyeBtn.setImageResource(R.drawable.eye_closed);
-        } else {
-            // Show password
-            passInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            eyeBtn.setImageResource(R.drawable.eye_open);
-        }
-        passInput.setSelection(passInput.getText().length()); // move the cursor to the very end of the text
-        isPasswordVisible = !isPasswordVisible; // flip state
     }
 
     public void usernameValidation() {
@@ -155,14 +141,14 @@ public class RegFinalActivity extends AppCompatActivity {
 
                 if (name.isEmpty()) {
                     userWarningTxt.setText(R.string.usernameWarning);
-                    userWarningTxt.setTextColor(ContextCompat.getColor(RegFinalActivity.this, R.color.gray));
+                    userWarningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.gray));
                     return;
                 }
 
                 // Basic character check (Illegal characters)
                 if (!name.matches("^[a-zA-Z0-9._]+$")) {
                     userWarningTxt.setText(R.string.usernameWarning);
-                    userWarningTxt.setTextColor(ContextCompat.getColor(RegFinalActivity.this, R.color.red));
+                    userWarningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.red));
                     return;
                 }
 
@@ -171,10 +157,11 @@ public class RegFinalActivity extends AppCompatActivity {
             }
         });
     }
+
     private void checkUsernameOnServer(String username) {
         if (username.length() < 2 || username.length() > 32) {
             userWarningTxt.setText(R.string.userLengthWarning);
-            userWarningTxt.setTextColor(ContextCompat.getColor(RegFinalActivity.this, R.color.red));
+            userWarningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.red));
             return;
         }
 
@@ -188,13 +175,14 @@ public class RegFinalActivity extends AppCompatActivity {
                                 RegDataHolder.isValid = true;
                                 checkButton();
                                 userWarningTxt.setText(R.string.usernameAvailable);
-                                userWarningTxt.setTextColor(ContextCompat.getColor(RegFinalActivity.this, R.color.green));
+                                userWarningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.green));
                                 if (!userInput.hasFocus()) {
                                     userWarningTxt.setVisibility(View.GONE);
                                 }
                             } else {
                                 userWarningTxt.setText(R.string.usernameTakenWarning);
-                                userWarningTxt.setTextColor(ContextCompat.getColor(RegFinalActivity.this, R.color.red));
+                                userWarningTxt.setVisibility(View.VISIBLE);
+                                userWarningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.red));
                                 nextBtn.setEnabled(false);
                                 nextBtn.setAlpha(0.5f);
                             }
@@ -203,12 +191,12 @@ public class RegFinalActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(@NonNull Call<CheckResponse> call, @NonNull Throwable t) {
-                        // Silent fail or log
+                        // Silent fail
                     }
                 });
     }
 
-    public void passwordStrength() {
+    private void passwordStrength() {
         passInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -221,12 +209,12 @@ public class RegFinalActivity extends AppCompatActivity {
                 String pass = s.toString();
 
                 if (pass.isEmpty()) {
-                    passStrengthWarning.setVisibility(View.GONE);
+                    passStrengthWarningTxt.setVisibility(View.GONE);
                     return;
                 }
 
-                passStrengthWarning.setVisibility(View.VISIBLE);
-                checkPasswordStrength(pass);
+                passStrengthWarningTxt.setVisibility(View.VISIBLE);
+                updatePassWarning(pass);
             }
 
             @Override
@@ -234,49 +222,26 @@ public class RegFinalActivity extends AppCompatActivity {
         });
     }
 
-    private void checkPasswordStrength(String password) {
-        int points = 0;
-        if (password.length() >= 6) {
-            // 1. Length Check (The most important one)
-            if (password.length() >= 8) points++;
-            if (password.length() >= 10) points++;
-            if (password.length() >= 12) points++;
-
-            // 2. Uppercase & Lowercase Check
-            if (password.matches(".*[a-z].*") && password.matches(".*[A-Z].*")) {
-                points++;
-            }
-
-            // 3. Number Check
-            if (password.matches(".*\\d.*")) {
-                points++;
-            }
-
-            // 4. Special Character Check
-            if (password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
-                points++;
-            }
-        }
-
-        // --- UPDATING THE UI ---
+    private void updatePassWarning(String password) {
+        int points = Helpers.checkPasswordStrength(password);
         if (points < 2) {
-            passStrengthWarning.setText(R.string.passWeak);
-            passStrengthWarning.setTextColor(ContextCompat.getColor(RegFinalActivity.this, R.color.red));
+            passStrengthWarningTxt.setText(R.string.passWeak);
+            passStrengthWarningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.red));
             RegDataHolder.passStrength = false;
         } else if (points <= 4) {
-            passStrengthWarning.setText(R.string.passMedium);
-            passStrengthWarning.setTextColor(ContextCompat.getColor(RegFinalActivity.this, R.color.yellow));
+            passStrengthWarningTxt.setText(R.string.passMedium);
+            passStrengthWarningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.yellow));
             RegDataHolder.passStrength = true;
             checkButton();
         } else {
-            passStrengthWarning.setText(R.string.passStrong);
-            passStrengthWarning.setTextColor(ContextCompat.getColor(RegFinalActivity.this, R.color.green));
+            passStrengthWarningTxt.setText(R.string.passStrong);
+            passStrengthWarningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.green));
             RegDataHolder.passStrength = true;
             checkButton();
         }
     }
 
-    public void checkButton() {
+    private void checkButton() {
         if (RegDataHolder.isValid && RegDataHolder.passStrength) {
             nextBtn.setEnabled(true);
             nextBtn.setAlpha(1.0f);
@@ -286,23 +251,8 @@ public class RegFinalActivity extends AppCompatActivity {
         }
     }
 
-    public void showPass() {
-        eyeBtn.setOnClickListener(v -> {
-            if (isPasswordVisible) {
-                // Switch to Hidden
-                passInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                eyeBtn.setImageResource(R.drawable.eye_closed);
-            } else {
-                // Switch to Visible
-                passInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                eyeBtn.setImageResource(R.drawable.eye_open);
-            }
-
-            isPasswordVisible = !isPasswordVisible;
-
-            // Keep the cursor at the end of the text
-            passInput.setSelection(passInput.getText().length());
-        });
+    public void regSwitchEye(View v) {
+        isPasswordVisible = Helpers.switchEye(isPasswordVisible, passInput, eyeBtn);
     }
 
     public void registerReq(View v) {
@@ -312,13 +262,12 @@ public class RegFinalActivity extends AppCompatActivity {
         RegDataHolder.password = passInput.getText().toString();
 
         // Set up UI for loading state
-        closeKeyboard();
+        Helpers.startDotsAnimation(this);
         nextBtn.setEnabled(false);
         nextBtn.setTextColor(android.graphics.Color.TRANSPARENT);
         userInput.setEnabled(false);
         passInput.setEnabled(false);
-        findViewById(R.id.loadingDots).setVisibility(View.VISIBLE);
-        startDotsAnimation();
+        Helpers.closeKeyboard(this);
 
         // Create the request object
         RegisterRequest request = new RegisterRequest();
@@ -327,7 +276,7 @@ public class RegFinalActivity extends AppCompatActivity {
         RetrofitClient.getApiService().register(request).enqueue(new Callback<RegisterResponse>() {
             @Override
             public void onResponse(@NonNull Call<RegisterResponse> call, @NonNull Response<RegisterResponse> response) {
-                resetUI(nextBtn, userInput, passInput);
+                Helpers.resetUI(RegUserActivity.this, nextBtn, userInput, passInput);
 
                 if (response.isSuccessful()) {
                     handleRegistrationError(1);
@@ -336,6 +285,7 @@ public class RegFinalActivity extends AppCompatActivity {
                     try {
                         // Retrofit won't automatically parse the body on a 400 error,
                         // so we manually convert the errorBody to our object
+                        assert response.errorBody() != null;
                         RegisterResponse errorRes = new Gson().fromJson(response.errorBody().charStream(), RegisterResponse.class);
                         handleRegistrationError(errorRes.getErrorCode());
                     } catch (Exception e) {
@@ -346,7 +296,7 @@ public class RegFinalActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<RegisterResponse> call, @NonNull Throwable t) {
-                warningTxt.setText("Server Error! Restart app and try again!");
+                warningTxt.setText(R.string.server_error_restart_app_and_try_again);
             }
         });
     }
@@ -358,66 +308,15 @@ public class RegFinalActivity extends AppCompatActivity {
         switch (code) {
             case 1:
                 warningTxt.setText(R.string.regSuccessful);
-                warningTxt.setTextColor(ContextCompat.getColor(RegFinalActivity.this, R.color.green));
+                warningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.green));
                 warningTxt.postDelayed(this::finish, 1000);
                 break;
             case 102:
                 finish(); // This kills the "Final" screen and shows the "Email/Phone" screen
                 break;
             case 999:
-                warningTxt.setText("Generic server Error!");
+                warningTxt.setText(R.string.generic_server_error);
                 break;
-        }
-    }
-
-    private void startDotsAnimation() {
-        final View[] dots = {
-                findViewById(R.id.dot1),
-                findViewById(R.id.dot2),
-                findViewById(R.id.dot3)
-        };
-
-        for (int i = 0; i < dots.length; i++) {
-            final View dot = dots[i];
-            dot.setAlpha(0.3f);
-
-            ObjectAnimator animator = ObjectAnimator.ofFloat(dot, "alpha", 0.3f, 1f, 0.3f);
-            animator.setDuration(800); // Set to 800 for Discord-like speed
-            animator.setStartDelay(i * 160);
-            animator.setRepeatCount(ValueAnimator.INFINITE);
-            animator.setRepeatMode(ValueAnimator.RESTART);
-
-            dot.setTag(animator);
-            animator.start();
-        }
-    }
-
-    private void resetUI(Button btn, EditText user, EditText pass) {
-        LinearLayout loadingDots = findViewById(R.id.loadingDots);
-        int[] dotIds = {R.id.dot1, R.id.dot2, R.id.dot3};
-
-        for (int id : dotIds) {
-            View dot = findViewById(id);
-            ObjectAnimator anim = (ObjectAnimator) dot.getTag();
-            if (anim != null) {
-                anim.cancel();
-            }
-            dot.setAlpha(1.0f);
-        }
-
-        // Standard UI Reset
-        btn.setEnabled(true);
-        btn.setTextColor(android.graphics.Color.WHITE);
-        loadingDots.setVisibility(View.GONE);
-        user.setEnabled(true);
-        pass.setEnabled(true);
-    }
-
-    private void closeKeyboard() {
-        View view = this.getCurrentFocus();
-        if (view != null) {
-            android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 

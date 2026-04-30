@@ -15,20 +15,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Doscord">
         <activity
-            android:name=".RegFinalActivity"
+            android:name=".activities.RegUserActivity"
             android:exported="false" />
         <activity
-            android:name=".RegDisplayActivity"
+            android:name=".activities.RegDisplayActivity"
             android:exported="false"
             android:theme="@style/Theme.Doscord" />
         <activity
-            android:name=".RegisterActivity"
+            android:name=".activities.RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".activities.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

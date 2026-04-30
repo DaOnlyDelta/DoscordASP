@@ -1,4 +1,4 @@
-package com.example.doscord;
+package com.example.doscord.api;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;

@@ -27,6 +27,19 @@
     <string name="what_s_your_name">What\'s your name?</string>
     <string name="first_fragment_label">First fragment</string>
     <string name="second_fragment_label">Second fragment</string>
-    <string name="userLengthWarning">This must be 2-32 characters.</string>
+    <string name="userLengthWarning">This must be 2–32 characters.</string>
     <string name="nextCreateAnAccount">Next, create an account</string>
+    <string name="please_enter_a_valid_email_address">Please enter a valid email address!</string>
+    <string name="login_or_password_is_invalid">Login or password is invalid.</string>
+    <string name="forgot_your_password">Forgot your password?</string>
+    <string name="toggle_password_visibility">Toggle password visibility.</string>
+    <string name="email_or_phone_number">Email or Phone Number</string>
+    <string name="loginTogether">Login</string>
+    <string name="skip">Skip</string>
+    <string name="display_name">Display Name</string>
+    <string name="you_can_use_emoji_and_special_characters">You can use emoji and special characters.</string>
+    <string name="usernameUpper">USERNAME</string>
+    <string name="passwordUpper">PASSWORD</string>
+    <string name="server_error_restart_app_and_try_again">Server Error! Restart app and try again!</string>
+    <string name="generic_server_error">Generic server Error!</string>
 </resources>

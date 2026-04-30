@@ -6,10 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1c1d23"
-    tools:context=".RegisterActivity">
+    tools:context=".activities.RegisterActivity">
 
     <ImageButton
-        android:id="@+id/regBack"
+        android:id="@+id/regBackBtn"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"
@@ -65,7 +65,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/regPhone"
+                android:id="@+id/regPhoneBtn"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -76,7 +76,7 @@
                 android:textColor="#FFFFFF" />
 
             <Button
-                android:id="@+id/regEmail"
+                android:id="@+id/regEmailBtn"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -103,7 +103,7 @@
         app:layout_constraintTop_toBottomOf="@+id/regBar" />
 
     <EditText
-        android:id="@+id/legPhoneOrEmail"
+        android:id="@+id/regIdentifierInput"
         android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"
@@ -125,7 +125,7 @@
         tools:ignore="TextFields" />
 
     <Button
-        android:id="@+id/regNext"
+        android:id="@+id/regNextBtn"
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_marginStart="20dp"
@@ -141,7 +141,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/legPhoneOrEmail" />
+        app:layout_constraintTop_toBottomOf="@+id/regIdentifierInput" />
 
     <TextView
         android:id="@+id/regWarning"
@@ -158,6 +158,6 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/regNext" />
+        app:layout_constraintTop_toBottomOf="@+id/regNextBtn" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

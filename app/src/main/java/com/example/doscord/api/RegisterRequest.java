@@ -1,4 +1,6 @@
-package com.example.doscord;
+package com.example.doscord.api;
+
+import com.example.doscord.utils.RegDataHolder;
 
 public class RegisterRequest {
     private String email;

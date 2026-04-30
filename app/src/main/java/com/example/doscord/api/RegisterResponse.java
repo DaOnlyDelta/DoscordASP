@@ -1,4 +1,4 @@
-package com.example.doscord;
+package com.example.doscord.api;
 
 /*
 Error Code,Meaning,Android Action
@@ -9,16 +9,13 @@ Error Code,Meaning,Android Action
 */
 
 public class RegisterResponse {
-    private boolean success;
-    private int errorCode;
+    private int responseCode;
 
     // Constructor
-    public RegisterResponse(boolean success, String message, int errorCode) {
-        this.success = success;
-        this.errorCode = errorCode;
+    public RegisterResponse(boolean success, int responseCode) {
+        this.responseCode = responseCode;
     }
 
     // Getters
-    public boolean isSuccess() { return success; }
-    public int getErrorCode() { return errorCode; }
+    public int getErrorCode() { return responseCode; }
 }

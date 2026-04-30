@@ -1,4 +1,4 @@
-package com.example.doscord;
+package com.example.doscord.api;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

@@ -3,13 +3,50 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
+    android:animateLayoutChanges="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#202024"
-    tools:context=".LoginActivity">
+    tools:context=".activities.LoginActivity">
+
+    <TextView
+        android:id="@+id/logIdentifierWarning"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="20dp"
+        android:letterSpacing="0.02"
+        android:text="@string/login_or_password_is_invalid"
+        android:textColor="@color/red"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.507"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logIdentifierInput" />
+
+    <TextView
+        android:id="@+id/logPassWarning"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="20dp"
+        android:letterSpacing="0.02"
+        android:text="@string/login_or_password_is_invalid"
+        android:textColor="@color/red"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.507"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logPassContainer" />
 
     <ImageButton
-        android:id="@+id/logBack"
+        android:id="@+id/logBackBtn"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"
@@ -54,25 +91,27 @@
         app:layout_constraintTop_toBottomOf="@+id/logTitle" />
 
     <TextView
-        android:id="@+id/logLabel1"
+        android:id="@+id/logUserLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="30dp"
+        android:labelFor="@id/logIdentifierInput"
         android:letterSpacing="0.02"
-        android:text="Email or Phone Number"
+        android:text="@string/email_or_phone_number"
         android:textColor="#999898"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logSubtitle" />
 
     <EditText
-        android:id="@+id/LogMailOrPhone"
+        android:id="@+id/logIdentifierInput"
         android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="5dp"
         android:layout_marginEnd="20dp"
+        android:autofillHints=""
         android:background="@drawable/input_background"
         android:ems="10"
         android:inputType="text"
@@ -81,21 +120,22 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logLabel1"
+        app:layout_constraintTop_toBottomOf="@+id/logUserLabel"
         tools:ignore="TextFields" />
 
     <TextView
-        android:id="@+id/logLabel2"
+        android:id="@+id/logPassLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
+        android:labelFor="@id/logPassInput"
         android:letterSpacing="0.02"
         android:text="@string/password"
         android:textColor="#999898"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/LogMailOrPhone" />
+        app:layout_constraintTop_toBottomOf="@+id/logIdentifierWarning" />
 
     <RelativeLayout
         android:id="@+id/logPassContainer"
@@ -106,28 +146,29 @@
         android:layout_marginEnd="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logLabel2">
+        app:layout_constraintTop_toBottomOf="@id/logPassLabel">
 
         <EditText
-            android:id="@+id/logPassword"
+            android:id="@+id/logPassInput"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:autofillHints=""
             android:background="@drawable/input_background"
-            android:hint="@string/password"
             android:inputType="textPassword"
             android:paddingStart="15dp"
             android:paddingEnd="48dp"
             android:textSize="16sp" />
 
         <ImageButton
-            android:id="@+id/logPassEye"
+            android:id="@+id/logPassEyeBtn"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="8dp"
+            android:layout_marginEnd="8dp"
             android:background="@android:color/transparent"
-            android:onClick="showPass"
+            android:contentDescription="@string/toggle_password_visibility"
+            android:onClick="logSwitchEye"
             android:src="@drawable/eye_closed" />
     </RelativeLayout>
 
@@ -142,13 +183,14 @@
         android:focusable="true"
         android:gravity="center|left"
         android:onClick="forgotPassword"
-        android:text="Forgot your password?"
+        android:text="@string/forgot_your_password"
         android:textColor="#3B9FDC"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logPassContainer" />
+        app:layout_constraintTop_toBottomOf="@+id/logPassWarning"
+        tools:ignore="RtlHardcoded" />
 
     <FrameLayout
-        android:id="@+id/buttonContainer"
+        android:id="@+id/logBtnContainer"
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_marginHorizontal="20dp"
@@ -160,14 +202,14 @@
         app:layout_constraintTop_toBottomOf="@+id/forgotPass">
 
         <Button
-            android:id="@+id/btnLogin"
+            android:id="@+id/logNextBtn"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:backgroundTint="#5865f2"
             android:textColor="@color/white"
             android:textSize="18sp"
             android:onClick="loginReq"
-            android:text="Login" />
+            android:text="@string/loginTogether" />
 
         <LinearLayout
             android:id="@+id/loadingDots"

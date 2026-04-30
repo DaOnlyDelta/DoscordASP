@@ -1,4 +1,4 @@
-package com.example.doscord;
+package com.example.doscord.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.example.doscord.R;
+import com.example.doscord.utils.RegDataHolder;
 
 public class RegDisplayActivity extends AppCompatActivity {
 
@@ -30,7 +33,6 @@ public class RegDisplayActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Button toggling
         initViews();
         inputToggling();
     }
@@ -44,10 +46,10 @@ public class RegDisplayActivity extends AppCompatActivity {
         }
     }
 
-    public void initViews() {
-        nextButton = findViewById(R.id.regDNext);
-        skipButton = findViewById(R.id.regDSkip);
-        input = findViewById(R.id.regDDisplayName);
+    private void initViews() {
+        nextButton = findViewById(R.id.regDNextBtn);
+        skipButton = findViewById(R.id.regDSkipBtn);
+        input = findViewById(R.id.regDDisplayInput);
 
         if (!RegDataHolder.displayName.isEmpty()) {
             input.setText(RegDataHolder.displayName);
@@ -58,7 +60,7 @@ public class RegDisplayActivity extends AppCompatActivity {
         }
     }
 
-    public void inputToggling() {
+    private void inputToggling() {
         input.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -83,14 +85,14 @@ public class RegDisplayActivity extends AppCompatActivity {
     }
 
     public void skip(View v) {
-        Intent intent = new Intent(this, RegFinalActivity.class);
+        Intent intent = new Intent(this, RegUserActivity.class);
         startActivity(intent);
     }
 
     public void openFinalReg(View v) {
         RegDataHolder.displayName = input.getText().toString().trim();
 
-        Intent intent = new Intent(this, RegFinalActivity.class);
+        Intent intent = new Intent(this, RegUserActivity.class);
         startActivity(intent);
     }
 }

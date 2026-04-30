@@ -1,4 +1,4 @@
-package com.example.doscord;
+package com.example.doscord.api;
 
 public class CheckResponse {
     private boolean available;

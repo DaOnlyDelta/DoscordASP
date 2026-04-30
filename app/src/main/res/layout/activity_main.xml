@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/home"
-    tools:context=".MainActivity">
+    tools:context=".activities.MainActivity">
 
     <ImageView
         android:id="@+id/mIcon"
@@ -56,28 +56,28 @@
         app:layout_constraintTop_toBottomOf="@+id/mTitle" />
 
     <Button
-        android:id="@+id/mRegister"
+        android:id="@+id/mRegBtn"
         android:layout_width="0dp"
         android:layout_height="55dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
         android:layout_marginBottom="5dp"
         android:backgroundTint="@color/white"
         android:onClick="openRegisterActivity"
         android:text="@string/register"
         android:textColor="@color/black"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/mLogin"
+        app:layout_constraintBottom_toTopOf="@+id/mLogBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/mLogin"
+        android:id="@+id/mLogBtn"
         android:layout_width="0dp"
         android:layout_height="55dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="35dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="40dp"
         android:backgroundTint="#1E2B8C"
         android:onClick="openLoginActivity"
         android:text="@string/login"

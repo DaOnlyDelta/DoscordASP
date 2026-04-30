@@ -1,4 +1,4 @@
-package com.example.doscord;
+package com.example.doscord.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,7 +8,6 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,6 +19,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.example.doscord.R;
+import com.example.doscord.utils.Helpers;
+import com.example.doscord.utils.RegDataHolder;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -56,10 +59,10 @@ public class RegisterActivity extends AppCompatActivity {
         selector = findViewById(R.id.regSelector);
         blackBar = findViewById(R.id.regBar);
         label = findViewById(R.id.regLabel);
-        input = findViewById(R.id.legPhoneOrEmail);
-        btnPhone = findViewById(R.id.regPhone);
-        btnEmail = findViewById(R.id.regEmail);
-        nextButton = findViewById(R.id.regNext);
+        input = findViewById(R.id.regIdentifierInput);
+        btnPhone = findViewById(R.id.regPhoneBtn);
+        btnEmail = findViewById(R.id.regEmailBtn);
+        nextButton = findViewById(R.id.regNextBtn);
         warningTxt = findViewById(R.id.regWarning);
     }
 
@@ -170,17 +173,13 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isValidEmail(String email) {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
-    }
-
     public void toDisplayReg(View v) {
         String identifier = input.getText().toString().trim();
 
         if (RegDataHolder.focused == 2) {
-            if (!isValidEmail(identifier)) {
+            if (!Helpers.isValidEmail(identifier)) {
                 warningTxt.setVisibility(View.VISIBLE);
-                warningTxt.setText("Please enter a valid email address!");
+                warningTxt.setText(R.string.please_enter_a_valid_email_address);
                 return;
             }
         }
