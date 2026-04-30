@@ -109,7 +109,7 @@
         android:alpha="0.5"
         android:backgroundTint="#5865f2"
         android:enabled="false"
-        android:onClick="openFinalReg"
+        android:onClick="openRegUserActivity"
         android:text="@string/next"
         android:textColor="@color/white"
         android:textSize="18sp"

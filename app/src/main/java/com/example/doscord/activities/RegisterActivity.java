@@ -15,14 +15,23 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.doscord.R;
+import com.example.doscord.api.RegisterRequest;
+import com.example.doscord.api.RegisterResponse;
+import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.utils.Helpers;
 import com.example.doscord.utils.RegDataHolder;
+import com.google.gson.Gson;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -30,7 +39,8 @@ public class RegisterActivity extends AppCompatActivity {
     private FrameLayout blackBar;
     private TextView label, warningTxt;
     private EditText input;
-    private Button btnPhone, btnEmail, nextButton;
+    private Button btnPhone, btnEmail, nextBtn;
+    private boolean midRequest = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +62,7 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        handlePotentialErrorReturn();
+        handleRegistrationError(RegDataHolder.errorCode);
     }
 
     private void initViews() {
@@ -62,7 +72,7 @@ public class RegisterActivity extends AppCompatActivity {
         input = findViewById(R.id.regIdentifierInput);
         btnPhone = findViewById(R.id.regPhoneBtn);
         btnEmail = findViewById(R.id.regEmailBtn);
-        nextButton = findViewById(R.id.regNextBtn);
+        nextBtn = findViewById(R.id.regNextBtn);
         warningTxt = findViewById(R.id.regWarning);
     }
 
@@ -80,8 +90,8 @@ public class RegisterActivity extends AppCompatActivity {
                 float moveX = blackBar.getWidth() / 2f;
                 selector.setTranslationX(moveX);
             });
-            nextButton.setEnabled(true);
-            nextButton.setAlpha(1.0f);
+            nextBtn.setEnabled(true);
+            nextBtn.setAlpha(1.0f);
         }
         // Otherwise check if we have a phone saved
         else if (!RegDataHolder.phone.isEmpty()) {
@@ -91,12 +101,52 @@ public class RegisterActivity extends AppCompatActivity {
             label.setText(R.string.phone_number);
 
             selector.setTranslationX(0);
-            nextButton.setEnabled(true);
-            nextButton.setAlpha(1.0f);
+            nextBtn.setEnabled(true);
+            nextBtn.setAlpha(1.0f);
         }
 
         // Set selection to end of text
         input.setSelection(input.getText().length());
+    }
+
+    public void registerReq() {
+        // Set up UI for loading state
+        input.setEnabled(false);
+        midRequest = true;
+        Helpers.startDotsAnimation(this, nextBtn);
+        Helpers.closeKeyboard(this);
+
+        // Create the request object
+        RegisterRequest request = new RegisterRequest();
+
+        // Send to Pi
+        RetrofitClient.getApiService().register(request).enqueue(new Callback<RegisterResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<RegisterResponse> call, @NonNull Response<RegisterResponse> response) {
+                if (response.isSuccessful()) {
+                    RegDataHolder.errorCode = 1;
+                    handleRegistrationError(1);
+                } else {
+                    // Handle Error Codes
+                    Helpers.resetUI(RegisterActivity.this, nextBtn, input, null);
+                    midRequest = false;
+                    try {
+                        // Retrofit won't automatically parse the body on a 400 error,
+                        // so we manually convert the errorBody to our object
+                        assert response.errorBody() != null;
+                        RegisterResponse errorRes = new Gson().fromJson(response.errorBody().charStream(), RegisterResponse.class);
+                        handleRegistrationError(errorRes.getErrorCode());
+                    } catch (Exception e) {
+                        handleRegistrationError(999); // Generic error
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<RegisterResponse> call, @NonNull Throwable t) {
+                warningTxt.setText(R.string.server_error_restart_app_and_try_again);
+            }
+        });
     }
 
     private void setupSelectorWidth() {
@@ -120,8 +170,8 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 boolean hasText = !s.toString().trim().isEmpty();
-                nextButton.setEnabled(hasText);
-                nextButton.animate().alpha(hasText ? 1.0f : 0.5f).setDuration(150).start();
+                nextBtn.setEnabled(hasText);
+                nextBtn.animate().alpha(hasText ? 1.0f : 0.5f).setDuration(150).start();
 
                 // Hide warning when user starts fixing the mistake
                 warningTxt.setVisibility(View.INVISIBLE);
@@ -133,6 +183,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void switchToPhone() {
+        if (midRequest) { return; }
         RegDataHolder.email = input.getText().toString().trim();
         RegDataHolder.focused = 1;
         input.setText(RegDataHolder.phone);
@@ -145,6 +196,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void switchToEmail() {
+        if (midRequest) { return; }
         RegDataHolder.phone = input.getText().toString().trim();
         RegDataHolder.focused = 2;
         input.setText(RegDataHolder.email);
@@ -157,23 +209,21 @@ public class RegisterActivity extends AppCompatActivity {
         selector.animate().translationX(moveX).setDuration(200).start();
     }
 
-    private void handlePotentialErrorReturn() {
-        if (RegDataHolder.errorCode == 1) {
-            RegDataHolder.clear();
+    private void handleRegistrationError(int code) {
+        if (code == 1) {
             finish();
-        } else if (RegDataHolder.errorCode == 102) {
+        } else if (code == 102) {
             warningTxt.setVisibility(View.VISIBLE);
             warningTxt.setText(String.format("This %s is already taken!", (RegDataHolder.focused == 1) ? "phone number" : "email"));
+            nextBtn.setText(R.string.create_account);
             input.requestFocus();
             // Show keyboard automatically
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
-
-            RegDataHolder.errorCode = 0;
         }
     }
 
-    public void toDisplayReg(View v) {
+    public void openRegDisplayActivity(View v) {
         String identifier = input.getText().toString().trim();
 
         if (RegDataHolder.focused == 2) {
@@ -185,8 +235,12 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         saveIdentifier();
-        Intent intent = new Intent(this, RegDisplayActivity.class);
-        startActivity(intent);
+        if (RegDataHolder.errorCode == 102) {
+            registerReq();
+        } else {
+            Intent intent = new Intent(this, RegDisplayActivity.class);
+            startActivity(intent);
+        }
     }
 
     public void finish(View v) {

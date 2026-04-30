@@ -76,9 +76,7 @@ public class LoginActivity extends AppCompatActivity {
         String password = passInput.getText().toString().trim();
 
         // Lock UI & Close keyboard
-        Helpers.startDotsAnimation(this);
-        loginBtn.setTextColor(android.graphics.Color.TRANSPARENT);
-        loginBtn.setEnabled(false);
+        Helpers.startDotsAnimation(this, loginBtn);
         identifierInput.setEnabled(false);
         passInput.setEnabled(false);
         Helpers.closeKeyboard(this);

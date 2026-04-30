@@ -1,0 +1,169 @@
+package com.example.doscord.activities;
+
+import android.app.DatePickerDialog;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.example.doscord.R;
+import com.example.doscord.api.RegisterRequest;
+import com.example.doscord.api.RegisterResponse;
+import com.example.doscord.api.RetrofitClient;
+import com.example.doscord.utils.Helpers;
+import com.example.doscord.utils.RegDataHolder;
+import com.google.gson.Gson;
+
+import java.util.Calendar;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class RegBdayActivity extends AppCompatActivity {
+
+    private EditText bdayInput;
+    private Button createBtn;
+    private boolean midRequest = false;
+    private Calendar c;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_reg_bday);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        initViews();
+        bdayListener();
+    }
+
+    private void initViews() {
+        bdayInput = findViewById(R.id.regBdayInput);
+        createBtn = findViewById(R.id.regNextBtn);
+        c  = Calendar.getInstance();
+
+        if (RegDataHolder.year == null) {
+            setCurrentDate();
+        } else {
+            c.set(RegDataHolder.year, RegDataHolder.month, RegDataHolder.day);
+        }
+
+        Helpers.setDate(bdayInput);
+        updateButton();
+    }
+
+    private void setCurrentDate() {
+        RegDataHolder.year = c.get(Calendar.YEAR);
+        RegDataHolder.month = c.get(Calendar.MONTH);
+        RegDataHolder.day = c.get(Calendar.DAY_OF_MONTH);
+    }
+
+    private void bdayListener() {
+        bdayInput.setOnClickListener(v -> {
+            if (midRequest) { return; }
+
+            // Create the Dialog
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    this,
+                    (view, year, month, day) -> {
+                        c.set(year, month, day);
+                        RegDataHolder.year = year;
+                        RegDataHolder.month = month;
+                        RegDataHolder.day = day;
+
+                        Helpers.setDate(bdayInput);
+                        updateButton();
+                    },
+                    RegDataHolder.year, RegDataHolder.month, RegDataHolder.day);
+
+            datePickerDialog.show();
+        });
+    }
+
+    private void updateButton() {
+        // Check for age
+        if (isOldEnough()) {
+            createBtn.setAlpha(1.0f);
+            createBtn.setEnabled(true);
+        } else {
+            createBtn.setAlpha(0.5f);
+            createBtn.setEnabled(false);
+        }
+    }
+
+    private boolean isOldEnough() {
+        Calendar minAgeCalendar = Calendar.getInstance();
+        minAgeCalendar.add(Calendar.YEAR, -13);
+        return c.before(minAgeCalendar) || c.equals(minAgeCalendar);
+    }
+
+    public void registerReq(View v) {
+        RegDataHolder.errorCode = 0;
+
+        // Set up UI for loading state
+        midRequest = true;
+        Helpers.startDotsAnimation(this, createBtn);
+        Helpers.closeKeyboard(this);
+
+        // Create the request object
+        RegisterRequest request = new RegisterRequest();
+
+        // Send to Pi
+        RetrofitClient.getApiService().register(request).enqueue(new Callback<RegisterResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<RegisterResponse> call, @NonNull Response<RegisterResponse> response) {
+                if (response.isSuccessful()) {
+                    handleRegistrationError(1);
+                } else {
+                    // Handle Error Codes
+                    Helpers.resetUI(RegBdayActivity.this, createBtn, null, null);
+                    midRequest = true;
+                    try {
+                        // Retrofit won't automatically parse the body on a 400 error,
+                        // so we manually convert the errorBody to our object
+                        assert response.errorBody() != null;
+                        RegisterResponse errorRes = new Gson().fromJson(response.errorBody().charStream(), RegisterResponse.class);
+                        handleRegistrationError(errorRes.getErrorCode());
+                    } catch (Exception e) {
+                        handleRegistrationError(999); // Generic error
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<RegisterResponse> call, @NonNull Throwable t) {
+                createBtn.setText(R.string.server_error_restart_app_and_try_again);
+            }
+        });
+    }
+
+    private void handleRegistrationError(int code) {
+        RegDataHolder.errorCode = code;
+
+        switch (code) {
+            case 1:
+            case 102:
+                finish();
+                break;
+            case 999:
+                createBtn.setText(R.string.generic_server_error);
+                break;
+        }
+    }
+
+    public void finish(View v) {
+        finish();
+    }
+}

@@ -42,4 +42,8 @@
     <string name="passwordUpper">PASSWORD</string>
     <string name="server_error_restart_app_and_try_again">Server Error! Restart app and try again!</string>
     <string name="generic_server_error">Generic server Error!</string>
+    <string name="and_how_old_are_you">And, how old are you?</string>
+    <string name="date_of_birth">Date of Birth</string>
+    <string name="must_be_at_least_13_years_old_to_create_an_account">Must be at least 13 years old to create an account.</string>
+    <string name="create_account">Create Account</string>
 </resources>

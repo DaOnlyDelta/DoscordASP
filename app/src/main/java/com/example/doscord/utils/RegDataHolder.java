@@ -10,9 +10,10 @@ public class RegDataHolder {
     public static String password = "";
     public static boolean passStrength = false;
     public static int errorCode = 0;
+    public static Integer year = null, month = null, day = null;
 
     // Helper to clear data after a successful registration
     public static void clear() {
-        email = ""; phone = ""; focused = 1; displayName = ""; username = ""; isValid = false; password = ""; passStrength = false; errorCode = 0;
+        email = ""; phone = ""; focused = 1; displayName = ""; username = ""; isValid = false; password = ""; passStrength = false; errorCode = 0; year = null; month = null; day = null;
     }
 }

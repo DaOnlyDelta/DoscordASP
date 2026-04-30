@@ -1,5 +1,6 @@
 package com.example.doscord.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -23,10 +24,7 @@ import com.example.doscord.api.CheckResponse;
 import com.example.doscord.R;
 import com.example.doscord.utils.Helpers;
 import com.example.doscord.utils.RegDataHolder;
-import com.example.doscord.api.RegisterRequest;
-import com.example.doscord.api.RegisterResponse;
 import com.example.doscord.api.RetrofitClient;
-import com.google.gson.Gson;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,7 +34,7 @@ public class RegUserActivity extends AppCompatActivity {
 
     private EditText userInput, passInput;
     private ImageButton eyeBtn;
-    private TextView userWarningTxt, passStrengthWarningTxt, passWarningTxt, warningTxt;
+    private TextView userWarningTxt, passStrengthWarningTxt, passWarningTxt;
     private boolean isPasswordVisible = false;
     private Button nextBtn;
     private final Handler debounceHandler = new Handler();
@@ -62,15 +60,23 @@ public class RegUserActivity extends AppCompatActivity {
         passwordStrength();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        handleRegistrationError(RegDataHolder.errorCode);
+        if (isPasswordVisible) { // Hide password
+            regSwitchEye(null);
+        }
+    }
+
     public void initViews() {
         userInput = findViewById(R.id.regUserUserInput);
         passInput = findViewById(R.id.regUserPassInput);
         eyeBtn = findViewById(R.id.regUserEyeBtn);
-        nextBtn = findViewById(R.id.regUserNextBtn);
+        nextBtn = findViewById(R.id.regNextBtn);
         userWarningTxt = findViewById(R.id.regUserUserWarning);
         passStrengthWarningTxt = findViewById(R.id.regUserPassWarning);
         passWarningTxt = findViewById(R.id.regUserPassWarning2);
-        warningTxt = findViewById(R.id.regUserWarning);
 
         userInput.setText(RegDataHolder.username);
         passInput.setText(RegDataHolder.password);
@@ -165,7 +171,6 @@ public class RegUserActivity extends AppCompatActivity {
             return;
         }
 
-        // Show a tiny loading indicator if you want
         RetrofitClient.getApiService().checkUsername(new CheckRequest(username))
                 .enqueue(new Callback<CheckResponse>() {
                     @Override
@@ -255,69 +260,26 @@ public class RegUserActivity extends AppCompatActivity {
         isPasswordVisible = Helpers.switchEye(isPasswordVisible, passInput, eyeBtn);
     }
 
-    public void registerReq(View v) {
-        RegDataHolder.errorCode = 0;
-        // Get inputs
-        RegDataHolder.username = userInput.getText().toString().trim();
-        RegDataHolder.password = passInput.getText().toString();
-
-        // Set up UI for loading state
-        Helpers.startDotsAnimation(this);
-        nextBtn.setEnabled(false);
-        nextBtn.setTextColor(android.graphics.Color.TRANSPARENT);
-        userInput.setEnabled(false);
-        passInput.setEnabled(false);
-        Helpers.closeKeyboard(this);
-
-        // Create the request object
-        RegisterRequest request = new RegisterRequest();
-
-        // Send to Pi
-        RetrofitClient.getApiService().register(request).enqueue(new Callback<RegisterResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<RegisterResponse> call, @NonNull Response<RegisterResponse> response) {
-                Helpers.resetUI(RegUserActivity.this, nextBtn, userInput, passInput);
-
-                if (response.isSuccessful()) {
-                    handleRegistrationError(1);
-                } else {
-                    // Handle Error Codes
-                    try {
-                        // Retrofit won't automatically parse the body on a 400 error,
-                        // so we manually convert the errorBody to our object
-                        assert response.errorBody() != null;
-                        RegisterResponse errorRes = new Gson().fromJson(response.errorBody().charStream(), RegisterResponse.class);
-                        handleRegistrationError(errorRes.getErrorCode());
-                    } catch (Exception e) {
-                        handleRegistrationError(999); // Generic error
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<RegisterResponse> call, @NonNull Throwable t) {
-                warningTxt.setText(R.string.server_error_restart_app_and_try_again);
-            }
-        });
-    }
-
     private void handleRegistrationError(int code) {
         RegDataHolder.errorCode = code;
-        warningTxt.setVisibility(View.VISIBLE);
 
         switch (code) {
             case 1:
-                warningTxt.setText(R.string.regSuccessful);
-                warningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.green));
-                warningTxt.postDelayed(this::finish, 1000);
-                break;
             case 102:
-                finish(); // This kills the "Final" screen and shows the "Email/Phone" screen
+                finish();
                 break;
             case 999:
-                warningTxt.setText(R.string.generic_server_error);
+                nextBtn.setText(R.string.generic_server_error);
                 break;
         }
+    }
+
+    public void openRegBdayActivity(View v) {
+        RegDataHolder.username = userInput.getText().toString().trim();
+        RegDataHolder.password = passInput.getText().toString();
+
+        Intent intent = new Intent(this, RegBdayActivity.class);
+        startActivity(intent);
     }
 
     public void finish(View v) {

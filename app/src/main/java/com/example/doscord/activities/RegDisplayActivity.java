@@ -89,7 +89,7 @@ public class RegDisplayActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void openFinalReg(View v) {
+    public void openRegUserActivity(View v) {
         RegDataHolder.displayName = input.getText().toString().trim();
 
         Intent intent = new Intent(this, RegUserActivity.class);

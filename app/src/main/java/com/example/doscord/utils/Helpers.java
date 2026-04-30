@@ -4,6 +4,7 @@ import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.graphics.Color;
 import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,9 @@ public class Helpers {
     }
 
     public static void resetUI(Activity activity, Button btn, EditText input1, EditText input2) {
+        btn.setTextColor(Color.WHITE);
+        btn.setEnabled(true);
+
         LinearLayout loadingDots = activity.findViewById(R.id.loadingDots);
         final View[] dots = {
                 activity.findViewById(R.id.dot1),
@@ -57,14 +61,19 @@ public class Helpers {
         }
 
         // Standard UI Reset
-        btn.setEnabled(true);
-        btn.setTextColor(android.graphics.Color.WHITE);
         loadingDots.setVisibility(View.GONE);
-        input1.setEnabled(true);
-        input2.setEnabled(true);
+        if (input1 != null) {
+            input1.setEnabled(true);
+        }
+        if (input2 != null) {
+            input2.setEnabled(true);
+        }
     }
 
-    public static void startDotsAnimation(Activity activity) {
+    public static void startDotsAnimation(Activity activity, Button btn) {
+        btn.setTextColor(android.graphics.Color.TRANSPARENT);
+        btn.setEnabled(false);
+
         activity.findViewById(R.id.loadingDots).setVisibility(View.VISIBLE);
         final View[] dots = {
                 activity.findViewById(R.id.dot1),
@@ -129,5 +138,10 @@ public class Helpers {
             }
         }
         return points;
+    }
+
+    public static void setDate(EditText input) {
+        String selectedDate = RegDataHolder.day + "/" + (RegDataHolder.month + 1) + "/" + RegDataHolder.year;
+        input.setText(selectedDate);
     }
 }

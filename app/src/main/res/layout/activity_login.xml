@@ -205,11 +205,13 @@
             android:id="@+id/logNextBtn"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:alpha="0.5"
             android:backgroundTint="#5865f2"
-            android:textColor="@color/white"
-            android:textSize="18sp"
+            android:enabled="false"
             android:onClick="loginReq"
-            android:text="@string/loginTogether" />
+            android:text="@string/loginTogether"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
 
         <LinearLayout
             android:id="@+id/loadingDots"
