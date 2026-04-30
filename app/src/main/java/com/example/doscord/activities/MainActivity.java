@@ -11,6 +11,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.doscord.R;
+import com.example.doscord.utils.RegDataHolder;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +25,17 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (RegDataHolder.errorCode == 1) {
+            RegDataHolder.clear();
+            Intent intent = new Intent(this, ChatroomActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     public void openLoginActivity(View v) {
