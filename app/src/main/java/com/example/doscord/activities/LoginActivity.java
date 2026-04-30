@@ -46,12 +46,11 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         Helpers.smoothLayout(this);
-
         initViews();
     }
 
     private void initViews() {
-        identifierInput = findViewById(R.id.regIdentifierInput);
+        identifierInput = findViewById(R.id.logIdentifierInput);
         passInput = findViewById(R.id.logPassInput);
         eyeBtn = findViewById(R.id.logPassEyeBtn);
         loginBtn = findViewById(R.id.logNextBtn);
