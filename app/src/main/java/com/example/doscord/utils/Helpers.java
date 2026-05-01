@@ -17,7 +17,7 @@ import com.example.doscord.R;
 
 public class Helpers {
     public static void smoothLayout(Activity activity) {
-        ((ViewGroup) activity.findViewById(R.id.main)).getLayoutTransition()
+        ((ViewGroup) activity.findViewById(R.id.crPfpImg)).getLayoutTransition()
                 .enableTransitionType(LayoutTransition.CHANGING);
     }
 

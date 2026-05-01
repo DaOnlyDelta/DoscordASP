@@ -1,10 +1,11 @@
-package com.example.doscord.activities;
+package com.example.doscord.activities.menu;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -45,7 +46,7 @@ public class RegUserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_reg_user);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.crPfpImg), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -175,6 +176,7 @@ public class RegUserActivity extends AppCompatActivity {
                 .enqueue(new Callback<CheckResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<CheckResponse> call, @NonNull Response<CheckResponse> response) {
+                        Log.d("API_DEBUG", "Code: " + response.code());
                         if (response.isSuccessful() && response.body() != null) {
                             if (response.body().isAvailable()) {
                                 RegDataHolder.isValid = true;
@@ -197,6 +199,8 @@ public class RegUserActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Call<CheckResponse> call, @NonNull Throwable t) {
                         // Silent fail
+                        Log.e("API_DEBUG", "FAILED TO CONNECT: " + t.getMessage());
+                        t.printStackTrace();
                     }
                 });
     }

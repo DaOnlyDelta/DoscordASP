@@ -14,26 +14,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Doscord">
         <activity
-            android:name=".activities.ChatroomActivity"
+            android:name=".activities.chatroom.ChatroomActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.RegBdayActivity"
+            android:name=".activities.menu.RegBdayActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.RegUserActivity"
+            android:name=".activities.menu.RegUserActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.RegDisplayActivity"
+            android:name=".activities.menu.RegDisplayActivity"
             android:exported="false"
             android:theme="@style/Theme.Doscord" />
         <activity
-            android:name=".activities.RegisterActivity"
+            android:name=".activities.menu.RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.LoginActivity"
+            android:name=".activities.menu.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.MainActivity"
+            android:name=".activities.menu.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

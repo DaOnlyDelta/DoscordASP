@@ -6,4 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#202024"
-    tools:context=".activities.ChatroomActivity"/>
+    tools:context=".activities.chatroom.ChatroomActivity">
+
+    <ImageView
+        android:id="@+id/crPfpImg"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:contentDescription="@string/profile_picture"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/pfp_placeholder" />
+</androidx.constraintlayout.widget.ConstraintLayout>

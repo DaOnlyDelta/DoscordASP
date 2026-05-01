@@ -8,7 +8,7 @@ public interface ApiService {
     @POST("api/login")
     Call<LoginResponse> login(@Body LoginRequest request);
 
-    @POST("/check-username")
+    @POST("api/check-username")
     Call<CheckResponse> checkUsername(@Body CheckRequest request);
 
     @POST("api/register")

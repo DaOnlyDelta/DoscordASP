@@ -1,4 +1,4 @@
-package com.example.doscord.activities;
+package com.example.doscord.activities.menu;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -39,7 +39,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.crPfpImg), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -88,10 +88,9 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    String displayName = response.body().user.getDisplayName();
-                    LogDataHolder.clear();
-                    updateWarningVisibility();
-                    // Intent to HomeActivity goes here
+                    LoginResponse.User user = response.body().getUser();
+                    LogDataHolder.setResponseData(user.getId(), user.getUsername(), user.getDisplayName(), user.getPfp());
+                    finish();
                 } else {
                     LogDataHolder.error = true;
                     updateWarningVisibility();

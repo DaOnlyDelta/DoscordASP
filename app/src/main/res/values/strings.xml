@@ -46,4 +46,5 @@
     <string name="date_of_birth">Date of Birth</string>
     <string name="must_be_at_least_13_years_old_to_create_an_account">Must be at least 13 years old to create an account.</string>
     <string name="create_account">Create Account</string>
+    <string name="profile_picture">Profile picture</string>
 </resources>
