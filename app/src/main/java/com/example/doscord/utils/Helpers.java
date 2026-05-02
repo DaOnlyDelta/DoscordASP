@@ -16,11 +16,6 @@ import android.widget.LinearLayout;
 import com.example.doscord.R;
 
 public class Helpers {
-    public static void smoothLayout(Activity activity) {
-        ((ViewGroup) activity.findViewById(R.id.main)).getLayoutTransition()
-                .enableTransitionType(LayoutTransition.CHANGING);
-    }
-
     public static boolean switchEye(boolean currentlyVisible, EditText input, ImageButton eye) {
         // Save the font before changing the input type
         android.graphics.Typeface originalTypeface = input.getTypeface();

@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.bumptech.glide.Glide;
 import com.example.doscord.R;
 import com.example.doscord.utils.LogDataHolder;
+import com.example.doscord.utils.RegDataHolder;
 
 public class CrMainActivity extends AppCompatActivity {
     private ImageView pfpImg;
@@ -23,7 +24,7 @@ public class CrMainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cr_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
 
@@ -33,18 +34,26 @@ public class CrMainActivity extends AppCompatActivity {
     private void initViews() {
         pfpImg = findViewById(R.id.crMainPfpBtn);
 
+        loadPfp();
+    }
+
+    private void loadPfp() {
         // Load pfp
-        String pfpPath = LogDataHolder.getPfp();
-        // Check for both null and empty
-        if (pfpPath == null || pfpPath.isEmpty()) {
-            pfpPath = "defaults/defaults0.png";
+        if (RegDataHolder.id != -1) {
+            Glide.with(this)
+                    .load((RegDataHolder.selectedImageUri != null) ? RegDataHolder.selectedImageUri : RegDataHolder.defaultPfpDrawable)
+                    .circleCrop()
+                    .into(pfpImg);
+        } else {
+            String fullPath = "https://doscord-api.duckdns.org/images/" + LogDataHolder.getPfp();
+            Glide.with(this)
+                    .load(fullPath)
+                    .placeholder(R.drawable.pfp_placeholder) // Show this while it's loading
+                    .error(R.drawable.icon)   // Show this if the link is broken
+                    .circleCrop()
+                    .into(pfpImg);
         }
 
-        String fullPfpUrl = "https://doscord-api.duckdns.org/images/" + pfpPath;
-        Glide.with(this)
-                .load(fullPfpUrl)
-                .circleCrop() // Makes it look like Discord
-                .placeholder(R.drawable.pfp_placeholder) // Show while loading
-                .into(pfpImg);
+
     }
 }

@@ -52,9 +52,6 @@ public class RegUserActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Smooth layout
-        Helpers.smoothLayout(this);
-
         initViews();
         warningTransitions();
         usernameValidation();
@@ -167,6 +164,7 @@ public class RegUserActivity extends AppCompatActivity {
 
     private void checkUsernameOnServer(String username) {
         if (username.length() < 2 || username.length() > 32) {
+            userWarningTxt.setVisibility(View.VISIBLE);
             userWarningTxt.setText(R.string.userLengthWarning);
             userWarningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.red));
             return;

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -31,8 +32,9 @@ import retrofit2.Response;
 public class RegBdayActivity extends AppCompatActivity {
 
     private EditText bdayInput;
+    private TextView warningTxt;
     private Button createBtn;
-    private boolean midRequest = false;
+    private boolean midRequest = false, ignoreFirstPass = true;
     private Calendar c;
 
     @Override
@@ -52,6 +54,7 @@ public class RegBdayActivity extends AppCompatActivity {
 
     private void initViews() {
         bdayInput = findViewById(R.id.regBdayInput);
+        warningTxt = findViewById(R.id.regBdayWarning);
         createBtn = findViewById(R.id.regNextBtn);
         c  = Calendar.getInstance();
 
@@ -105,9 +108,17 @@ public class RegBdayActivity extends AppCompatActivity {
     }
 
     private boolean isOldEnough() {
+        if (ignoreFirstPass) {
+            warningTxt.setVisibility(View.GONE);
+            ignoreFirstPass = false;
+            return false;
+        }
+
         Calendar minAgeCalendar = Calendar.getInstance();
         minAgeCalendar.add(Calendar.YEAR, -13);
-        return c.before(minAgeCalendar) || c.equals(minAgeCalendar);
+        boolean pass = c.before(minAgeCalendar) || c.equals(minAgeCalendar);
+        warningTxt.setVisibility((pass) ? View.GONE : View.VISIBLE);
+        return pass;
     }
 
     public void registerReq(View v) {
@@ -127,7 +138,7 @@ public class RegBdayActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<RegisterResponse> call, @NonNull Response<RegisterResponse> response) {
                 if (response.isSuccessful()) {
                     assert response.body() != null;
-                    LogDataHolder.setId(response.body().getId());
+                    RegDataHolder.id = response.body().getId();
                     handleRegistrationError(1);
                 } else {
                     // Handle Error Codes

@@ -124,6 +124,8 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<RegisterResponse> call, @NonNull Response<RegisterResponse> response) {
                 if (response.isSuccessful()) {
+                    assert response.body() != null;
+                    RegDataHolder.id = response.body().getId();
                     RegDataHolder.errorCode = 1;
                     handleRegistrationError(1);
                 } else {

@@ -23,7 +23,9 @@
             android:layout_width="100dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="@null"
             android:backgroundTint="@color/bgGray"
+            android:padding="25dp"
             app:srcCompat="@drawable/pfp_placeholder" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

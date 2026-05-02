@@ -29,7 +29,7 @@ import com.example.doscord.api.ApiService;
 import com.example.doscord.api.PfpRequest;
 import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.utils.Helpers;
-import com.example.doscord.utils.LogDataHolder;
+import com.example.doscord.utils.RegDataHolder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -145,6 +145,7 @@ public class CrPfpActivity extends AppCompatActivity {
 
                 // 2. Save selection to the class-level variable
                 currentSelectedPath = pfpPath;
+                RegDataHolder.defaultPfpDrawable = selectedDrawableId;
 
                 // 3. Clear other borders and set the new one
                 clearAllBorders(tableLayout);
@@ -171,9 +172,9 @@ public class CrPfpActivity extends AppCompatActivity {
     }
 
     public void skip(View v) {
-        // Intent intent = new Intent(this, CrMainActivity.class);
-        // startActivity(intent);
-        // finish();
+        Intent intent = new Intent(this, CrMainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     public void openLauncher(View v) {
@@ -194,9 +195,9 @@ public class CrPfpActivity extends AppCompatActivity {
     }
 
     public void sendPfpToServer(View v) {
-        // Helpers.startDotsAnimation(this, nextBtn);
+        Helpers.startDotsAnimation(this, nextBtn);
         ApiService apiService = RetrofitClient.getApiService();
-        String userId = String.valueOf(LogDataHolder.getId());
+        String userId = String.valueOf(RegDataHolder.id);
 
         // Case 1: User hasn't changed anything (still defaults0)
         // We just treat this as a skip.
@@ -222,10 +223,11 @@ public class CrPfpActivity extends AppCompatActivity {
                 MultipartBody.Part body = MultipartBody.Part.createFormData("pfp", "upload.jpg", requestFile);
                 RequestBody userIdPart = RequestBody.create(MediaType.parse("text/plain"), userId);
 
-                apiService.updatePfpCustom(userIdPart, body).enqueue(new Callback<Void>() {
+                apiService.updatePfpCustom(userIdPart, body).enqueue(new Callback<>() {
                     @Override
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if (response.isSuccessful()) {
+                            RegDataHolder.selectedImageUri = selectedImageUri;
                             skip(null); // Success! Move to next screen
                         } else {
                             // Error: Server returned status like 500
@@ -247,7 +249,7 @@ public class CrPfpActivity extends AppCompatActivity {
         } else {
             // --- DEFAULT AVATAR SELECTION ---
             PfpRequest request = new PfpRequest(userId, currentSelectedPath);
-            apiService.updatePfpDefault(request).enqueue(new Callback<Void>() {
+            apiService.updatePfpDefault(request).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     if (response.isSuccessful()) {

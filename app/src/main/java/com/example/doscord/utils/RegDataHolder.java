@@ -1,5 +1,7 @@
 package com.example.doscord.utils;
 
+import android.net.Uri;
+
 public class RegDataHolder {
     public static String email = "";
     public static String phone = "";
@@ -11,9 +13,7 @@ public class RegDataHolder {
     public static boolean passStrength = false;
     public static int errorCode = 0;
     public static Integer year = null, month = null, day = null;
-
-    // Helper to clear data after a successful registration
-    public static void clear() {
-        email = ""; phone = ""; focused = 1; displayName = ""; username = ""; isValid = false; password = ""; passStrength = false; errorCode = 0; year = null; month = null; day = null;
-    }
+    public static Integer id = -1;
+    public static int defaultPfpDrawable = -1;
+    public static Uri selectedImageUri = null;
 }
