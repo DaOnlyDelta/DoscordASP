@@ -10,6 +10,9 @@ public class LogDataHolder {
     private static String pfp = "";
 
     // Setter
+    public static void setId(int id1) {
+        id = id1;
+    }
     public static void setResponseData(int id1, String username1, String displayName1, String pfp1) {
         id = id1;
         username = username1;

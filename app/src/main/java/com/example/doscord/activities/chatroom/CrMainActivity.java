@@ -13,16 +13,15 @@ import com.bumptech.glide.Glide;
 import com.example.doscord.R;
 import com.example.doscord.utils.LogDataHolder;
 
-public class ChatroomActivity extends AppCompatActivity {
-
+public class CrMainActivity extends AppCompatActivity {
     private ImageView pfpImg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_chatroom);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.crPfpImg), (v, insets) -> {
+        setContentView(R.layout.activity_cr_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -32,7 +31,7 @@ public class ChatroomActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        pfpImg = findViewById(R.id.crPfpImg);
+        pfpImg = findViewById(R.id.crMainPfpBtn);
 
         // Load pfp
         String pfpPath = LogDataHolder.getPfp();

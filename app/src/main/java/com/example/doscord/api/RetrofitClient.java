@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 public class RetrofitClient {
     private static Retrofit retrofit = null;
-    private static final String BASE_URL = "https://doscord-api.duckdns.org/";
+    private static final String BASE_URL = "https://doscord-api.duckdns.org/api/";
 
     public static ApiService getApiService() {
         if (retrofit == null) {

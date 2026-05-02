@@ -11,7 +11,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.doscord.R;
-import com.example.doscord.activities.chatroom.ChatroomActivity;
+import com.example.doscord.activities.chatroom.CrMainActivity;
+import com.example.doscord.activities.chatroom.CrPfpActivity;
 import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
 
@@ -22,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.crPfpImg), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -32,8 +33,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (RegDataHolder.errorCode == 1 || LogDataHolder.getId() != -1) {
-            Intent intent = new Intent(this, ChatroomActivity.class);
+        if (RegDataHolder.errorCode == 1) {
+            Intent intent = new Intent(this, CrPfpActivity.class);
+            startActivity(intent);
+            finish();
+        } else if (LogDataHolder.getId() != -1) {
+            Intent intent = new Intent(this, CrMainActivity.class);
             startActivity(intent);
             finish();
         }

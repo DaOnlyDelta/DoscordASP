@@ -18,6 +18,7 @@ import com.example.doscord.api.RegisterRequest;
 import com.example.doscord.api.RegisterResponse;
 import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.utils.Helpers;
+import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
 import com.google.gson.Gson;
 
@@ -39,7 +40,7 @@ public class RegBdayActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_reg_bday);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.crPfpImg), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -125,6 +126,8 @@ public class RegBdayActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<RegisterResponse> call, @NonNull Response<RegisterResponse> response) {
                 if (response.isSuccessful()) {
+                    assert response.body() != null;
+                    LogDataHolder.setId(response.body().getId());
                     handleRegistrationError(1);
                 } else {
                     // Handle Error Codes

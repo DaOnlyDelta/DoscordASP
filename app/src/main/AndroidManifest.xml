@@ -14,7 +14,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Doscord">
         <activity
-            android:name=".activities.chatroom.ChatroomActivity"
+            android:name=".activities.chatroom.CrMainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.chatroom.CrPfpActivity"
             android:exported="false" />
         <activity
             android:name=".activities.menu.RegBdayActivity"
