@@ -10,6 +10,23 @@
     tools:context=".activities.menu.RegUserActivity">
 
     <TextView
+        android:id="@+id/regUserServerWarning"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="20dp"
+        android:letterSpacing="0.02"
+        android:text="@string/server_error_check_your_network_connection_and_try_again"
+        android:textColor="@color/red"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/regUserNextBtn" />
+
+    <TextView
         android:id="@+id/regUserUserWarning"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -23,7 +40,6 @@
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.507"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/regUserUserInput" />
 
@@ -41,7 +57,6 @@
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.507"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/regUserPassContainer" />
 
@@ -59,7 +74,6 @@
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.507"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/regUserPassWarning" />
 
@@ -111,7 +125,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="5dp"
         android:layout_marginEnd="20dp"
-        android:autofillHints=""
+        android:autofillHints="username"
         android:background="@drawable/input_background"
         android:inputType="text"
         android:paddingHorizontal="15dp"
@@ -149,7 +163,7 @@
             android:id="@+id/regUserPassInput"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:autofillHints=""
+            android:autofillHints="password"
             android:background="@drawable/input_background"
             android:inputType="textPassword"
             android:paddingStart="15dp"
@@ -158,8 +172,8 @@
 
         <ImageButton
             android:id="@+id/regUserEyeBtn"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="8dp"
@@ -171,7 +185,7 @@
     </RelativeLayout>
 
     <Button
-        android:id="@+id/regNextBtn"
+        android:id="@+id/regUserNextBtn"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_marginStart="20dp"

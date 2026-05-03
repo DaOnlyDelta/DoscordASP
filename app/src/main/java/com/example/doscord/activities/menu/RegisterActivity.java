@@ -12,6 +12,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -37,9 +38,10 @@ public class RegisterActivity extends AppCompatActivity {
 
     private View selector;
     private FrameLayout blackBar;
-    private TextView label, warningTxt;
+    private TextView label, warningTxt, serverWarningTxt;
     private EditText input;
     private Button btnPhone, btnEmail, nextBtn;
+    private ImageButton backBtn;
     private boolean midRequest = false;
 
     @Override
@@ -73,7 +75,9 @@ public class RegisterActivity extends AppCompatActivity {
         btnPhone = findViewById(R.id.regPhoneBtn);
         btnEmail = findViewById(R.id.regEmailBtn);
         nextBtn = findViewById(R.id.regNextBtn);
+        backBtn = findViewById(R.id.regBackBtn);
         warningTxt = findViewById(R.id.regWarning);
+        serverWarningTxt = findViewById(R.id.regServerWarning);
     }
 
     private void loadSavedData() {
@@ -112,9 +116,9 @@ public class RegisterActivity extends AppCompatActivity {
     public void registerReq() {
         // Set up UI for loading state
         input.setEnabled(false);
+        backBtn.setEnabled(false);
         midRequest = true;
         Helpers.startDotsAnimation(this, nextBtn);
-        Helpers.closeKeyboard(this);
 
         // Create the request object
         RegisterRequest request = new RegisterRequest();
@@ -130,7 +134,8 @@ public class RegisterActivity extends AppCompatActivity {
                     handleRegistrationError(1);
                 } else {
                     // Handle Error Codes
-                    Helpers.resetUI(RegisterActivity.this, nextBtn, input, null);
+                    serverWarningTxt.setVisibility(View.GONE);
+                    Helpers.resetUI(RegisterActivity.this, nextBtn, backBtn, input, null);
                     midRequest = false;
                     try {
                         // Retrofit won't automatically parse the body on a 400 error,
@@ -146,7 +151,8 @@ public class RegisterActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<RegisterResponse> call, @NonNull Throwable t) {
-                warningTxt.setText(R.string.server_error_restart_app_and_try_again);
+                serverWarningTxt.setVisibility(View.VISIBLE);
+                Helpers.resetUI(RegisterActivity.this, nextBtn, backBtn, input, null);
             }
         });
     }
@@ -176,7 +182,7 @@ public class RegisterActivity extends AppCompatActivity {
                 nextBtn.animate().alpha(hasText ? 1.0f : 0.5f).setDuration(150).start();
 
                 // Hide warning when user starts fixing the mistake
-                warningTxt.setVisibility(View.INVISIBLE);
+                warningTxt.setVisibility(View.GONE);
             }
 
             @Override

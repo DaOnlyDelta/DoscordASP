@@ -28,8 +28,8 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText identifierInput, passInput;
-    private TextView identifierWarningTxt, passWarningTxt;
-    private ImageButton eyeBtn;
+    private TextView identifierWarningTxt, passWarningTxt, serverWarningTxt;
+    private ImageButton backBtn, eyeBtn;
     private boolean isPasswordVisible = false;
     private Button loginBtn;
 
@@ -50,10 +50,12 @@ public class LoginActivity extends AppCompatActivity {
     private void initViews() {
         identifierInput = findViewById(R.id.logIdentifierInput);
         passInput = findViewById(R.id.logPassInput);
+        backBtn = findViewById(R.id.logBackBtn);
         eyeBtn = findViewById(R.id.logPassEyeBtn);
         loginBtn = findViewById(R.id.logNextBtn);
         identifierWarningTxt = findViewById(R.id.logIdentifierWarning);
         passWarningTxt = findViewById(R.id.logPassWarning);
+        serverWarningTxt = findViewById(R.id.logServerWarning);
 
         identifierInput.setText(LogDataHolder.identifier);
         passInput.setText(LogDataHolder.password);
@@ -73,11 +75,20 @@ public class LoginActivity extends AppCompatActivity {
         String identifier = identifierInput.getText().toString().trim();
         String password = passInput.getText().toString().trim();
 
+        // Check if empty
+        if (identifier.isEmpty()) {
+            identifierInput.requestFocus();
+            return;
+        } else if (password.trim().isEmpty()) {
+            passInput.requestFocus();
+            return;
+        }
+
         // Lock UI & Close keyboard
         Helpers.startDotsAnimation(this, loginBtn);
+        backBtn.setEnabled(false);
         identifierInput.setEnabled(false);
         passInput.setEnabled(false);
-        Helpers.closeKeyboard(this);
 
         // Execute (Using the class-level apiService initialized in onCreate)
         LoginRequest loginRequest = new LoginRequest(identifier, password);
@@ -90,15 +101,17 @@ public class LoginActivity extends AppCompatActivity {
                     LogDataHolder.setResponseData(user.getId(), user.getUsername(), user.getDisplayName(), user.getPfp());
                     finish();
                 } else {
+                    serverWarningTxt.setVisibility(View.GONE);
                     LogDataHolder.error = true;
                     updateWarningVisibility();
-                    Helpers.resetUI(LoginActivity.this, loginBtn, identifierInput, passInput);
+                    Helpers.resetUI(LoginActivity.this, loginBtn, backBtn, identifierInput, passInput);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
-                // Silent fail
+                serverWarningTxt.setVisibility(View.VISIBLE);
+                Helpers.resetUI(LoginActivity.this, loginBtn, backBtn, identifierInput, passInput);
             }
         });
     }

@@ -8,6 +8,23 @@
     android:background="@color/bgGray"
     tools:context=".activities.chatroom.CrPfpActivity">
 
+    <TextView
+        android:id="@+id/crPfpServerWarning"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="20dp"
+        android:letterSpacing="0.02"
+        android:text="@string/server_error_check_your_network_connection_and_try_again"
+        android:textColor="@color/red"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/crPfpNextBtn" />
+
     <Button
         android:id="@+id/crPfpSkipBtn"
         android:layout_width="wrap_content"
@@ -31,7 +48,7 @@
         android:layout_marginTop="55dp"
         android:gravity="center"
         android:letterSpacing="0.02"
-        android:text="Choose profile picture"
+        android:text="@string/choose_profile_picture"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -47,7 +64,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="50dp"
         android:gravity="center"
-        android:text="Choose a photo that represents you!"
+        android:text="@string/choose_a_photo_that_represents_you"
         android:textColor="#aaa"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -62,7 +79,7 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="30dp"
         android:background="@null"
-        android:contentDescription="Click to select profile picture"
+        android:contentDescription="@string/click_to_select_profile_picture"
         android:onClick="openLauncher"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -76,7 +93,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginEnd="50dp"
         android:gravity="center"
-        android:text="or choose a Doscord avatar"
+        android:text="@string/or_choose_a_doscord_avatar"
         android:textColor="#aaa"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -92,58 +109,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/crPfpSubtitle2" />
 
-    <FrameLayout
-        android:id="@+id/crPfpBtnContainer"
-        android:layout_width="0dp"
+    <Button
+        android:id="@+id/crPfpNextBtn"
+        android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:layout_marginHorizontal="20dp"
         android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:backgroundTint="#5865f2"
+        android:onClick="sendPfpToServer"
+        android:text="@string/next"
+        android:textColor="@color/white"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <Button
-            android:id="@+id/crPfpNextBtn"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:backgroundTint="#5865f2"
-            android:onClick="sendPfpToServer"
-            android:text="@string/next"
-            android:textColor="@color/white"
-            android:textSize="18sp" />
-
-        <LinearLayout
-            android:id="@+id/loadingDots"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <View
-                android:id="@+id/dot1"
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:layout_margin="4dp"
-                android:background="@drawable/dot_shape" />
-
-            <View
-                android:id="@+id/dot2"
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:layout_margin="4dp"
-                android:background="@drawable/dot_shape" />
-
-            <View
-                android:id="@+id/dot3"
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:layout_margin="4dp"
-                android:background="@drawable/dot_shape" />
-        </LinearLayout>
-    </FrameLayout>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/crPfpTableLayout" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -47,4 +47,11 @@
     <string name="must_be_at_least_13_years_old_to_create_an_account">Must be at least 13 years old to create an account.</string>
     <string name="create_account">Create Account</string>
     <string name="profile_picture">Profile picture</string>
+    <string name="server_error_check_your_network_connection_and_try_again">Server Error! Check your network connection and try again.</string>
+    <string name="loading">Loading..</string>
+    <string name="profile">Profile</string>
+    <string name="or_choose_a_doscord_avatar">or choose a Doscord avatar</string>
+    <string name="click_to_select_profile_picture">Click to select profile picture</string>
+    <string name="choose_a_photo_that_represents_you">Choose a photo that represents you!</string>
+    <string name="choose_profile_picture">Choose profile picture</string>
 </resources>

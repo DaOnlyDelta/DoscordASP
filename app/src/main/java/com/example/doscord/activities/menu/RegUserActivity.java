@@ -35,7 +35,7 @@ public class RegUserActivity extends AppCompatActivity {
 
     private EditText userInput, passInput;
     private ImageButton eyeBtn;
-    private TextView userWarningTxt, passStrengthWarningTxt, passWarningTxt;
+    private TextView userWarningTxt, passStrengthWarningTxt, passWarningTxt, serverWarningTxt;
     private boolean isPasswordVisible = false;
     private Button nextBtn;
     private final Handler debounceHandler = new Handler();
@@ -71,10 +71,11 @@ public class RegUserActivity extends AppCompatActivity {
         userInput = findViewById(R.id.regUserUserInput);
         passInput = findViewById(R.id.regUserPassInput);
         eyeBtn = findViewById(R.id.regUserEyeBtn);
-        nextBtn = findViewById(R.id.regNextBtn);
+        nextBtn = findViewById(R.id.regUserNextBtn);
         userWarningTxt = findViewById(R.id.regUserUserWarning);
         passStrengthWarningTxt = findViewById(R.id.regUserPassWarning);
         passWarningTxt = findViewById(R.id.regUserPassWarning2);
+        serverWarningTxt = findViewById(R.id.regUserServerWarning);
 
         userInput.setText(RegDataHolder.username);
         passInput.setText(RegDataHolder.password);
@@ -132,6 +133,8 @@ public class RegUserActivity extends AppCompatActivity {
                 RegDataHolder.isValid = false;
                 nextBtn.setEnabled(false); // Disable until we verify
                 nextBtn.setAlpha(0.5f);
+                userWarningTxt.setTextColor(ContextCompat.getColor(RegUserActivity.this, R.color.gray));
+                userWarningTxt.setText(R.string.loading);
 
                 // Remove any pending checks because the user is still typing
                 if (checkRunnable != null) {
@@ -176,6 +179,7 @@ public class RegUserActivity extends AppCompatActivity {
                     public void onResponse(@NonNull Call<CheckResponse> call, @NonNull Response<CheckResponse> response) {
                         Log.d("API_DEBUG", "Code: " + response.code());
                         if (response.isSuccessful() && response.body() != null) {
+                            serverWarningTxt.setVisibility(View.GONE);
                             if (response.body().isAvailable()) {
                                 RegDataHolder.isValid = true;
                                 checkButton();
@@ -196,9 +200,7 @@ public class RegUserActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(@NonNull Call<CheckResponse> call, @NonNull Throwable t) {
-                        // Silent fail
-                        Log.e("API_DEBUG", "FAILED TO CONNECT: " + t.getMessage());
-                        t.printStackTrace();
+                        serverWarningTxt.setVisibility(View.VISIBLE);
                     }
                 });
     }

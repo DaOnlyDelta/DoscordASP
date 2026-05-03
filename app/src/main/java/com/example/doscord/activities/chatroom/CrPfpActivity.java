@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TableLayout;
@@ -28,7 +27,6 @@ import com.example.doscord.R;
 import com.example.doscord.api.ApiService;
 import com.example.doscord.api.PfpRequest;
 import com.example.doscord.api.RetrofitClient;
-import com.example.doscord.utils.Helpers;
 import com.example.doscord.utils.RegDataHolder;
 
 import java.io.ByteArrayOutputStream;
@@ -50,7 +48,17 @@ public class CrPfpActivity extends AppCompatActivity {
     private TableLayout tableLayout;
     private Uri selectedImageUri = null; // Stores the local phone path
     private ActivityResultLauncher<Intent> galleryLauncher;
-    private Button nextBtn;
+
+    private final int[] avatarResources = {
+            R.drawable.defaults1,
+            R.drawable.defaults2,
+            R.drawable.defaults3,
+            R.drawable.defaults4,
+            R.drawable.defaults5,
+            R.drawable.defaults6,
+            R.drawable.defaults7,
+            R.drawable.defaults8
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +104,6 @@ public class CrPfpActivity extends AppCompatActivity {
     private void initViews() {
         mainPfpBtn = findViewById(R.id.crPfpBtn);
         tableLayout = findViewById(R.id.crPfpTableLayout);
-        nextBtn = findViewById(R.id.crPfpNextBtn);
 
         // Set initial placeholder for the big button
         Glide.with(this)
@@ -106,12 +113,11 @@ public class CrPfpActivity extends AppCompatActivity {
     }
 
     private void setupAvatarGrid() {
-        int totalAvatars = 8;
         int columns = 4;
         TableRow currentRealRow = null;
 
-        for (int i = 1; i <= totalAvatars; i++) {
-            if ((i - 1) % columns == 0) {
+        for (int i = 0; i < avatarResources.length; i++) {
+            if (i % columns == 0) {
                 currentRealRow = new TableRow(this);
                 currentRealRow.setGravity(Gravity.CENTER);
                 tableLayout.addView(currentRealRow);
@@ -125,15 +131,16 @@ public class CrPfpActivity extends AppCompatActivity {
             params.setMargins(40, 40, 40, 40);
             imageView.setLayoutParams(params);
 
-            // Fetch drawable by name (defaults1, defaults2, etc.)
-            int drawableId = getResources().getIdentifier("defaults" + i, "drawable", getPackageName());
+            // Fetch drawable by index in array
+            int drawableId = avatarResources[i];
 
             Glide.with(this)
                     .load(drawableId)
                     .circleCrop()
                     .into(imageView);
 
-            final String pfpPath = "defaults/defaults" + i + ".png";
+            // Path for the database
+            final String pfpPath = "defaults/defaults" + (i + 1) + ".png";
             final int selectedDrawableId = drawableId; // Final copy for the inner click listener
 
             imageView.setOnClickListener(v -> {
@@ -195,7 +202,6 @@ public class CrPfpActivity extends AppCompatActivity {
     }
 
     public void sendPfpToServer(View v) {
-        Helpers.startDotsAnimation(this, nextBtn);
         ApiService apiService = RetrofitClient.getApiService();
         String userId = String.valueOf(RegDataHolder.id);
 
@@ -210,7 +216,6 @@ public class CrPfpActivity extends AppCompatActivity {
             // --- CUSTOM GALLERY UPLOAD ---
             if (selectedImageUri == null) {
                 // Error: No image to upload
-                Helpers.resetUI(this, nextBtn, null, null);
                 return;
             }
 
@@ -231,19 +236,16 @@ public class CrPfpActivity extends AppCompatActivity {
                             skip(null); // Success! Move to next screen
                         } else {
                             // Error: Server returned status like 500
-                            Helpers.resetUI(CrPfpActivity.this, nextBtn, null, null);
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                         // Error: Network failure
-                        Helpers.resetUI(CrPfpActivity.this, nextBtn, null, null);
                     }
                 });
             } catch (Exception e) {
                 // Error: Critical file access error
-                Helpers.resetUI(this, nextBtn, null, null);
             }
 
         } else {
@@ -256,14 +258,12 @@ public class CrPfpActivity extends AppCompatActivity {
                         skip(null); // Success! Move to next screen
                     } else {
                         // Error: Server rejected selection
-                        Helpers.resetUI(CrPfpActivity.this, nextBtn, null, null);
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     // Error: Connection lost
-                    Helpers.resetUI(CrPfpActivity.this, nextBtn, null, null);
                 }
             });
         }

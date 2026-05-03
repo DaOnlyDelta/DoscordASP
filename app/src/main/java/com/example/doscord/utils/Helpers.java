@@ -36,9 +36,10 @@ public class Helpers {
         return !currentlyVisible;
     }
 
-    public static void resetUI(Activity activity, Button btn, EditText input1, EditText input2) {
-        btn.setTextColor(Color.WHITE);
+    public static void resetUI(Activity activity, Button btn, ImageButton backBtn, EditText input1, EditText input2) {
+        btn.setTextColor(android.graphics.Color.WHITE);
         btn.setEnabled(true);
+        backBtn.setEnabled(true);
 
         LinearLayout loadingDots = activity.findViewById(R.id.loadingDots);
         final View[] dots = {
@@ -66,6 +67,7 @@ public class Helpers {
     }
 
     public static void startDotsAnimation(Activity activity, Button btn) {
+        closeKeyboard(activity);
         btn.setTextColor(android.graphics.Color.TRANSPARENT);
         btn.setEnabled(false);
 
