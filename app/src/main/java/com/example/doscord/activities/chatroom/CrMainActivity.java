@@ -32,7 +32,7 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        pfpImg = findViewById(R.id.crMainPfpBtn);
+        pfpImg = findViewById(R.id.crMainPfp);
 
         loadPfp();
     }
@@ -42,6 +42,7 @@ public class CrMainActivity extends AppCompatActivity {
         if (RegDataHolder.id != -1) {
             Glide.with(this)
                     .load((RegDataHolder.selectedImageUri != null) ? RegDataHolder.selectedImageUri : RegDataHolder.defaultPfpDrawable)
+                    .centerCrop()
                     .circleCrop()
                     .into(pfpImg);
         } else {
@@ -50,10 +51,9 @@ public class CrMainActivity extends AppCompatActivity {
                     .load(fullPath)
                     .placeholder(R.drawable.pfp_placeholder) // Show this while it's loading
                     .error(R.drawable.icon)   // Show this if the link is broken
+                    .centerCrop()
                     .circleCrop()
                     .into(pfpImg);
         }
-
-
     }
 }

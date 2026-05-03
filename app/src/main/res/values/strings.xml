@@ -54,4 +54,7 @@
     <string name="click_to_select_profile_picture">Click to select profile picture</string>
     <string name="choose_a_photo_that_represents_you">Choose a photo that represents you!</string>
     <string name="choose_profile_picture">Choose profile picture</string>
+    <string name="you">You</string>
+    <string name="notifications">Notifications</string>
+    <string name="home">Home</string>
 </resources>

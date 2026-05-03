@@ -94,6 +94,7 @@ public class CrPfpActivity extends AppCompatActivity {
                         currentSelectedPath = "custom"; // Mark that we aren't using a default icon
                         Glide.with(this)
                                 .load(selectedImageUri)
+                                .centerCrop()
                                 .circleCrop()
                                 .into(mainPfpBtn);
                     }
@@ -147,10 +148,12 @@ public class CrPfpActivity extends AppCompatActivity {
                 // 1. Update the big preview button at the top
                 Glide.with(this)
                         .load(selectedDrawableId)
+                        .centerCrop()
                         .circleCrop()
                         .into(mainPfpBtn);
 
                 // 2. Save selection to the class-level variable
+                selectedImageUri = null;
                 currentSelectedPath = pfpPath;
                 RegDataHolder.defaultPfpDrawable = selectedDrawableId;
 

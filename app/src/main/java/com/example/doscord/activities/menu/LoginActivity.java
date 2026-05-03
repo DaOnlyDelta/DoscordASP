@@ -99,6 +99,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     LoginResponse.User user = response.body().getUser();
                     LogDataHolder.setResponseData(user.getId(), user.getUsername(), user.getDisplayName(), user.getPfp());
+                    loginBtn.setText(user.getPfp());
                     finish();
                 } else {
                     serverWarningTxt.setVisibility(View.GONE);
