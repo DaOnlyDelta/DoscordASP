@@ -39,7 +39,8 @@ dependencies {
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
-    implementation "androidx.fragment:fragment:1.6.0"
+    implementation libs.fragment
+    implementation libs.okhttp.dnsoverhttps
     implementation libs.constraintlayout
     implementation libs.navigation.fragment
     implementation libs.navigation.ui

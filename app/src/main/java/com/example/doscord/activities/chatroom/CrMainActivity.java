@@ -1,10 +1,14 @@
 package com.example.doscord.activities.chatroom;
 
+import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -15,7 +19,9 @@ import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
 
 public class CrMainActivity extends AppCompatActivity {
-    private ImageView pfpImg;
+    private ImageView homeIcon, notifIcon, pfpImg;
+    private TextView homeTxt, notifTxt, pfpTxt;
+    private int selected = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +38,12 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        pfpImg = findViewById(R.id.crMainPfp);
+        homeIcon = findViewById(R.id.crMainHomeIcon);
+        homeTxt = findViewById(R.id.crMainHomeText);
+        notifIcon = findViewById(R.id.crMainNotifIcon);
+        notifTxt = findViewById(R.id.crMainNotifText);
+        pfpImg = findViewById(R.id.crMainPfpIcon);
+        pfpTxt = findViewById(R.id.crMainPfpText);
 
         loadPfp();
     }
@@ -54,6 +65,57 @@ public class CrMainActivity extends AppCompatActivity {
                     .centerCrop()
                     .circleCrop()
                     .into(pfpImg);
+        }
+    }
+
+    public void homeClicked(View v) {
+        updateNav(0);
+    }
+
+    public void notifClicked(View v) {
+        updateNav(1);
+    }
+
+    public void pfpClicked(View v) {
+        updateNav(2);
+    }
+
+    private void updateNav(int index) {
+        if (selected == index) return;
+        selected = index;
+        clearSelected();
+    }
+
+    private void clearSelected() {
+        // 1. Get your colors from resources
+        int selectedColor = ContextCompat.getColor(this, R.color.selected);
+        int unselectedColor = ContextCompat.getColor(this, R.color.unselected);
+
+        // 2. Reset everything to unselected first
+        // Icons
+        homeIcon.setColorFilter(unselectedColor, PorterDuff.Mode.SRC_IN);
+        notifIcon.setColorFilter(unselectedColor, PorterDuff.Mode.SRC_IN);
+        pfpImg.setAlpha(0.5f);
+
+        // Text
+        homeTxt.setTextColor(unselectedColor);
+        notifTxt.setTextColor(unselectedColor);
+        pfpTxt.setTextColor(unselectedColor);
+
+        // 3. Highlight the one that matches the 'selected' variable
+        switch (selected) {
+            case 0:
+                homeIcon.setColorFilter(selectedColor, PorterDuff.Mode.SRC_IN);
+                homeTxt.setTextColor(selectedColor);
+                break;
+            case 1:
+                notifIcon.setColorFilter(selectedColor, PorterDuff.Mode.SRC_IN);
+                notifTxt.setTextColor(selectedColor);
+                break;
+            case 2:
+                pfpImg.setAlpha(1.0f);
+                pfpTxt.setTextColor(selectedColor);
+                break;
         }
     }
 }

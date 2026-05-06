@@ -5,14 +5,15 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgGray"
+    android:background="#131318"
     tools:context=".activities.chatroom.CrMainActivity">
 
     <LinearLayout
         android:id="@+id/crMainBottomLayout"
         android:layout_width="0dp"
-        android:layout_height="75dp"
-        android:background="#333"
+        android:layout_height="80dp"
+        android:background="#26272f"
+        android:baselineAligned="false"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -21,80 +22,97 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:onClick="homeClicked">
 
             <ImageButton
-                android:id="@+id/crMainHome"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginTop="5dp"
+                android:id="@+id/crMainHomeIcon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginTop="10dp"
                 android:background="@null"
                 android:backgroundTint="@color/bgGray"
+                android:clickable="false"
                 android:contentDescription="@string/home"
+                android:focusable="false"
                 android:scaleType="centerCrop"
+                android:src="@drawable/home_icon"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/selected" />
 
             <TextView
                 android:id="@+id/crMainHomeText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/home"
-                android:textColor="@color/white"
+                android:textColor="@color/selected"
+                android:textSize="13sp"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.6" />
+                app:layout_constraintVertical_bias="0.65" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:onClick="notifClicked">
 
             <ImageButton
-                android:id="@+id/crMainNotif"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:id="@+id/crMainNotifIcon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_marginTop="10dp"
                 android:background="@null"
-                android:backgroundTint="@color/bgGray"
+                android:clickable="false"
                 android:contentDescription="@string/notifications"
-                android:scaleType="centerCrop"
+                android:focusable="false"
+                android:scaleType="fitCenter"
+                android:src="@drawable/notif"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/unselected" />
 
             <TextView
                 android:id="@+id/crMainNotifText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/notifications"
-                android:textColor="@color/gray"
+                android:textColor="@color/unselected"
+                android:textSize="13sp"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.6" />
+                app:layout_constraintVertical_bias="0.65" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:onClick="pfpClicked">
 
             <ImageButton
-                android:id="@+id/crMainPfp"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+                android:id="@+id/crMainPfpIcon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_marginTop="10dp"
+                android:alpha="0.5"
                 android:background="@null"
                 android:backgroundTint="@color/bgGray"
+                android:clickable="false"
                 android:contentDescription="@string/profile"
+                android:focusable="false"
                 android:scaleType="centerCrop"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.48"
@@ -107,14 +125,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/you"
-                android:textColor="@color/gray"
+                android:textColor="@color/unselected"
+                android:textSize="13sp"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.6" />
+                app:layout_constraintVertical_bias="0.65" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="75dp"
+        android:layout_marginTop="5dp"
+        android:background="#1c1d23"
+        app:layout_constraintBottom_toTopOf="@+id/crMainBottomLayout"
+        app:layout_constraintCircleRadius="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
