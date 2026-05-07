@@ -15,5 +15,9 @@
         <item name="android:textColorSecondary">@android:color/darker_gray</item>
     </style>
 
+    <style name="RoundedSquare">
+        <item name="cornerSize">15dp</item> <item name="cornerFamily">rounded</item>
+    </style>
+
     <style name="Theme.Doscord" parent="Base.Theme.Doscord" />
 </resources>

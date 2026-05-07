@@ -30,7 +30,7 @@ public class CrMainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cr_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
+            v.setPadding(systemBars.left, systemBars.top, 0, 0);
             return insets;
         });
 

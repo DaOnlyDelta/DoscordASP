@@ -7,6 +7,8 @@
     <color name="yellow">#F1C40F</color>
     <color name="green">#2DC771</color>
     <color name="gray">#818491</color>
+    <color name="uiGray">#383a43</color>
+    <color name="blue">#5865f2</color>
     <color name="unselected">#6c6f7c</color>
     <color name="selected">#dddee1</color>
     <color name="purple_500">#6200EE</color>
