@@ -57,4 +57,11 @@
     <string name="you">You</string>
     <string name="notifications">Notifications</string>
     <string name="home">Home</string>
+    <string name="add_friends">Add Friends</string>
+    <string name="at">\@</string>
+    <string name="add_by_username">Add by Username</string>
+    <string name="who_would_you_like_to_add_as_a_friend">Who would you like to add as a friend?</string>
+    <string name="enter_a_username">Enter a username</string>
+    <string name="by_the_way_your_username_is">"By the way, your username is "</string>
+    <string name="send_friend_request">Send Friend Request</string>
 </resources>

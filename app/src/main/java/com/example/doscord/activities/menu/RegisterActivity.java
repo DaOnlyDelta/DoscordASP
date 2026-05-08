@@ -116,9 +116,8 @@ public class RegisterActivity extends AppCompatActivity {
     public void registerReq() {
         // Set up UI for loading state
         input.setEnabled(false);
-        backBtn.setEnabled(false);
         midRequest = true;
-        Helpers.startDotsAnimation(this, nextBtn);
+        Helpers.startDotsAnimation(this, nextBtn, backBtn);
 
         // Create the request object
         RegisterRequest request = new RegisterRequest();

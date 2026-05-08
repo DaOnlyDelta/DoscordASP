@@ -52,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
         passInput = findViewById(R.id.logPassInput);
         backBtn = findViewById(R.id.logBackBtn);
         eyeBtn = findViewById(R.id.logPassEyeBtn);
-        loginBtn = findViewById(R.id.logNextBtn);
+        loginBtn = findViewById(R.id.crAddUserSend);
         identifierWarningTxt = findViewById(R.id.logIdentifierWarning);
         passWarningTxt = findViewById(R.id.logPassWarning);
         serverWarningTxt = findViewById(R.id.logServerWarning);
@@ -85,8 +85,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         // Lock UI & Close keyboard
-        Helpers.startDotsAnimation(this, loginBtn);
-        backBtn.setEnabled(false);
+        Helpers.startDotsAnimation(this, loginBtn, backBtn);
         identifierInput.setEnabled(false);
         passInput.setEnabled(false);
 

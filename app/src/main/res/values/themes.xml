@@ -19,5 +19,10 @@
         <item name="cornerSize">15dp</item> <item name="cornerFamily">rounded</item>
     </style>
 
+    <style name="CircleImageView">
+        <item name="cornerSize">50%</item>
+        <item name="cornerFamily">rounded</item>
+    </style>
+
     <style name="Theme.Doscord" parent="Base.Theme.Doscord" />
 </resources>

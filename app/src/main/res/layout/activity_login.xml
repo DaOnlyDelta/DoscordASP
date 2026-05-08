@@ -24,7 +24,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logBtnContainer" />
+        app:layout_constraintTop_toBottomOf="@id/crAddserBtnContainer" />
 
     <TextView
         android:id="@+id/logIdentifierWarning"
@@ -112,7 +112,7 @@
         android:labelFor="@id/logIdentifierInput"
         android:letterSpacing="0.02"
         android:text="@string/email_or_phone_number"
-        android:textColor="#999898"
+        android:textColor="@color/labelGray"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logSubtitle" />
@@ -126,15 +126,13 @@
         android:layout_marginEnd="20dp"
         android:autofillHints="email, phone_number"
         android:background="@drawable/input_background"
-        android:ems="10"
         android:inputType="text"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logUserLabel"
-        tools:ignore="TextFields" />
+        app:layout_constraintTop_toBottomOf="@+id/logUserLabel" />
 
     <TextView
         android:id="@+id/logPassLabel"
@@ -145,7 +143,7 @@
         android:labelFor="@id/logPassInput"
         android:letterSpacing="0.02"
         android:text="@string/password"
-        android:textColor="#999898"
+        android:textColor="@color/labelGray"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logIdentifierWarning" />
@@ -202,7 +200,7 @@
         tools:ignore="RtlHardcoded" />
 
     <FrameLayout
-        android:id="@+id/logBtnContainer"
+        android:id="@+id/crAddserBtnContainer"
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_marginHorizontal="20dp"
@@ -214,7 +212,7 @@
         app:layout_constraintTop_toBottomOf="@+id/logForgotPass">
 
         <Button
-            android:id="@+id/logNextBtn"
+            android:id="@+id/crAddUserSend"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:backgroundTint="#5865f2"

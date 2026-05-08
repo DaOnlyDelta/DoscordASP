@@ -29,4 +29,7 @@ public interface ApiService {
             @Part("userId") RequestBody userId,
             @Part MultipartBody.Part image
     );
+
+    @POST("friend-request")
+    Call<FriendRequestResponse> sendFriendRequest(@Body FriendRequestRequest request);
 }

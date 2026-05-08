@@ -66,8 +66,9 @@ public class Helpers {
         }
     }
 
-    public static void startDotsAnimation(Activity activity, Button btn) {
+    public static void startDotsAnimation(Activity activity, Button btn, ImageButton back) {
         closeKeyboard(activity);
+        back.setEnabled(false);
         btn.setTextColor(android.graphics.Color.TRANSPARENT);
         btn.setEnabled(false);
 

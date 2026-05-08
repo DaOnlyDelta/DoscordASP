@@ -130,7 +130,7 @@ public class RegBdayActivity extends AppCompatActivity {
 
         // Set up UI for loading state
         midRequest = true;
-        Helpers.startDotsAnimation(this, createBtn);
+        Helpers.startDotsAnimation(this, createBtn, backBtn);
 
         // Create the request object
         RegisterRequest request = new RegisterRequest();

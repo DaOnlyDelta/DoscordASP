@@ -1,5 +1,6 @@
 package com.example.doscord.activities.chatroom;
 
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
@@ -13,6 +14,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.example.doscord.R;
 import com.example.doscord.utils.LogDataHolder;
@@ -22,6 +26,7 @@ public class CrMainActivity extends AppCompatActivity {
     private ImageView homeIcon, notifIcon, pfpImg;
     private TextView homeTxt, notifTxt, pfpTxt;
     private int selected = 0;
+    RecyclerView chatsView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +50,9 @@ public class CrMainActivity extends AppCompatActivity {
         pfpImg = findViewById(R.id.crMainPfpIcon);
         pfpTxt = findViewById(R.id.crMainPfpText);
 
+        chatsView = findViewById(R.id.crMainRecyclerView);
+        chatsView.setLayoutManager(new LinearLayoutManager(this));
+
         loadPfp();
     }
 
@@ -66,6 +74,11 @@ public class CrMainActivity extends AppCompatActivity {
                     .circleCrop()
                     .into(pfpImg);
         }
+    }
+
+    public void openAddFriends(View v) {
+        Intent intent = new Intent(this, AddFriendsActivity.class);
+        startActivity(intent);
     }
 
     public void homeClicked(View v) {

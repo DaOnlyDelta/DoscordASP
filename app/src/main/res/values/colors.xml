@@ -8,6 +8,9 @@
     <color name="green">#2DC771</color>
     <color name="gray">#818491</color>
     <color name="uiGray">#383a43</color>
+    <color name="uiGray2">#26272f</color>
+    <color name="textGray">#b1b2b8</color>
+    <color name="labelGray">#999898</color>
     <color name="blue">#5865f2</color>
     <color name="unselected">#6c6f7c</color>
     <color name="selected">#dddee1</color>
