@@ -28,6 +28,7 @@ import com.example.doscord.api.RegisterResponse;
 import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.utils.Helpers;
 import com.example.doscord.utils.RegDataHolder;
+import com.example.doscord.utils.SessionManager;
 import com.google.gson.Gson;
 
 import retrofit2.Call;
@@ -126,10 +127,13 @@ public class RegisterActivity extends AppCompatActivity {
         RetrofitClient.getApiService().register(request).enqueue(new Callback<RegisterResponse>() {
             @Override
             public void onResponse(@NonNull Call<RegisterResponse> call, @NonNull Response<RegisterResponse> response) {
-                if (response.isSuccessful()) {
-                    assert response.body() != null;
+                if (response.isSuccessful() && response.body() != null) {
                     RegDataHolder.id = response.body().getId();
-                    RegDataHolder.errorCode = 1;
+                    String receivedToken = response.body().getToken(); // Grab the 64-char string
+
+                    // Save it to the phone disk
+                    SessionManager sessionManager = new SessionManager(getApplicationContext());
+                    sessionManager.saveLoginSession(receivedToken);
                     handleRegistrationError(1);
                 } else {
                     // Handle Error Codes
@@ -218,6 +222,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void handleRegistrationError(int code) {
         if (code == 1) {
+            RegDataHolder.registered = true;
             finish();
         } else if (code == 102) {
             warningTxt.setVisibility(View.VISIBLE);

@@ -9,8 +9,9 @@ Error Code,Meaning,Android Action
 public class RegisterResponse {
     private Integer errorCode;
     private Integer id;
+    private String token;
 
-    // Getters
-    public Integer getId() { return id; }
     public Integer getErrorCode() { return errorCode; }
+    public Integer getId() { return id; }
+    public String getToken() { return token; }
 }

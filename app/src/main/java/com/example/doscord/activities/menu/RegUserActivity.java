@@ -177,7 +177,6 @@ public class RegUserActivity extends AppCompatActivity {
                 .enqueue(new Callback<CheckResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<CheckResponse> call, @NonNull Response<CheckResponse> response) {
-                        Log.d("API_DEBUG", "Code: " + response.code());
                         if (response.isSuccessful() && response.body() != null) {
                             serverWarningTxt.setVisibility(View.GONE);
                             if (response.body().isAvailable()) {

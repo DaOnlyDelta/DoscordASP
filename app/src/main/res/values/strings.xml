@@ -64,4 +64,5 @@
     <string name="enter_a_username">Enter a username</string>
     <string name="by_the_way_your_username_is">"By the way, your username is "</string>
     <string name="send_friend_request">Send Friend Request</string>
+    <string name="friend_request_sent">Friend request sent!</string>
 </resources>

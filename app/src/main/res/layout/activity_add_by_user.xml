@@ -3,10 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
+    android:animateLayoutChanges="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bgGray"
     tools:context=".activities.chatroom.AddByUserActivity">
+
+    <TextView
+        android:id="@+id/crAddByUserWarning"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="20dp"
+        android:textColor="@color/red"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/crAddByUserInput" />
 
     <ImageButton
         android:id="@+id/crAddByUserBackBtn"
@@ -31,7 +45,7 @@
         android:letterSpacing="0.02"
         android:text="@string/add_by_username"
         android:textColor="@color/selected"
-        android:textSize="24sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -79,7 +93,7 @@
         android:text="@string/by_the_way_your_username_is"
         android:textColor="@color/gray"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/crAddByUserInput" />
+        app:layout_constraintTop_toBottomOf="@id/crAddByUserWarning" />
 
     <TextView
         android:id="@+id/crAddByUserLabelUsername"
@@ -91,7 +105,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/crAddByUserLabel2"
-        app:layout_constraintTop_toBottomOf="@+id/crAddByUserInput" />
+        app:layout_constraintTop_toBottomOf="@id/crAddByUserWarning" />
 
     <FrameLayout
         android:id="@+id/crAddByUserBtnContainer"

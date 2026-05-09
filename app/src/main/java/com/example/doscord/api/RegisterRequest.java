@@ -11,6 +11,7 @@ public class RegisterRequest {
     private String username;
     private String password;
     private String birthday;
+    private String deviceName;
 
     public RegisterRequest() {
         this.username = RegDataHolder.username;
@@ -29,5 +30,7 @@ public class RegisterRequest {
                 RegDataHolder.year,
                 (RegDataHolder.month + 1),
                 RegDataHolder.day);
+
+        this.deviceName = android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL;
     }
 }

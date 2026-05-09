@@ -1,5 +1,6 @@
 package com.example.doscord.activities.menu;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +21,7 @@ import com.example.doscord.R;
 import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.utils.Helpers;
 import com.example.doscord.utils.LogDataHolder;
+import com.example.doscord.utils.SessionManager;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -96,9 +98,12 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    LoginResponse.User user = response.body().getUser();
-                    LogDataHolder.setResponseData(user.getId(), user.getUsername(), user.getDisplayName(), user.getPfp());
-                    loginBtn.setText(user.getPfp());
+                    String receivedToken = response.body().getToken(); // Grab the 64-char string
+
+                    // Save it to the phone disk
+                    SessionManager sessionManager = new SessionManager(getApplicationContext());
+                    sessionManager.saveLoginSession(receivedToken);
+
                     finish();
                 } else {
                     serverWarningTxt.setVisibility(View.GONE);

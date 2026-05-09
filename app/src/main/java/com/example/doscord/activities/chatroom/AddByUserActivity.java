@@ -6,11 +6,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -19,9 +19,13 @@ import com.example.doscord.R;
 import com.example.doscord.api.FriendRequestRequest;
 import com.example.doscord.api.FriendRequestResponse;
 import com.example.doscord.api.RetrofitClient;
+import com.example.doscord.api.TokenLoginResponse;
+import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.Helpers;
 import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
+
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,9 +34,10 @@ import retrofit2.Response;
 public class AddByUserActivity extends AppCompatActivity {
 
     private EditText usernameInput;
-    private TextView usernameLabel;
+    private TextView usernameLabel, warningTxt;
     private ImageButton backBtn;
     private Button sendBtn;
+    private TokenLoginResponse.User me;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,24 +58,27 @@ public class AddByUserActivity extends AppCompatActivity {
         usernameLabel = findViewById(R.id.crAddByUserLabelUsername);
         backBtn = findViewById(R.id.crAddByUserBackBtn);
         sendBtn = findViewById(R.id.crAddByUserSend);
+        warningTxt = findViewById(R.id.crAddByUserWarning);
+        me = GlobalData.getMe();
 
-        usernameLabel.setText((RegDataHolder.username.isEmpty()) ? LogDataHolder.getUsername() : RegDataHolder.username);
+        assert me != null;
+        usernameLabel.setText(me.getUsername());
     }
 
     public void sendFriendReq(View v) {
         String friendUsername = usernameInput.getText().toString().trim();
 
         if (friendUsername.isEmpty()) {
-            Toast.makeText(this, "Please enter a username", Toast.LENGTH_SHORT).show();
+            usernameInput.requestFocus();
             return;
         }
 
-        int userId = LogDataHolder.getId();
-        if (userId == -1) {
-            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+        if (me.getUsername().contentEquals(usernameInput.getText())) {
+            handleError(97);
             return;
         }
 
+        int userId = GlobalData.getActiveUserId();
 
         Helpers.startDotsAnimation(this, sendBtn, backBtn);
         FriendRequestRequest request = new FriendRequestRequest(userId, friendUsername);
@@ -80,21 +88,22 @@ public class AddByUserActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     Integer errorCode = response.body().getErrorCode();
                     if (errorCode == null) {
-                        Toast.makeText(AddByUserActivity.this, "Friend request sent!", Toast.LENGTH_SHORT).show();
-                        finish();
+                        warningTxt.setText(R.string.friend_request_sent);
+                        warningTxt.setTextColor(ContextCompat.getColor(AddByUserActivity.this, R.color.green));
+                        usernameInput.setText("");
                     } else {
                         handleError(errorCode);
-                        Helpers.resetUI(AddByUserActivity.this, sendBtn, backBtn, usernameInput, null);
                     }
                 } else {
-                    Toast.makeText(AddByUserActivity.this, "Server error. Try again later.", Toast.LENGTH_SHORT).show();
-                    Helpers.resetUI(AddByUserActivity.this, sendBtn, backBtn, usernameInput, null);
+                    handleError(98);
                 }
+                Helpers.resetUI(AddByUserActivity.this, sendBtn, backBtn, usernameInput, null);
             }
 
             @Override
             public void onFailure(@NonNull Call<FriendRequestResponse> call, @NonNull Throwable t) {
-                Toast.makeText(AddByUserActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                warningTxt.setText(R.string.generic_server_error);
+                warningTxt.setTextColor(ContextCompat.getColor(AddByUserActivity.this, R.color.red));
                 Helpers.resetUI(AddByUserActivity.this, sendBtn, backBtn, usernameInput, null);
             }
         });
@@ -104,25 +113,31 @@ public class AddByUserActivity extends AppCompatActivity {
         String message;
         switch (errorCode) {
             case 1:
-                message = "User not found";
+                message = "That user doesn't exist. Double check the spelling.";
                 break;
             case 2:
-                message = "You are already friends with this user";
+                message = "You're already friends with that user!";
                 break;
             case 3:
-                message = "Friend request already pending";
+                message = "Friend request already pending.";
                 break;
-            case 4:
-                message = "You cannot add yourself";
+            case 97:
+                message = "You cannot send a friend request to yourself.";
+                break;
+            case 98:
+                message = "Server error. Please try again.";
                 break;
             case 99:
-                message = "Something went wrong on the server";
+                message = "Something went wrong on the server!";
                 break;
             default:
                 message = "Unknown error occurred";
                 break;
         }
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+
+        warningTxt.setVisibility(View.VISIBLE);
+        warningTxt.setText(message);
+        warningTxt.setTextColor(ContextCompat.getColor(AddByUserActivity.this, R.color.red));
     }
 
     public void finish(View v) {

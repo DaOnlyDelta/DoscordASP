@@ -12,9 +12,8 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.doscord.R;
 import com.example.doscord.activities.chatroom.CrMainActivity;
-import com.example.doscord.activities.chatroom.CrPfpActivity;
-import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
+import com.example.doscord.utils.SessionManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,20 +27,28 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        checkSession();
+    }
+
+    private void checkSession() {
+        SessionManager sessionManager = new SessionManager(this);
+        if (sessionManager.isLoggedIn()) {
+            Intent intent = new Intent(this, CrMainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (RegDataHolder.errorCode == 1) {
-            Intent intent = new Intent(this, CrPfpActivity.class);
+        if (RegDataHolder.registered) {
+            Intent intent = new Intent(this, RegPfpActivity.class);
             startActivity(intent);
-            finish();
-        } else if (LogDataHolder.getId() != -1) {
-            Intent intent = new Intent(this, CrMainActivity.class);
-            startActivity(intent);
-            finish();
+            return;
         }
+        checkSession();
     }
 
     public void openLoginActivity(View v) {

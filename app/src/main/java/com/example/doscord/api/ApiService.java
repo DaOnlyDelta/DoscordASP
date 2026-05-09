@@ -4,13 +4,18 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import retrofit2.http.Query;
 
 public interface ApiService {
     @POST("login")
     Call<LoginResponse> login(@Body LoginRequest request);
+
+    @POST("logout")
+    Call<Void> logout(@Body LogoutRequest request);
 
     @POST("check-username")
     Call<CheckResponse> checkUsername(@Body CheckRequest request);
@@ -30,6 +35,13 @@ public interface ApiService {
             @Part MultipartBody.Part image
     );
 
-    @POST("friend-request")
+    @POST("send-friend-request")
     Call<FriendRequestResponse> sendFriendRequest(@Body FriendRequestRequest request);
+
+    @GET("token-login")
+    Call<TokenLoginResponse> tokenLogin(@Query("token") String token);
+
+    // This will be for your background worker later
+    @GET("get-updates")
+    Call<UpdateResponse> getUpdates(@Query("token") String token);
 }

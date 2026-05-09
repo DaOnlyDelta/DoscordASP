@@ -1,4 +1,4 @@
-package com.example.doscord.activities.chatroom;
+package com.example.doscord.activities.menu;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -24,6 +24,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.doscord.R;
+import com.example.doscord.activities.chatroom.CrMainActivity;
 import com.example.doscord.api.ApiService;
 import com.example.doscord.api.PfpRequest;
 import com.example.doscord.api.RetrofitClient;
@@ -41,7 +42,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class CrPfpActivity extends AppCompatActivity {
+public class RegPfpActivity extends AppCompatActivity {
 
     private ImageButton mainPfpBtn; // Changed to ImageButton to match your XML
     private String currentSelectedPath = "defaults/defaults0.png";
@@ -64,7 +65,7 @@ public class CrPfpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_cr_pfp);
+        setContentView(R.layout.activity_reg_pfp);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -74,6 +75,7 @@ public class CrPfpActivity extends AppCompatActivity {
         initLauncher();
         initViews();
         setupAvatarGrid();
+        RegDataHolder.registered = false;
     }
 
     private void initLauncher() {
@@ -181,9 +183,7 @@ public class CrPfpActivity extends AppCompatActivity {
         }
     }
 
-    public void skip(View v) {
-        Intent intent = new Intent(this, CrMainActivity.class);
-        startActivity(intent);
+    public void finish(View v) {
         finish();
     }
 
@@ -211,7 +211,7 @@ public class CrPfpActivity extends AppCompatActivity {
         // Case 1: User hasn't changed anything (still defaults0)
         // We just treat this as a skip.
         if (currentSelectedPath.equals("defaults/defaults0.png")) {
-            skip(null);
+            finish();
             return;
         }
 
@@ -236,7 +236,7 @@ public class CrPfpActivity extends AppCompatActivity {
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if (response.isSuccessful()) {
                             RegDataHolder.selectedImageUri = selectedImageUri;
-                            skip(null); // Success! Move to next screen
+                            finish(); // Success! Move to next screen
                         } else {
                             // Error: Server returned status like 500
                         }
@@ -258,7 +258,7 @@ public class CrPfpActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     if (response.isSuccessful()) {
-                        skip(null); // Success! Move to next screen
+                        finish(); // Success! Move to next screen
                     } else {
                         // Error: Server rejected selection
                     }

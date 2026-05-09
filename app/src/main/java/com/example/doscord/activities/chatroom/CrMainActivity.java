@@ -3,12 +3,15 @@ package com.example.doscord.activities.chatroom;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -19,14 +22,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.doscord.R;
+import com.example.doscord.activities.menu.MainActivity;
+import com.example.doscord.api.LogoutRequest;
+import com.example.doscord.api.RetrofitClient;
+import com.example.doscord.api.TokenLoginResponse;
+import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
+import com.example.doscord.utils.SessionManager;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CrMainActivity extends AppCompatActivity {
     private ImageView homeIcon, notifIcon, pfpImg;
     private TextView homeTxt, notifTxt, pfpTxt;
     private int selected = 0;
-    RecyclerView chatsView;
+    private RecyclerView homeChatsView;
+    private ConstraintLayout homeLayout, notifLayout, emptyNotifLayout, profileLayout, overlayLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +57,7 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        // Bottom
         homeIcon = findViewById(R.id.crMainHomeIcon);
         homeTxt = findViewById(R.id.crMainHomeText);
         notifIcon = findViewById(R.id.crMainNotifIcon);
@@ -50,13 +65,66 @@ public class CrMainActivity extends AppCompatActivity {
         pfpImg = findViewById(R.id.crMainPfpIcon);
         pfpTxt = findViewById(R.id.crMainPfpText);
 
-        chatsView = findViewById(R.id.crMainRecyclerView);
-        chatsView.setLayoutManager(new LinearLayoutManager(this));
+        // Home
+        homeLayout = findViewById(R.id.crMainHomeContainer);
+        homeChatsView = findViewById(R.id.crMainRecyclerView);
+        homeChatsView.setLayoutManager(new LinearLayoutManager(this));
 
-        loadPfp();
+        // Notif
+        notifLayout = findViewById(R.id.crMainNotifContainer);
+        emptyNotifLayout = findViewById(R.id.crMainEmptyNotifLayout);
+
+        // Profile
+        profileLayout = findViewById(R.id.crMainProfileContainer);
+
+        overlayLayout = findViewById(R.id.crMainOverlay);
+        fetchData();
     }
 
-    private void loadPfp() {
+    private void fetchData() {
+        SessionManager sessionManager = new SessionManager(this);
+        String token = sessionManager.getToken();
+
+        // Use our new renamed method
+        RetrofitClient.getApiService().tokenLogin(token).enqueue(new Callback<TokenLoginResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<TokenLoginResponse> call, @NonNull Response<TokenLoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    // FILL THE STATIC REPOSITORY
+                    GlobalData.updateData(response.body());
+                    displayData();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TokenLoginResponse> call, @NonNull Throwable t) {
+                Log.e("DoscordAuth", "Connection failed");
+                fetchData();
+            }
+        });
+    }
+
+    private void displayData() {
+        for (TokenLoginResponse.User user : GlobalData.getUserList()) {
+            if (user.getId() == GlobalData.getActiveUserId()) {
+                // Update active user ui
+                loadPfp(user.getPfp());
+            }
+        }
+
+        // Animate alpha from 1 to 0
+        overlayLayout.animate()
+                .alpha(0f)
+                .setDuration(500) // 500ms
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        overlayLayout.setVisibility(View.GONE);
+                    }
+                });
+    }
+
+    private void loadPfp(String path) {
         // Load pfp
         if (RegDataHolder.id != -1) {
             Glide.with(this)
@@ -65,7 +133,7 @@ public class CrMainActivity extends AppCompatActivity {
                     .circleCrop()
                     .into(pfpImg);
         } else {
-            String fullPath = "https://doscord-api.duckdns.org/images/" + LogDataHolder.getPfp();
+            String fullPath = "https://doscord-api.duckdns.org/images/" + path;
             Glide.with(this)
                     .load(fullPath)
                     .placeholder(R.drawable.pfp_placeholder) // Show this while it's loading
@@ -115,20 +183,50 @@ public class CrMainActivity extends AppCompatActivity {
         notifTxt.setTextColor(unselectedColor);
         pfpTxt.setTextColor(unselectedColor);
 
+        // Layouts
+        homeLayout.setVisibility(View.GONE);
+        notifLayout.setVisibility(View.GONE);
+        profileLayout.setVisibility(View.GONE);
+
         // 3. Highlight the one that matches the 'selected' variable
         switch (selected) {
             case 0:
+                homeLayout.setVisibility(View.VISIBLE);
                 homeIcon.setColorFilter(selectedColor, PorterDuff.Mode.SRC_IN);
                 homeTxt.setTextColor(selectedColor);
                 break;
             case 1:
+                notifLayout.setVisibility(View.VISIBLE);
                 notifIcon.setColorFilter(selectedColor, PorterDuff.Mode.SRC_IN);
                 notifTxt.setTextColor(selectedColor);
                 break;
             case 2:
+                profileLayout.setVisibility(View.VISIBLE);
                 pfpImg.setAlpha(1.0f);
                 pfpTxt.setTextColor(selectedColor);
                 break;
         }
+    }
+
+    public void openSettings(View v) {
+        // Placeholder
+        // Logout
+        SessionManager sessionManager = new SessionManager(this);
+        String token = sessionManager.getToken();
+
+        // Tell the server (Don't even wait for response, just fire and forget)
+        RetrofitClient.getApiService().logout(new LogoutRequest(token)).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {}
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+        });
+        sessionManager.logout();
+
+        GlobalData.clear();
+
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
