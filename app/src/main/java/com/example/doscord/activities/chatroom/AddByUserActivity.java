@@ -88,6 +88,7 @@ public class AddByUserActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     Integer errorCode = response.body().getErrorCode();
                     if (errorCode == null) {
+                        warningTxt.setVisibility(View.VISIBLE);
                         warningTxt.setText(R.string.friend_request_sent);
                         warningTxt.setTextColor(ContextCompat.getColor(AddByUserActivity.this, R.color.green));
                         usernameInput.setText("");

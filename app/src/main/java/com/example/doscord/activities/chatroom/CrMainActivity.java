@@ -26,10 +26,15 @@ import com.example.doscord.activities.menu.MainActivity;
 import com.example.doscord.api.LogoutRequest;
 import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.api.TokenLoginResponse;
+import com.example.doscord.utils.FriendsAdapter;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
 import com.example.doscord.utils.SessionManager;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -105,12 +110,8 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     private void displayData() {
-        for (TokenLoginResponse.User user : GlobalData.getUserList()) {
-            if (user.getId() == GlobalData.getActiveUserId()) {
-                // Update active user ui
-                loadPfp(user.getPfp());
-            }
-        }
+        loadPfp(Objects.requireNonNull(GlobalData.getMe()).getPfp());
+        setupRecyclerView();
 
         // Animate alpha from 1 to 0
         overlayLayout.animate()
@@ -125,23 +126,30 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     private void loadPfp(String path) {
-        // Load pfp
-        if (RegDataHolder.id != -1) {
-            Glide.with(this)
-                    .load((RegDataHolder.selectedImageUri != null) ? RegDataHolder.selectedImageUri : RegDataHolder.defaultPfpDrawable)
-                    .centerCrop()
-                    .circleCrop()
-                    .into(pfpImg);
-        } else {
-            String fullPath = "https://doscord-api.duckdns.org/images/" + path;
-            Glide.with(this)
-                    .load(fullPath)
-                    .placeholder(R.drawable.pfp_placeholder) // Show this while it's loading
-                    .error(R.drawable.icon)   // Show this if the link is broken
-                    .centerCrop()
-                    .circleCrop()
-                    .into(pfpImg);
+        String fullPath = "https://doscord-api.duckdns.org/images/" + path;
+        Glide.with(this)
+                .load(fullPath)
+                .placeholder(R.drawable.pfp_placeholder) // Show this while it's loading
+                .error(R.drawable.icon)   // Show this if the link is broken
+                .centerCrop()
+                .circleCrop()
+                .into(pfpImg);
+    }
+
+    private void setupRecyclerView() {
+        RecyclerView recyclerView = findViewById(R.id.crMainRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Get the list but remove "Self" (activeUserId) so you don't chat with yourself
+        List<TokenLoginResponse.User> onlyFriends = new ArrayList<>();
+        int myId = GlobalData.getActiveUserId();
+
+        for (TokenLoginResponse.User u : GlobalData.getUserList()) {
+            if (u.getId() != myId) onlyFriends.add(u);
         }
+
+        FriendsAdapter adapter = new FriendsAdapter(onlyFriends, this);
+        recyclerView.setAdapter(adapter);
     }
 
     public void openAddFriends(View v) {

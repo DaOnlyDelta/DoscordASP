@@ -16,9 +16,11 @@ public class TokenLoginResponse {
         private String username;
         private String display_name;
         private String pfp;
-        private String created_at;    // Added
-        private String friends_since; // Added (null for self)
-        private String nickname;      // Added (null for self)
+        private String created_at;
+        private String friends_since;
+        private String nickname;
+        private String last_message;
+        private String last_message_time;
 
         public int getId() { return id; }
         public String getUsername() { return username; }
@@ -27,5 +29,7 @@ public class TokenLoginResponse {
         public String getCreatedAt() { return created_at; }
         public String getFriendsSince() { return friends_since; }
         public String getNickname() { return nickname; }
+        public String getLastMessage() { return last_message; }
+        public String getLastMessageTime() { return last_message_time; }
     }
 }
