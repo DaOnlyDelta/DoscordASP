@@ -184,6 +184,7 @@ public class RegPfpActivity extends AppCompatActivity {
     }
 
     public void finish(View v) {
+        RegDataHolder.clear();
         finish();
     }
 
@@ -211,7 +212,7 @@ public class RegPfpActivity extends AppCompatActivity {
         // Case 1: User hasn't changed anything (still defaults0)
         // We just treat this as a skip.
         if (currentSelectedPath.equals("defaults/defaults0.png")) {
-            finish();
+            finish(null);
             return;
         }
 
@@ -236,7 +237,7 @@ public class RegPfpActivity extends AppCompatActivity {
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if (response.isSuccessful()) {
                             RegDataHolder.selectedImageUri = selectedImageUri;
-                            finish(); // Success! Move to next screen
+                            finish(null); // Success! Move to next screen
                         } else {
                             // Error: Server returned status like 500
                         }
@@ -258,7 +259,7 @@ public class RegPfpActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     if (response.isSuccessful()) {
-                        finish(); // Success! Move to next screen
+                        finish(null); // Success! Move to next screen
                     } else {
                         // Error: Server rejected selection
                     }

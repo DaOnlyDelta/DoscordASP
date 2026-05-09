@@ -57,7 +57,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
         }
 
         // 3. Loading time
-        holder.time.setText(formatTime(user.getLastMessageTime()));
+        holder.time.setText(Helpers.formatTime(user.getLastMessageTime()));
 
         // 4. Load PFP using Glide
         String pfpUrl = "https://doscord-api.duckdns.org/images/" + user.getPfp();
@@ -87,44 +87,6 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
             name = itemView.findViewById(R.id.itemChatName);
             message = itemView.findViewById(R.id.itemChatMessage);
             time = itemView.findViewById(R.id.itemChatTime);
-        }
-    }
-
-    public String formatTime(String rawTime) {
-        if (rawTime == null || rawTime.isEmpty()) return "";
-
-        try {
-            // 1. Parse the DB string (Adjust format if your DB sends T or .000Z)
-            // Since you used dateStrings: true, it should be yyyy-MM-dd HH:mm:ss
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-            Date messageDate = sdf.parse(rawTime);
-            assert messageDate != null;
-            long messageTime = messageDate.getTime();
-            long now = System.currentTimeMillis();
-
-            // 2. Calculate difference in seconds
-            long diffSeconds = (now - messageTime) / 1000;
-
-            if (diffSeconds < 60) return "1m"; // Discord starts at 1m
-
-            long diffMinutes = diffSeconds / 60;
-            if (diffMinutes < 60) return diffMinutes + "m";
-
-            long diffHours = diffMinutes / 60;
-            if (diffHours < 24) return diffHours + "h";
-
-            long diffDays = diffHours / 24;
-            if (diffDays < 30) return diffDays + "d";
-
-            long diffMonths = diffDays / 30;
-            if (diffMonths < 12) return diffMonths + "mo";
-
-            long diffYears = diffMonths / 12;
-            return diffYears + "y";
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
         }
     }
 }

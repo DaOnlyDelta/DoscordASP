@@ -15,6 +15,10 @@ import android.widget.LinearLayout;
 
 import com.example.doscord.R;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class Helpers {
     public static boolean switchEye(boolean currentlyVisible, EditText input, ImageButton eye) {
         // Save the font before changing the input type
@@ -141,5 +145,43 @@ public class Helpers {
     public static void setDate(EditText input) {
         String selectedDate = RegDataHolder.day + "/" + (RegDataHolder.month + 1) + "/" + RegDataHolder.year;
         input.setText(selectedDate);
+    }
+
+    public static String formatTime(String rawTime) {
+        if (rawTime == null || rawTime.isEmpty()) return "";
+
+        try {
+            // 1. Parse the DB string (Adjust format if your DB sends T or .000Z)
+            // Since you used dateStrings: true, it should be yyyy-MM-dd HH:mm:ss
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            Date messageDate = sdf.parse(rawTime);
+            assert messageDate != null;
+            long messageTime = messageDate.getTime();
+            long now = System.currentTimeMillis();
+
+            // 2. Calculate difference in seconds
+            long diffSeconds = (now - messageTime) / 1000;
+
+            if (diffSeconds < 60) return "1m"; // Discord starts at 1m
+
+            long diffMinutes = diffSeconds / 60;
+            if (diffMinutes < 60) return diffMinutes + "m";
+
+            long diffHours = diffMinutes / 60;
+            if (diffHours < 24) return diffHours + "h";
+
+            long diffDays = diffHours / 24;
+            if (diffDays < 30) return diffDays + "d";
+
+            long diffMonths = diffDays / 30;
+            if (diffMonths < 12) return diffMonths + "mo";
+
+            long diffYears = diffMonths / 12;
+            return diffYears + "y";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 }

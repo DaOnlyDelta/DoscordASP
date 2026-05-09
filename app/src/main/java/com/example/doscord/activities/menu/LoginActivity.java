@@ -104,6 +104,7 @@ public class LoginActivity extends AppCompatActivity {
                     SessionManager sessionManager = new SessionManager(getApplicationContext());
                     sessionManager.saveLoginSession(receivedToken);
 
+                    LogDataHolder.clear();
                     finish();
                 } else {
                     serverWarningTxt.setVisibility(View.GONE);

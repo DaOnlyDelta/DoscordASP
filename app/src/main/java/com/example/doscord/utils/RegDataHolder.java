@@ -17,4 +17,21 @@ public class RegDataHolder {
     public static int defaultPfpDrawable = -1;
     public static Uri selectedImageUri = null;
     public static boolean registered = false;
+
+    public static void clear() {
+        id = -1;
+        email = "";
+        phone = "";
+        focused = 1;
+        displayName = "";
+        username = "";
+        isValid = false;
+        password = "";
+        passStrength = false;
+        errorCode = 0;
+        year = null; month = null; day = null;
+        defaultPfpDrawable = -1;
+        selectedImageUri = null;
+        registered = false;
+    }
 }

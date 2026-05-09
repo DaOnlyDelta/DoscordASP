@@ -30,6 +30,7 @@ import com.example.doscord.utils.FriendsAdapter;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
+import com.example.doscord.utils.RequestsAdapter;
 import com.example.doscord.utils.SessionManager;
 
 import java.util.ArrayList;
@@ -137,19 +138,56 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        RecyclerView recyclerView = findViewById(R.id.crMainRecyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
         // Get the list but remove "Self" (activeUserId) so you don't chat with yourself
-        List<TokenLoginResponse.User> onlyFriends = new ArrayList<>();
+        List<TokenLoginResponse.User> friendsOnly = new ArrayList<>();
+        List<TokenLoginResponse.User> requestsOnly = new ArrayList<>();
+        List<Integer> pendingIds = GlobalData.getPendingRequestIds();
         int myId = GlobalData.getActiveUserId();
 
         for (TokenLoginResponse.User u : GlobalData.getUserList()) {
-            if (u.getId() != myId) onlyFriends.add(u);
+            if (u.getId() == myId) continue;
+
+            // Case A: They sent ME a request (It's in the pendingIds list)
+            if (pendingIds.contains(u.getId())) {
+                requestsOnly.add(u);
+            }
+            // Case B: We are already accepted friends
+            // We check the "friends_since" field (it's NULL for pending requests in our query)
+            else if (u.getFriendsSince() != null) {
+                friendsOnly.add(u);
+            }
+            // Case C: I sent THEM a request, and it's still pending
+            else {
+                // Optional: Add to a "Sent Requests" list or just ignore for now
+                Log.d("DoscordAuth", "Outgoing request to " + u.getDisplayName() + " is still pending.");
+            }
         }
 
-        FriendsAdapter adapter = new FriendsAdapter(onlyFriends, this);
+        RecyclerView recyclerView = findViewById(R.id.crMainRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        FriendsAdapter adapter = new FriendsAdapter(friendsOnly, this);
         recyclerView.setAdapter(adapter);
+
+        updateRequests(requestsOnly);
+    }
+
+    private void updateRequests(List<TokenLoginResponse.User> requestsOnly) {
+        RecyclerView recyclerView = findViewById(R.id.crNotifRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        RequestsAdapter requestsAdapter = new RequestsAdapter(requestsOnly, this, new RequestsAdapter.OnRequestHandledListener() {
+            @Override
+            public void onRequestProcessed() {
+                // This runs whenever a button is clicked and successful!
+                setupRecyclerView();
+            }
+        });
+
+        if (requestsAdapter.getItemCount() > 0) {
+            emptyNotifLayout.setVisibility(View.GONE);
+        } else {
+            emptyNotifLayout.setVisibility(View.VISIBLE);
+        }
+        recyclerView.setAdapter(requestsAdapter);
     }
 
     public void openAddFriends(View v) {

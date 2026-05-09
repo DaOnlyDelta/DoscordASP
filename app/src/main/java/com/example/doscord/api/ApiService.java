@@ -1,5 +1,7 @@
 package com.example.doscord.api;
 
+import java.util.Map;
+
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -37,6 +39,9 @@ public interface ApiService {
 
     @POST("send-friend-request")
     Call<FriendRequestResponse> sendFriendRequest(@Body FriendRequestRequest request);
+
+    @POST("handle-friend-request")
+    Call<Void> handleFriendRequest(@Body Map<String, Object> body);
 
     @GET("token-login")
     Call<TokenLoginResponse> tokenLogin(@Query("token") String token);
