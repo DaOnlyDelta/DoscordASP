@@ -65,13 +65,11 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
 
         // Green Check Clicked
         holder.btnAccept.setOnClickListener(v -> {
-            // TODO: Call API to accept request
             handleRequest(user.getId(), "accepted", position);
         });
 
         // Red Cross Clicked
         holder.btnDecline.setOnClickListener(v -> {
-            // TODO: Call API to decline/delete request
             handleRequest(user.getId(), "declined", position);
         });
     }
