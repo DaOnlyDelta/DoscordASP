@@ -1,6 +1,7 @@
 package com.example.doscord.activities.chatroom;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -59,8 +60,11 @@ public class AddByUserActivity extends AppCompatActivity {
         warningTxt = findViewById(R.id.crAddByUserWarning);
         me = GlobalData.getMe();
 
-        assert me != null;
-        usernameLabel.setText(me.getUsername());
+        if (me != null) {
+            usernameLabel.setText(me.getUsername());
+        } else {
+            Log.e("AddByUserActivity", "me is null");
+        }
     }
 
     public void sendFriendReq(View v) {

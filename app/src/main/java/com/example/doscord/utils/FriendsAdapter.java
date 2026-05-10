@@ -36,43 +36,55 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = friendsList.get(position);
 
-        // 1. Set the Name (Use Nickname if it exists, otherwise Display Name)
-        String displayName = user.getUsername();
+        // 1. Set the Name (SQL already handles picking the right nickname)
+        String finalDisplayName = user.getUsername();
         if (user.getNickname() != null && !user.getNickname().isEmpty()) {
-            displayName = user.getNickname();
+            finalDisplayName = user.getNickname();
         } else if (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) {
-            displayName = user.getDisplayName();
+            finalDisplayName = user.getDisplayName();
         }
-        holder.name.setText(displayName);
+        holder.name.setText(finalDisplayName);
 
-        // 2. Set Last Message (Handle null if you've never chatted)
-        if (user.getLastMessage() != null && user.getLastMessageSenderId() != null) {
-            String msg = "";
-            if (user.getLastMessageSenderId() == user.getId()) {
-                msg = user.getUsername() + ": ";
-            } else {
-                msg = "You: ";
+        // 2. Set Last Message + Sender Prefix
+        if (user.getLastMessage() != null) {
+            String prefix = "";
+            // Check if the sender ID matches the Active User (You)
+            if (user.getLastMessageSenderId() != null) {
+                if (user.getLastMessageSenderId() == GlobalData.getActiveUserId()) {
+                    prefix = "You: ";
+                } else {
+                    // It was sent by the friend.
+                    // You can use their nickname/display name or just leave it blank.
+                    prefix = finalDisplayName + ": ";
+                }
             }
-            msg += user.getLastMessage();
-            holder.message.setText(msg);
+            holder.message.setText(prefix + user.getLastMessage());
         } else {
             holder.message.setText("No messages yet. Say hi!");
         }
 
-        // 3. Loading time
-        holder.time.setText(Helpers.formatTime(user.getLastMessageTime()));
+        // 3. Format and Set Time
+        if (user.getLastMessageTime() != null) {
+            holder.time.setText(Helpers.formatTime(user.getLastMessageTime()));
+        } else {
+            holder.time.setText("");
+        }
 
-        // 4. Load PFP using Glide
+        // 4. Load PFP
         String pfpUrl = "https://doscord-api.duckdns.org/images/" + user.getPfp();
         Glide.with(context)
                 .load(pfpUrl)
                 .placeholder(R.drawable.pfp_placeholder)
+                .error(R.drawable.pfp_placeholder) // Fallback if image fails
+                .circleCrop() // Optional: makes PFPs round
                 .into(holder.pfp);
 
-        // 5. Click Listener to open the Chat
+        // 5. Click Listener (Passing Channel ID for the future)
+        final String chatName = finalDisplayName; // Need final for lambda
         holder.itemView.setOnClickListener(v -> {
             // Intent intent = new Intent(context, ChatActivity.class);
-            // intent.putExtra("friend_id", user.getId());
+            // intent.putExtra("channel_id", user.getChannelId());
+            // intent.putExtra("chat_name", chatName);
             // context.startActivity(intent);
         });
     }

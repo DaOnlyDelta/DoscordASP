@@ -1,25 +1,34 @@
 package com.example.doscord.utils;
 
-public class User {
-    private int id;
-    private String username;
-    private String display_name;
-    private String pfp;
-    private String created_at;
-    private String friends_since;
-    private String nickname;
-    private String last_message;
-    private String last_message_time;
-    private Integer last_message_sender_id;
+import com.google.gson.annotations.SerializedName;
 
+public class User {
+    private Integer id;
+    private String username;
+    @SerializedName("display_name")
+    private String displayName;
+    private String pfp;
+    @SerializedName("channel_id")
+    private Integer channelId;
+    private String nickname;
+    @SerializedName("friends_since")
+    private String friendsSince;
+    @SerializedName("last_message")
+    private String lastMessage;
+    @SerializedName("last_message_time")
+    private String lastMessageTime;
+    @SerializedName("last_message_sender_id")
+    private Integer lastMessageSenderId;
+
+    // Getters
     public int getId() { return id; }
     public String getUsername() { return username; }
-    public String getDisplayName() { return display_name; }
+    public String getDisplayName() { return displayName; }
     public String getPfp() { return pfp; }
-    public String getCreatedAt() { return created_at; }
-    public String getFriendsSince() { return friends_since; }
+    public Integer getChannelId() { return channelId; }
     public String getNickname() { return nickname; }
-    public String getLastMessage() { return last_message; }
-    public String getLastMessageTime() { return last_message_time; }
-    public Integer getLastMessageSenderId() { return last_message_sender_id; }
+    public String getFriendsSince() { return friendsSince; }
+    public String getLastMessage() { return lastMessage; }
+    public String getLastMessageTime() { return lastMessageTime; }
+    public Integer getLastMessageSenderId() { return lastMessageSenderId; }
 }

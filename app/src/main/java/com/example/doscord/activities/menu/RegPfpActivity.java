@@ -184,7 +184,6 @@ public class RegPfpActivity extends AppCompatActivity {
     }
 
     public void finish(View v) {
-        RegDataHolder.clear();
         finish();
     }
 

@@ -28,15 +28,13 @@ import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.api.TokenLoginResponse;
 import com.example.doscord.utils.FriendsAdapter;
 import com.example.doscord.utils.GlobalData;
-import com.example.doscord.utils.User;
-import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
+import com.example.doscord.utils.User;
 import com.example.doscord.utils.RequestsAdapter;
 import com.example.doscord.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -112,7 +110,12 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     private void displayData() {
-        loadPfp(Objects.requireNonNull(GlobalData.getMe()).getPfp());
+        User me = GlobalData.getMe();
+        if (me != null) {
+            loadPfp(me.getPfp());
+        } else {
+            Log.e("CrMainActivity", "GlobalData.getMe() returned null!");
+        }
         setupRecyclerView();
 
         // Animate alpha from 1 to 0
@@ -128,14 +131,32 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     private void loadPfp(String path) {
-        String fullPath = "https://doscord-api.duckdns.org/images/" + path;
-        Glide.with(this)
-                .load(fullPath)
-                .placeholder(R.drawable.pfp_placeholder) // Show this while it's loading
-                .error(R.drawable.icon)   // Show this if the link is broken
-                .centerCrop()
-                .circleCrop()
-                .into(pfpImg);
+        // Try to load from RegDataHolder first to avoid API wait after registration
+        if (RegDataHolder.selectedImageUri != null) {
+            Glide.with(this)
+                    .load(RegDataHolder.selectedImageUri)
+                    .centerCrop()
+                    .circleCrop()
+                    .into(pfpImg);
+        } else if (RegDataHolder.defaultPfpDrawable != -1) {
+            Glide.with(this)
+                    .load(RegDataHolder.defaultPfpDrawable)
+                    .centerCrop()
+                    .circleCrop()
+                    .into(pfpImg);
+        } else {
+            String fullPath = "https://doscord-api.duckdns.org/images/" + path;
+            Glide.with(this)
+                    .load(fullPath)
+                    .placeholder(R.drawable.pfp_placeholder) // Show this while it's loading
+                    .error(R.drawable.icon)   // Show this if the link is broken
+                    .centerCrop()
+                    .circleCrop()
+                    .into(pfpImg);
+        }
+
+        // Clear RegDataHolder now that we've used the data
+        RegDataHolder.clear();
     }
 
     private void setupRecyclerView() {
