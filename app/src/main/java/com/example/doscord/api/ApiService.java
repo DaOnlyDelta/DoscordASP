@@ -49,4 +49,7 @@ public interface ApiService {
     // This will be for your background worker later
     @GET("get-updates")
     Call<UpdateResponse> getUpdates(@Query("token") String token);
+
+    @POST("get-messages")
+    Call<MessagesResponse> getMessages(@Body MessagesRequest request);
 }

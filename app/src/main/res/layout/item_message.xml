@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="15dp"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="8dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/itemMsgPfpContainer"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:cardCornerRadius="40dp"
+        app:cardElevation="0dp"
+        app:cardMaxElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:strokeWidth="0dp">
+
+        <ImageView
+            android:id="@+id/itemMsgPfp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/pfp_placeholder" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/itemMsgUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/itemMsgPfpContainer"
+        app:layout_constraintTop_toTopOf="@id/itemMsgPfpContainer"
+        tools:text="Username" />
+
+    <TextView
+        android:id="@+id/itemMsgTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/textGray"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/itemMsgUsername"
+        app:layout_constraintStart_toEndOf="@id/itemMsgUsername"
+        app:layout_constraintTop_toTopOf="@id/itemMsgUsername"
+        tools:text="12:34 PM" />
+
+    <TextView
+        android:id="@+id/itemMsgContent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="@color/textGray"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/itemMsgUsername"
+        app:layout_constraintTop_toBottomOf="@id/itemMsgUsername"
+        tools:text="This is a message content that can be very long and should wrap to the next line accordingly." />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

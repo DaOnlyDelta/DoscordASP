@@ -1,6 +1,7 @@
 package com.example.doscord.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.doscord.R;
+import com.example.doscord.activities.chatroom.CrChatActivity;
 
 import java.util.List;
 
@@ -79,13 +81,13 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
                 .circleCrop() // Optional: makes PFPs round
                 .into(holder.pfp);
 
-        // 5. Click Listener (Passing Channel ID for the future)
-        final String chatName = finalDisplayName; // Need final for lambda
+        // 5. Click Listener
+        final String chatDisplayName = finalDisplayName;
         holder.itemView.setOnClickListener(v -> {
-            // Intent intent = new Intent(context, ChatActivity.class);
-            // intent.putExtra("channel_id", user.getChannelId());
-            // intent.putExtra("chat_name", chatName);
-            // context.startActivity(intent);
+             Intent intent = new Intent(context, CrChatActivity.class);
+             intent.putExtra("channel_id", user.getChannelId());
+             intent.putExtra("chat_name", chatDisplayName);
+             context.startActivity(intent);
         });
     }
 

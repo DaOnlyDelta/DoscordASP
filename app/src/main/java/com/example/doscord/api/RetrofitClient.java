@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
     private static Retrofit retrofit = null;
-    private static final String BASE_URL = "https://doscord-api.duckdns.org/api/";
+    private static final String BASE_URL = "https://doscord.top/api/";
 
     public static ApiService getApiService() {
         if (retrofit == null) {

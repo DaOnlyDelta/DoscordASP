@@ -46,6 +46,7 @@ public class CrMainActivity extends AppCompatActivity {
     private int selected = 0;
     private RecyclerView homeChatsView;
     private ConstraintLayout homeLayout, notifLayout, emptyNotifLayout, profileLayout, overlayLayout;
+    private int atempt = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,12 +99,21 @@ public class CrMainActivity extends AppCompatActivity {
                     // FILL THE STATIC REPOSITORY
                     GlobalData.updateData(response.body());
                     displayData();
+                } else {
+                    if (atempt < 2) {
+                        atempt++;
+                        fetchData();
+                    } else {
+                        new SessionManager(CrMainActivity.this).logout();
+                        Intent intent = new Intent(CrMainActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<TokenLoginResponse> call, @NonNull Throwable t) {
-                Log.e("DoscordAuth", "Connection failed");
                 fetchData();
             }
         });

@@ -118,13 +118,13 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout2"
+            android:id="@+id/crNotifSpacer"
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:background="#3c3c3c"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+            app:layout_constraintTop_toBottomOf="@id/constraintLayout">
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -135,7 +135,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/constraintLayout2"
+            app:layout_constraintTop_toBottomOf="@id/crNotifSpacer"
             tools:listitem="@layout/item_request" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -145,7 +145,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/constraintLayout2">
+            app:layout_constraintTop_toBottomOf="@id/crNotifSpacer">
 
             <ImageView
                 android:id="@+id/imageView2"
