@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.doscord.R;
 import com.example.doscord.api.RetrofitClient;
-import com.example.doscord.api.TokenLoginResponse;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,11 +25,11 @@ import retrofit2.Response;
 
 public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHolder> {
 
-    private List<TokenLoginResponse.User> requestList;
+    private List<User> requestList;
     private Context context;
     private OnRequestHandledListener listener;
 
-    public RequestsAdapter(List<TokenLoginResponse.User> requestList, Context context, OnRequestHandledListener listener) {
+    public RequestsAdapter(List<User> requestList, Context context, OnRequestHandledListener listener) {
         this.requestList = requestList;
         this.context = context;
         this.listener = listener;
@@ -45,7 +44,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        TokenLoginResponse.User user = requestList.get(position);
+        User user = requestList.get(position);
 
         String displayName = user.getUsername();
         if (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) {

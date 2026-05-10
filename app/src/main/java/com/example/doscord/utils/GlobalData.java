@@ -6,7 +6,7 @@ import java.util.List;
 
 public class GlobalData {
     private static Integer activeUserId;
-    private static List<TokenLoginResponse.User> userList = new ArrayList<>();
+    private static List<User> userList = new ArrayList<>();
     private static List<Integer> pendingRequestIds;
 
     // Fill the static data
@@ -17,7 +17,7 @@ public class GlobalData {
         pendingRequestIds = response.getPendingRequests();
     }
 
-    public static List<TokenLoginResponse.User> getUserList() {
+    public static List<User> getUserList() {
         return userList;
     }
 
@@ -26,8 +26,8 @@ public class GlobalData {
     }
 
     // Helper: Get the "Me" user object specifically
-    public static TokenLoginResponse.User getMe() {
-        for (TokenLoginResponse.User u : userList) {
+    public static User getMe() {
+        for (User u : userList) {
             if (u.getId() == activeUserId) return u;
         }
         return null;
@@ -38,11 +38,11 @@ public class GlobalData {
     }
 
     // Helper to get actual User objects for those pending IDs
-    public static List<TokenLoginResponse.User> getPendingUserObjects() {
-        List<TokenLoginResponse.User> pendingUsers = new ArrayList<>();
+    public static List<User> getPendingUserObjects() {
+        List<User> pendingUsers = new ArrayList<>();
         if (userList == null || pendingRequestIds == null) return pendingUsers;
 
-        for (TokenLoginResponse.User user : userList) {
+        for (User user : userList) {
             if (pendingRequestIds.contains(user.getId())) {
                 pendingUsers.add(user);
             }
@@ -53,6 +53,20 @@ public class GlobalData {
     public static void removePending(int idToRemove) {
         if (pendingRequestIds != null) {
             pendingRequestIds.removeIf(id -> id == idToRemove);
+        }
+
+        // Move the user to the top of the list so they appear first in the main view
+        User foundUser = null;
+        for (User u : userList) {
+            if (u.getId() == idToRemove) {
+                foundUser = u;
+                break;
+            }
+        }
+
+        if (foundUser != null) {
+            userList.remove(foundUser);
+            userList.add(0, foundUser);
         }
     }
 

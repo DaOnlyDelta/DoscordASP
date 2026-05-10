@@ -19,11 +19,9 @@ import com.example.doscord.R;
 import com.example.doscord.api.FriendRequestRequest;
 import com.example.doscord.api.FriendRequestResponse;
 import com.example.doscord.api.RetrofitClient;
-import com.example.doscord.api.TokenLoginResponse;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.Helpers;
-import com.example.doscord.utils.LogDataHolder;
-import com.example.doscord.utils.RegDataHolder;
+import com.example.doscord.utils.User;
 
 import java.util.Objects;
 
@@ -37,7 +35,7 @@ public class AddByUserActivity extends AppCompatActivity {
     private TextView usernameLabel, warningTxt;
     private ImageButton backBtn;
     private Button sendBtn;
-    private TokenLoginResponse.User me;
+    private User me;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -12,19 +12,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.doscord.R;
-import com.example.doscord.api.TokenLoginResponse;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHolder> {
 
-    private List<TokenLoginResponse.User> friendsList;
+    private List<User> friendsList;
     private Context context;
 
-    public FriendsAdapter(List<TokenLoginResponse.User> friendsList, Context context) {
+    public FriendsAdapter(List<User> friendsList, Context context) {
         this.friendsList = friendsList;
         this.context = context;
     }
@@ -38,7 +34,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        TokenLoginResponse.User user = friendsList.get(position);
+        User user = friendsList.get(position);
 
         // 1. Set the Name (Use Nickname if it exists, otherwise Display Name)
         String displayName = user.getUsername();
@@ -50,8 +46,15 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
         holder.name.setText(displayName);
 
         // 2. Set Last Message (Handle null if you've never chatted)
-        if (user.getLastMessage() != null) {
-            holder.message.setText(user.getLastMessage());
+        if (user.getLastMessage() != null && user.getLastMessageSenderId() != null) {
+            String msg = "";
+            if (user.getLastMessageSenderId() == user.getId()) {
+                msg = user.getUsername() + ": ";
+            } else {
+                msg = "You: ";
+            }
+            msg += user.getLastMessage();
+            holder.message.setText(msg);
         } else {
             holder.message.setText("No messages yet. Say hi!");
         }

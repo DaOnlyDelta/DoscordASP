@@ -28,6 +28,7 @@ import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.api.TokenLoginResponse;
 import com.example.doscord.utils.FriendsAdapter;
 import com.example.doscord.utils.GlobalData;
+import com.example.doscord.utils.User;
 import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
 import com.example.doscord.utils.RequestsAdapter;
@@ -139,12 +140,12 @@ public class CrMainActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         // Get the list but remove "Self" (activeUserId) so you don't chat with yourself
-        List<TokenLoginResponse.User> friendsOnly = new ArrayList<>();
-        List<TokenLoginResponse.User> requestsOnly = new ArrayList<>();
+        List<User> friendsOnly = new ArrayList<>();
+        List<User> requestsOnly = new ArrayList<>();
         List<Integer> pendingIds = GlobalData.getPendingRequestIds();
         int myId = GlobalData.getActiveUserId();
 
-        for (TokenLoginResponse.User u : GlobalData.getUserList()) {
+        for (User u : GlobalData.getUserList()) {
             if (u.getId() == myId) continue;
 
             // Case A: They sent ME a request (It's in the pendingIds list)
@@ -171,7 +172,7 @@ public class CrMainActivity extends AppCompatActivity {
         updateRequests(requestsOnly);
     }
 
-    private void updateRequests(List<TokenLoginResponse.User> requestsOnly) {
+    private void updateRequests(List<User> requestsOnly) {
         RecyclerView recyclerView = findViewById(R.id.crNotifRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         RequestsAdapter requestsAdapter = new RequestsAdapter(requestsOnly, this, new RequestsAdapter.OnRequestHandledListener() {

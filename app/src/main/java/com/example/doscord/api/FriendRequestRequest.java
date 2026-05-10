@@ -8,12 +8,4 @@ public class FriendRequestRequest {
         this.userId = userId;
         this.friendUsername = friendUsername;
     }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public String getFriendUsername() {
-        return friendUsername;
-    }
 }

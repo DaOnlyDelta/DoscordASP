@@ -8,8 +8,4 @@ public class PfpRequest {
         this.userId = userId;
         this.pfp = pfp;
     }
-
-    // Getters (Retrofit/Gson uses these to build the JSON)
-    public String getUserId() { return userId; }
-    public String getPfp() { return pfp; }
 }
