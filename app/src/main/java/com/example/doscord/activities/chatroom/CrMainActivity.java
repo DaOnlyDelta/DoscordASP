@@ -46,7 +46,7 @@ public class CrMainActivity extends AppCompatActivity {
     private int selected = 0;
     private RecyclerView homeChatsView;
     private ConstraintLayout homeLayout, notifLayout, emptyNotifLayout, profileLayout, overlayLayout;
-    private int atempt = 0;
+    private int attempt = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,8 +100,8 @@ public class CrMainActivity extends AppCompatActivity {
                     GlobalData.updateData(response.body());
                     displayData();
                 } else {
-                    if (atempt < 2) {
-                        atempt++;
+                    if (attempt < 2) {
+                        attempt++;
                         fetchData();
                     } else {
                         new SessionManager(CrMainActivity.this).logout();
@@ -155,7 +155,7 @@ public class CrMainActivity extends AppCompatActivity {
                     .circleCrop()
                     .into(pfpImg);
         } else {
-            String fullPath = "https://doscord-api.duckdns.org/images/" + path;
+            String fullPath = "https://doscord.top/api/images/" + path;
             Glide.with(this)
                     .load(fullPath)
                     .placeholder(R.drawable.pfp_placeholder) // Show this while it's loading

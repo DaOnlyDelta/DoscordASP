@@ -73,7 +73,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
         }
 
         // 4. Load PFP
-        String pfpUrl = "https://doscord-api.duckdns.org/images/" + user.getPfp();
+        String pfpUrl = "https://doscord.top/api/images/" + user.getPfp();
         Glide.with(context)
                 .load(pfpUrl)
                 .placeholder(R.drawable.pfp_placeholder)

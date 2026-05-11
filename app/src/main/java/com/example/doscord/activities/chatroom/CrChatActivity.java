@@ -1,6 +1,11 @@
 package com.example.doscord.activities.chatroom;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -14,9 +19,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.doscord.R;
 import com.example.doscord.api.ApiService;
+import com.example.doscord.api.MessageRequest;
 import com.example.doscord.api.MessagesRequest;
 import com.example.doscord.api.MessagesResponse;
 import com.example.doscord.api.RetrofitClient;
+import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.Message;
 import com.example.doscord.utils.MessagesAdapter;
 import com.example.doscord.utils.SessionManager;
@@ -24,6 +31,9 @@ import com.example.doscord.utils.SessionManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -31,6 +41,9 @@ import retrofit2.Response;
 public class CrChatActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
+    private EditText messageInput;
+    private TextView chatTitle;
+    private View micBtn, sendBtn;
     private MessagesAdapter adapter;
     private final List<Message> messagesList = new ArrayList<>();
     private int channelId;
@@ -43,16 +56,28 @@ public class CrChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cr_chat);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, Math.max(systemBars.bottom, ime.bottom));
+            
+            // Scroll to bottom if keyboard opened and we have messages
+            if (ime.bottom > 0 && !messagesList.isEmpty()) {
+                recyclerView.postDelayed(() -> recyclerView.scrollToPosition(messagesList.size() - 1), 100);
+            }
+
             return insets;
         });
 
         initViews();
+        buttonSwitching();
         loadMessages();
     }
 
     private void initViews() {
         recyclerView = findViewById(R.id.crChatChat);
+        messageInput = findViewById(R.id.crChatTextInput);
+        chatTitle = findViewById(R.id.crChatTitle);
+        micBtn = findViewById(R.id.crChatVMContainer);
+        sendBtn = findViewById(R.id.crChatSendContainer);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
@@ -61,6 +86,12 @@ public class CrChatActivity extends AppCompatActivity {
 
         sessionManager = new SessionManager(this);
         channelId = getIntent().getIntExtra("channel_id", -1);
+        String chatName = getIntent().getStringExtra("chat_name");
+        if (chatName != null) {
+            chatTitle.setText(chatName);
+        }
+
+        micBtn.setOnClickListener(v -> Toast.makeText(this, "Voice messages coming soon!", Toast.LENGTH_SHORT).show());
     }
 
     private void loadMessages() {
@@ -90,5 +121,66 @@ public class CrChatActivity extends AppCompatActivity {
                 Toast.makeText(CrChatActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public void buttonSwitching() {
+        messageInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.toString().trim().isEmpty()) {
+                    sendBtn.setVisibility(View.GONE);
+                    micBtn.setVisibility(View.VISIBLE);
+                } else {
+                    sendBtn.setVisibility(View.VISIBLE);
+                    micBtn.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    public void send(View v) {
+        String text = messageInput.getText().toString().trim();
+        if (!text.isEmpty()) {
+            MessageRequest request = new MessageRequest(channelId, GlobalData.getActiveUserId(), -1, text);
+            executeSendMessage(request, new ArrayList<>());
+        }
+    }
+
+    public void executeSendMessage(MessageRequest request, List<MultipartBody.Part> files) {
+        // Convert strings to RequestBody parts
+        MultipartBody.Part cId = MultipartBody.Part.createFormData("channel_id", request.getChannelId());
+        MultipartBody.Part sId = MultipartBody.Part.createFormData("sender_id", request.getSenderId());
+        MultipartBody.Part msg = MultipartBody.Part.createFormData("message_text", request.getMessageText());
+
+        ApiService apiService = RetrofitClient.getApiService();
+        Call<Void> call = apiService.sendMessage(cId, sId, msg, files);
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                // response.isSuccessful() checks for 2xx range (like your 201 Created)
+                if (response.isSuccessful()) {
+                    messageInput.setText("");
+                    loadMessages();
+                } else {
+                    Toast.makeText(CrChatActivity.this, "Failed to send message", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                // Handle Network Error
+            }
+        });
+    }
+
+    public void finish(View v) {
+        finish();
     }
 }

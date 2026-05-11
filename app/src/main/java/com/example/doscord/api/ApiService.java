@@ -1,5 +1,6 @@
 package com.example.doscord.api;
 
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.MultipartBody;
@@ -52,4 +53,13 @@ public interface ApiService {
 
     @POST("get-messages")
     Call<MessagesResponse> getMessages(@Body MessagesRequest request);
+
+    @Multipart
+    @POST("send-message")
+    Call<Void> sendMessage(
+            @Part MultipartBody.Part channel_id,
+            @Part MultipartBody.Part sender_id,
+            @Part MultipartBody.Part message_text,
+            @Part List<MultipartBody.Part> files
+    );
 }

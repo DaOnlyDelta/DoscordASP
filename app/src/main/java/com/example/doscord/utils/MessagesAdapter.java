@@ -52,7 +52,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
 
             holder.username.setText(displayName);
             
-            String pfpUrl = "https://doscord-api.duckdns.org/images/" + sender.getPfp();
+            String pfpUrl = "https://doscord.top/api/images/" + sender.getPfp();
             Glide.with(context)
                     .load(pfpUrl)
                     .placeholder(R.drawable.pfp_placeholder)

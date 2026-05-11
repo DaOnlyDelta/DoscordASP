@@ -1,0 +1,52 @@
+<!--
+  ~ Copyright (C) 2026 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="80dp"
+    android:height="80dp"
+    android:viewportWidth="80"
+    android:viewportHeight="80">
+  <group>
+    <clip-path
+        android:pathData="M80,0H0V80H80V0Z"/>
+    <group>
+      <clip-path
+          android:pathData="M0,0H80V80H0V0Z"/>
+      <group>
+        <clip-path
+            android:pathData="M-26.667,-26.667H106.667V106.667H-26.667V-26.667Z"/>
+        <group>
+          <clip-path
+              android:pathData="M80,0H0V80H80V0ZM110.029,-38.294L87.16,-14.967C87.16,-14.967 78.635,-5.969 85.218,0.648C92.4,7.867 101.024,-1.192 101.024,-1.192L123.894,-24.52C123.894,-24.52 134.933,-35.467 128.029,-42.074C121.171,-48.636 110.029,-38.294 110.029,-38.294ZM66.4,27.333H58.933V37.2H66.4V27.333Z"/>
+          <path
+              android:pathData="M53.333,19.867C53.333,12.503 47.363,6.533 40,6.533C32.637,6.533 26.667,12.503 26.667,19.867V33.067C26.667,40.43 32.637,46.4 40,46.4C47.363,46.4 53.333,40.43 53.333,33.067V19.867Z"
+              android:fillColor="#ABABAB"/>
+          <path
+              android:pathData="M63.333,33.067C63.333,45.953 52.887,56.4 40,56.4C27.113,56.4 16.667,45.953 16.667,33.067"
+              android:strokeWidth="4"
+              android:fillColor="#00000000"
+              android:strokeColor="#ABABAB"
+              android:strokeLineCap="round"/>
+          <path
+              android:pathData="M43.333,56.4C43.333,55.48 42.587,54.733 41.667,54.733H38.333C37.413,54.733 36.667,55.48 36.667,56.4V69.733C36.667,70.653 37.413,71.4 38.333,71.4H41.667C42.587,71.4 43.333,70.653 43.333,69.733V56.4Z"
+              android:fillColor="#ABABAB"/>
+          <path
+              android:pathData="M30,66.4C28.16,66.4 26.667,67.894 26.667,69.733C26.667,71.574 28.16,73.067 30,73.067H50C51.84,73.067 53.333,71.574 53.333,69.733C53.333,67.894 51.84,66.4 50,66.4H30Z"
+              android:fillColor="#ABABAB"/>
+        </group>
+      </group>
+    </group>
+  </group>
+</vector>

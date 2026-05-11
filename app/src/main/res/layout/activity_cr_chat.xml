@@ -16,6 +16,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <ImageButton
+            android:id="@+id/crChatBackBtn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="10dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/back"
+            android:onClick="finish"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/back" />
+
+        <TextView
+            android:id="@+id/crChatTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:text="@string/messages"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/crChatBackBtn"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -36,7 +62,8 @@
         app:layout_constraintBottom_toTopOf="@+id/crChatSpacer2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/crChatSpacer" />
+        app:layout_constraintTop_toBottomOf="@+id/crChatSpacer"
+        tools:listitem="@layout/item_message" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/crChatSpacer2"
@@ -59,7 +86,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/crChatPlusContainer"
+            android:id="@+id/crChatAttachContainer"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:clickable="true"
@@ -71,87 +98,157 @@
             app:cardMaxElevation="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:strokeWidth="0dp">
 
-            <TextView
-                android:id="@+id/crChatPlus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="+"
-                android:textColor="@color/white"
-                android:textSize="30sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="HardcodedText" />
+            <ImageButton
+                android:id="@+id/crChatAttachIcon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:background="@null"
+                android:backgroundTint="@color/bgGray"
+                android:clickable="false"
+                android:contentDescription="@string/home"
+                android:focusable="false"
+                android:scaleType="centerCrop"
+                android:src="@drawable/plus"
+                app:tint="@color/selected" />
 
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/crChatTextContainer"
             android:layout_width="0dp"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:clickable="true"
             android:focusable="true"
             android:stateListAnimator="@null"
             app:cardBackgroundColor="@color/uiGray2"
-            app:cardCornerRadius="50dp"
+            app:cardCornerRadius="24dp"
             app:cardElevation="0dp"
             app:cardMaxElevation="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/crChatVMContainer"
-            app:layout_constraintStart_toEndOf="@+id/crChatPlusContainer"
+            app:layout_constraintEnd_toStartOf="@+id/crChatSwitchContainer"
+            app:layout_constraintStart_toEndOf="@id/crChatAttachContainer"
             app:layout_constraintTop_toTopOf="parent"
             app:strokeWidth="0dp">
 
-            <TextView
-                android:id="@+id/crChatText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textColor="@color/white"
-                android:textSize="30sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="HardcodedText" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
+                <EditText
+                    android:id="@+id/crChatTextInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="Message"
+                    android:background="@null"
+                    android:gravity="center_vertical"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:maxHeight="300dp"
+                    android:minHeight="40dp"
+                    android:paddingStart="15dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="45dp"
+                    android:paddingBottom="8dp"
+                    android:scrollbars="vertical"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="LabelFor" />
+
+                <ImageButton
+                    android:id="@+id/crChatEmojiIcon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/emojis"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/emoji"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@color/selected" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/crChatVMContainer"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:stateListAnimator="@null"
-            app:cardBackgroundColor="@color/uiGray2"
-            app:cardCornerRadius="50dp"
-            app:cardElevation="0dp"
-            app:cardMaxElevation="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/crChatSwitchContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:strokeWidth="0dp">
+            app:layout_constraintEnd_toEndOf="parent">
 
-            <TextView
-                android:id="@+id/crChatVM"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="V"
-                android:textColor="@color/white"
-                android:textSize="30sp"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/crChatVMContainer"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:stateListAnimator="@null"
+                app:cardBackgroundColor="@color/uiGray2"
+                app:cardCornerRadius="50dp"
+                app:cardElevation="0dp"
+                app:cardMaxElevation="0dp"
+                app:strokeWidth="0dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="HardcodedText" />
+                app:layout_constraintEnd_toEndOf="parent">
 
-        </com.google.android.material.card.MaterialCardView>
+                <ImageButton
+                    android:id="@+id/crChatVMIcon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="5dp"
+                    android:background="@null"
+                    android:backgroundTint="@color/bgGray"
+                    android:clickable="false"
+                    android:contentDescription="@string/home"
+                    android:focusable="false"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/mic"
+                    app:tint="@color/selected" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/crChatSendContainer"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="send"
+                android:stateListAnimator="@null"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/blue"
+                app:cardCornerRadius="50dp"
+                app:cardElevation="0dp"
+                app:cardMaxElevation="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:strokeWidth="0dp">
+
+                <ImageButton
+                    android:id="@+id/crChatSendIcon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="5dp"
+                    android:background="@null"
+                    android:backgroundTint="@color/blue"
+                    android:clickable="false"
+                    android:contentDescription="@string/send"
+                    android:focusable="false"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/play"
+                    app:tint="@color/selected" />
+            </com.google.android.material.card.MaterialCardView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
