@@ -1,6 +1,5 @@
 package com.example.doscord.activities.menu;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -21,6 +20,7 @@ import com.example.doscord.R;
 import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.utils.Helpers;
 import com.example.doscord.utils.LogDataHolder;
+import com.example.doscord.utils.RegDataHolder;
 import com.example.doscord.utils.SessionManager;
 
 import retrofit2.Call;
@@ -105,6 +105,7 @@ public class LoginActivity extends AppCompatActivity {
                     sessionManager.saveLoginSession(receivedToken);
 
                     LogDataHolder.clear();
+                    RegDataHolder.clear();
                     finish();
                 } else {
                     serverWarningTxt.setVisibility(View.GONE);

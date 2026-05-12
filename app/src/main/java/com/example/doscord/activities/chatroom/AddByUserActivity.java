@@ -105,6 +105,7 @@ public class AddByUserActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<FriendRequestResponse> call, @NonNull Throwable t) {
+                handleError(99);
                 warningTxt.setText(R.string.generic_server_error);
                 warningTxt.setTextColor(ContextCompat.getColor(AddByUserActivity.this, R.color.red));
                 Helpers.resetUI(AddByUserActivity.this, sendBtn, backBtn, usernameInput, null);

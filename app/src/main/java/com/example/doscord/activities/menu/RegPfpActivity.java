@@ -23,9 +23,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.doscord.R;
-import com.example.doscord.activities.chatroom.CrMainActivity;
 import com.example.doscord.api.ApiService;
 import com.example.doscord.api.PfpRequest;
 import com.example.doscord.api.RetrofitClient;

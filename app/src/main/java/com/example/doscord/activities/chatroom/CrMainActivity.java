@@ -28,6 +28,7 @@ import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.api.TokenLoginResponse;
 import com.example.doscord.utils.FriendsAdapter;
 import com.example.doscord.utils.GlobalData;
+import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
 import com.example.doscord.utils.User;
 import com.example.doscord.utils.RequestsAdapter;
@@ -167,6 +168,7 @@ public class CrMainActivity extends AppCompatActivity {
 
         // Clear RegDataHolder now that we've used the data
         RegDataHolder.clear();
+        LogDataHolder.clear();
     }
 
     private void setupRecyclerView() {

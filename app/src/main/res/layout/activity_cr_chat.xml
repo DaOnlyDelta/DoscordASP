@@ -24,10 +24,13 @@
             android:background="@android:color/transparent"
             android:contentDescription="@string/back"
             android:onClick="finish"
+            android:padding="12dp"
+            android:scaleType="centerInside"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/back" />
+            app:srcCompat="@drawable/back_arrow"
+            app:tint="@color/textGray" />
 
         <TextView
             android:id="@+id/crChatTitle"
