@@ -50,6 +50,12 @@ public interface ApiService {
     @POST("get-messages")
     Call<MessagesResponse> getMessages(@Body MessagesRequest request);
 
+    @POST("get-older-messages")
+    Call<MessagesResponse> getOlderMessages(@Body OlderMessagesRequest request);
+
+    @POST("get-new-messages")
+    Call<MessagesResponse> getNewMessages(@Body NewMessagesRequest request);
+
     @Multipart
     @POST("send-message")
     Call<Void> sendMessage(

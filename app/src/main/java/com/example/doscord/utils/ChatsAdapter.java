@@ -2,7 +2,6 @@ package com.example.doscord.utils;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,17 +15,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.doscord.R;
 import com.example.doscord.activities.chatroom.CrChatActivity;
-import com.example.doscord.activities.menu.RegUserActivity;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.List;
 
-public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHolder> {
+public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> {
 
     private List<User> friendsList;
     private Context context;
 
-    public FriendsAdapter(List<User> friendsList, Context context) {
+    public ChatsAdapter(List<User> friendsList, Context context) {
         this.friendsList = friendsList;
         this.context = context;
     }

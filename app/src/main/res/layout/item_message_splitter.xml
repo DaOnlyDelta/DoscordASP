@@ -10,7 +10,7 @@
     <View
         android:id="@+id/itemSplitterLineStart"
         android:layout_width="0dp"
-        android:layout_height="1dp"
+        android:layout_height="2dp"
         android:layout_marginStart="10dp"
         android:background="#3c3c3c"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -36,7 +36,7 @@
     <View
         android:id="@+id/itemSplitterLineEnd"
         android:layout_width="0dp"
-        android:layout_height="1dp"
+        android:layout_height="2dp"
         android:layout_marginEnd="10dp"
         android:background="#3c3c3c"
         app:layout_constraintBottom_toBottomOf="parent"

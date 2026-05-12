@@ -1,5 +1,6 @@
 package com.example.doscord.activities.chatroom;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -23,13 +24,12 @@ import com.example.doscord.api.ApiService;
 import com.example.doscord.api.MessageRequest;
 import com.example.doscord.api.MessagesRequest;
 import com.example.doscord.api.MessagesResponse;
+import com.example.doscord.api.NewMessagesRequest;
+import com.example.doscord.api.OlderMessagesRequest;
 import com.example.doscord.api.RetrofitClient;
-import com.example.doscord.api.UpdateRequest;
-import com.example.doscord.api.UpdateResponse;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.Message;
 import com.example.doscord.utils.MessagesAdapter;
-import com.example.doscord.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,10 +48,11 @@ public class CrChatActivity extends AppCompatActivity {
     private MessagesAdapter adapter;
     private final List<Message> messagesList = new ArrayList<>();
     private int channelId;
-    private SessionManager sessionManager;
+    private boolean canLoadMore = true; // Track if the server has more history
+    private boolean isLoading = false;
+    private boolean isLoadingNew = false;
 
     // Updates
-    private long lastSyncTime = 0;
     private final Handler updateHandler = new Handler();
     private Runnable updateRunnable;
     private final int PING_INTERVAL = 3000; // Chats feel better with a 3s check
@@ -99,13 +100,24 @@ public class CrChatActivity extends AppCompatActivity {
         chatTitle = findViewById(R.id.crChatTitle);
         micBtn = findViewById(R.id.crChatVMContainer);
         sendBtn = findViewById(R.id.crChatSendContainer);
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
         adapter = new MessagesAdapter(messagesList, this);
         recyclerView.setAdapter(adapter);
 
-        sessionManager = new SessionManager(this);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                // If scrolling up and we see the loader, trigger "loadOlder"
+                if (canLoadMore && !isLoading && dy < 0 && lm != null && lm.findFirstVisibleItemPosition() == 0) {
+                    loadOlder();
+                }
+            }
+        });
+
         channelId = getIntent().getIntExtra("channel_id", -1);
         String chatName = getIntent().getStringExtra("chat_name");
         if (chatName != null) {
@@ -115,59 +127,180 @@ public class CrChatActivity extends AppCompatActivity {
         micBtn.setOnClickListener(v -> Toast.makeText(this, "Voice messages coming soon!", Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * Call this once in onCreate. Gets the most recent 25 messages.
+     */
     private void loadMessages() {
-        if (channelId == -1) return;
+        if (channelId == -1 || isLoading) return;
+        isLoading = true;
 
-        ApiService apiService = RetrofitClient.getApiService();
-        MessagesRequest request = new MessagesRequest(sessionManager.getToken(), channelId, 20);
-
-        apiService.getMessages(request).enqueue(new Callback<MessagesResponse>() {
+        MessagesRequest req = new MessagesRequest(channelId);
+        RetrofitClient.getApiService().getMessages(req).enqueue(new Callback<MessagesResponse>() {
+            @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onResponse(@NonNull Call<MessagesResponse> call, @NonNull Response<MessagesResponse> response) {
+                isLoading = false;
                 if (response.isSuccessful() && response.body() != null) {
+                    MessagesResponse data = response.body();
+                    canLoadMore = data.isHasMore();
+
                     messagesList.clear();
-                    messagesList.addAll(response.body().getMessages());
+                    messagesList.addAll(data.getMessages());
+
+                    adapter.setShowLoader(canLoadMore);
+                    adapter.updateDisplayList();
                     adapter.notifyDataSetChanged();
 
-                    // Update local sync time so we don't trigger an immediate refresh loop
-                    lastSyncTime = System.currentTimeMillis();
-
-                    if (!messagesList.isEmpty()) {
-                        recyclerView.scrollToPosition(messagesList.size() - 1);
-                    }
+                    recyclerView.post(() -> recyclerView.scrollToPosition(adapter.getItemCount() - 1));
                 }
             }
+
             @Override
-            public void onFailure(@NonNull Call<MessagesResponse> call, @NonNull Throwable t) {}
+            public void onFailure(@NonNull Call<MessagesResponse> call, @NonNull Throwable t) {
+                isLoading = false;
+            }
         });
     }
 
+    /**
+     * Triggers when user hits the top. Fetches messages BEFORE the oldest current ID.
+     */
+    private void loadOlder() {
+        if (messagesList.isEmpty() || !canLoadMore || isLoading) return;
+        isLoading = true;
+        adapter.setLoaderPlaying(true);
+
+        // Save anchor for scroll restoration
+        LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+        int anchorId = -1;
+        int anchorTop = 0;
+        if (lm != null) {
+            int firstVisible = lm.findFirstVisibleItemPosition();
+            if (firstVisible != RecyclerView.NO_POSITION) {
+                View v = lm.findViewByPosition(firstVisible);
+                if (v != null) {
+                    anchorTop = v.getTop();
+                    List<Object> currentDisplayList = adapter.getDisplayList();
+                    if (firstVisible < currentDisplayList.size()) {
+                        Object item = currentDisplayList.get(firstVisible);
+                        if (item instanceof Message) {
+                            anchorId = ((Message) item).getId();
+                        } else {
+                            // Find first message to pin to
+                            for (int i = firstVisible + 1; i < currentDisplayList.size(); i++) {
+                                if (currentDisplayList.get(i) instanceof Message) {
+                                    anchorId = ((Message) currentDisplayList.get(i)).getId();
+                                    View nextV = lm.findViewByPosition(i);
+                                    if (nextV != null) anchorTop = nextV.getTop();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Cursor: The ID of our oldest message
+        int oldestId = messagesList.get(0).getId();
+
+        OlderMessagesRequest req = new OlderMessagesRequest(channelId, oldestId);
+        final int finalAnchorId = anchorId;
+        final int finalAnchorTop = anchorTop;
+
+        RetrofitClient.getApiService().getOlderMessages(req).enqueue(new Callback<MessagesResponse>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onResponse(@NonNull Call<MessagesResponse> call, @NonNull Response<MessagesResponse> response) {
+                isLoading = false;
+                adapter.setLoaderPlaying(false);
+
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Message> olderMessages = response.body().getMessages();
+                    if (olderMessages.isEmpty()) {
+                        canLoadMore = false;
+                        adapter.setShowLoader(false);
+                        return;
+                    }
+
+                    // Prepend data
+                    canLoadMore = response.body().isHasMore();
+                    messagesList.addAll(0, olderMessages);
+
+                    adapter.setShowLoader(canLoadMore);
+                    adapter.updateDisplayList();
+                    adapter.notifyDataSetChanged();
+
+                    // Restore scroll relative to anchor
+                    if (lm != null && finalAnchorId != -1) {
+                        List<Object> displayList = adapter.getDisplayList();
+                        for (int i = 0; i < displayList.size(); i++) {
+                            Object obj = displayList.get(i);
+                            if (obj instanceof Message && ((Message) obj).getId() == finalAnchorId) {
+                                lm.scrollToPositionWithOffset(i, finalAnchorTop);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<MessagesResponse> call, @NonNull Throwable t) {
+                isLoading = false;
+                adapter.setLoaderPlaying(false);
+            }
+        });
+    }
+
+    /**
+     * The Update Loop: Only fetches messages AFTER the newest current ID.
+     */
     private void startChatUpdateLoop() {
         updateRunnable = new Runnable() {
             @Override
             public void run() {
-                String token = sessionManager.getToken();
-                UpdateRequest updateReq = new UpdateRequest(token, lastSyncTime);
-
-                RetrofitClient.getApiService().checkUpdates(updateReq).enqueue(new Callback<UpdateResponse>() {
-                    @Override
-                    public void onResponse(@NonNull Call<UpdateResponse> call, @NonNull Response<UpdateResponse> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            if (response.body().isUpdateRequired()) {
-                                loadMessages(); // New message found!
-                            }
-                        }
-                        updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<UpdateResponse> call, @NonNull Throwable t) {
-                        updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
-                    }
-                });
+                fetchNewMessages(false);
+                updateHandler.postDelayed(this, PING_INTERVAL);
             }
         };
         updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
+    }
+
+    private void fetchNewMessages(boolean forceScroll) {
+        if (messagesList.isEmpty() || isLoadingNew) return;
+        isLoadingNew = true;
+
+        int newestId = messagesList.get(messagesList.size() - 1).getId();
+        NewMessagesRequest req = new NewMessagesRequest(channelId, newestId);
+
+        RetrofitClient.getApiService().getNewMessages(req).enqueue(new Callback<MessagesResponse>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onResponse(@NonNull Call<MessagesResponse> call, @NonNull Response<MessagesResponse> response) {
+                isLoadingNew = false;
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Message> newOnes = response.body().getMessages();
+                    if (!newOnes.isEmpty()) {
+                        LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+                        boolean isAtBottom = lm != null && lm.findLastVisibleItemPosition() >= adapter.getItemCount() - 2;
+
+                        messagesList.addAll(newOnes);
+                        adapter.updateDisplayList();
+                        adapter.notifyDataSetChanged();
+
+                        if (forceScroll || isAtBottom) {
+                            recyclerView.smoothScrollToPosition(adapter.getItemCount() - 1);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<MessagesResponse> call, @NonNull Throwable t) {
+                isLoadingNew = false;
+            }
+        });
     }
 
     public void buttonSwitching() {
@@ -214,7 +347,7 @@ public class CrChatActivity extends AppCompatActivity {
                 // response.isSuccessful() checks for 2xx range (like your 201 Created)
                 if (response.isSuccessful()) {
                     messageInput.setText("");
-                    loadMessages();
+                    fetchNewMessages(true);
                 } else {
                     Toast.makeText(CrChatActivity.this, "Failed to send message", Toast.LENGTH_SHORT).show();
                 }

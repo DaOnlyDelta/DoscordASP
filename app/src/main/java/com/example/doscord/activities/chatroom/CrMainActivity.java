@@ -29,7 +29,7 @@ import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.api.TokenLoginResponse;
 import com.example.doscord.api.UpdateRequest;
 import com.example.doscord.api.UpdateResponse;
-import com.example.doscord.utils.FriendsAdapter;
+import com.example.doscord.utils.ChatsAdapter;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
@@ -226,7 +226,7 @@ public class CrMainActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.crMainRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        FriendsAdapter adapter = new FriendsAdapter(friendsOnly, this);
+        ChatsAdapter adapter = new ChatsAdapter(friendsOnly, this);
         recyclerView.setAdapter(adapter);
 
         updateRequests(requestsOnly);

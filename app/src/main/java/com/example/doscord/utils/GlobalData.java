@@ -2,6 +2,7 @@ package com.example.doscord.utils;
 
 import com.example.doscord.api.TokenLoginResponse;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class GlobalData {
@@ -11,9 +12,32 @@ public class GlobalData {
 
     // Fill the static data
     public static void updateData(TokenLoginResponse response) {
-        activeUserId = response.getActiveUserId();
         userList.clear();
-        userList.addAll(response.getUserList());
+        List<User> list = response.getUserList();
+
+        list.sort((u1, u2) -> {
+
+            // Put your own profile at the top
+            boolean u1IsProfile = u1.getId() == response.getActiveUserId();
+            boolean u2IsProfile = u2.getId() == response.getActiveUserId();
+
+            if (u1IsProfile && !u2IsProfile) return -1;
+            if (!u1IsProfile && u2IsProfile) return 1;
+
+            // Handle null timestamps safely
+            String s1 = u1.getLastMessageTime();
+            String s2 = u2.getLastMessageTime();
+
+            long t1 = (s1 != null) ? Helpers.dateStringToMillis(s1) : 0;
+            long t2 = (s2 != null) ? Helpers.dateStringToMillis(s2) : 0;
+
+            // Descending order
+            return Long.compare(t2, t1);
+        });
+
+        userList = list;
+
+        activeUserId = response.getActiveUserId();
         pendingRequestIds = response.getPendingRequests();
     }
 

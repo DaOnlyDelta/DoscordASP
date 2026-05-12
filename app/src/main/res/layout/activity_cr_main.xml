@@ -552,7 +552,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:lottie_autoPlay="true"
             app:lottie_loop="true"
-            app:lottie_rawRes="@raw/loading" />
+            app:lottie_rawRes="@raw/chat_loading" />
 
         <TextView
             android:id="@+id/textView4"
