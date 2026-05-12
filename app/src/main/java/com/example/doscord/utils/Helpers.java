@@ -181,4 +181,22 @@ public class Helpers {
             return "";
         }
     }
+
+    public static long dateStringToMillis(String dateString) {
+        if (dateString == null || dateString.isEmpty()) return 0;
+
+        try {
+            // Match the MariaDB datetime format
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+
+            // If your Pi 4 stores time in UTC (standard for servers), uncomment the next line:
+            // sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+            Date date = sdf.parse(dateString);
+            return (date != null) ? date.getTime() : 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 }

@@ -47,10 +47,6 @@ public interface ApiService {
     @GET("token-login")
     Call<TokenLoginResponse> tokenLogin(@Query("token") String token);
 
-    // This will be for your background worker later
-    @GET("get-updates")
-    Call<UpdateResponse> getUpdates(@Query("token") String token);
-
     @POST("get-messages")
     Call<MessagesResponse> getMessages(@Body MessagesRequest request);
 
@@ -62,4 +58,7 @@ public interface ApiService {
             @Part MultipartBody.Part message_text,
             @Part List<MultipartBody.Part> files
     );
+
+    @POST("get-updates")
+    Call<UpdateResponse> checkUpdates(@Body UpdateRequest request);
 }

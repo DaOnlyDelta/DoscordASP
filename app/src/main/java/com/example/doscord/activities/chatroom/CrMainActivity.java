@@ -3,6 +3,7 @@ package com.example.doscord.activities.chatroom;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -26,6 +27,8 @@ import com.example.doscord.activities.menu.MainActivity;
 import com.example.doscord.api.LogoutRequest;
 import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.api.TokenLoginResponse;
+import com.example.doscord.api.UpdateRequest;
+import com.example.doscord.api.UpdateResponse;
 import com.example.doscord.utils.FriendsAdapter;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.LogDataHolder;
@@ -49,6 +52,12 @@ public class CrMainActivity extends AppCompatActivity {
     private ConstraintLayout homeLayout, notifLayout, emptyNotifLayout, profileLayout, overlayLayout;
     private int attempt = 0;
 
+    // Updates
+    private long lastSyncTime = 0;
+    private final Handler updateHandler = new Handler();
+    private Runnable updateRunnable;
+    private final int PING_INTERVAL = 5000; // 5 seconds
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +70,20 @@ public class CrMainActivity extends AppCompatActivity {
         });
 
         initViews();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startUpdateLoop(); // Start pinging
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (updateHandler != null && updateRunnable != null) {
+            updateHandler.removeCallbacks(updateRunnable); // Stop pinging
+        }
     }
 
     private void initViews() {
@@ -99,6 +122,10 @@ public class CrMainActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     // FILL THE STATIC REPOSITORY
                     GlobalData.updateData(response.body());
+
+                    // SAVE THE TIMESTAMP FROM BACKEND (we added this to auth.js earlier)
+                    lastSyncTime = response.body().getSyncTimestamp();
+
                     displayData();
                 } else {
                     if (attempt < 2) {
@@ -286,6 +313,37 @@ public class CrMainActivity extends AppCompatActivity {
                 pfpTxt.setTextColor(selectedColor);
                 break;
         }
+    }
+
+    private void startUpdateLoop() {
+        updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                String token = new SessionManager(CrMainActivity.this).getToken();
+
+                UpdateRequest updateReq = new UpdateRequest(token, lastSyncTime);
+
+                RetrofitClient.getApiService().checkUpdates(updateReq).enqueue(new Callback<UpdateResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UpdateResponse> call, @NonNull Response<UpdateResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            if (response.body().isUpdateRequired()) {
+                                fetchData(); // Trigger existing full refresh
+                            }
+                        }
+                        // Schedule next check
+                        updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UpdateResponse> call, @NonNull Throwable t) {
+                        // Even if it fails, try again later
+                        updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
+                    }
+                });
+            }
+        };
+        updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
     }
 
     public void openSettings(View v) {

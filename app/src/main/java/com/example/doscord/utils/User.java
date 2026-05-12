@@ -19,6 +19,8 @@ public class User {
     private String lastMessageTime;
     @SerializedName("last_message_sender_id")
     private Integer lastMessageSenderId;
+    @SerializedName("is_online")
+    private int isOnline;
 
     // Getters
     public int getId() { return id; }
@@ -31,4 +33,5 @@ public class User {
     public String getLastMessage() { return lastMessage; }
     public String getLastMessageTime() { return lastMessageTime; }
     public Integer getLastMessageSenderId() { return lastMessageSenderId; }
+    public boolean isOnline() { return isOnline == 1; }
 }

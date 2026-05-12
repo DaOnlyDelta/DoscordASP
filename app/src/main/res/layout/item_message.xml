@@ -4,9 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="15dp"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="8dp">
+    android:layout_marginTop="20dp"
+    android:paddingHorizontal="16dp">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/itemMsgPfpContainer"
@@ -34,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:textColor="@color/white"
-        android:textSize="14sp"
+        android:textSize="17sp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@id/itemMsgPfpContainer"
         app:layout_constraintTop_toTopOf="@id/itemMsgPfpContainer"
@@ -56,12 +55,13 @@
         android:id="@+id/itemMsgContent"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="2dp"
-        android:textColor="@color/textGray"
-        android:textSize="14sp"
+        android:textColor="@color/white"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/itemMsgUsername"
+        app:layout_constraintStart_toEndOf="@id/itemMsgPfpContainer"
         app:layout_constraintTop_toBottomOf="@id/itemMsgUsername"
-        tools:text="This is a message content that can be very long and should wrap to the next line accordingly." />
+        tools:text="Message content..." />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,7 @@
 package com.example.doscord.activities.chatroom;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -23,6 +24,8 @@ import com.example.doscord.api.MessageRequest;
 import com.example.doscord.api.MessagesRequest;
 import com.example.doscord.api.MessagesResponse;
 import com.example.doscord.api.RetrofitClient;
+import com.example.doscord.api.UpdateRequest;
+import com.example.doscord.api.UpdateResponse;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.Message;
 import com.example.doscord.utils.MessagesAdapter;
@@ -47,6 +50,12 @@ public class CrChatActivity extends AppCompatActivity {
     private int channelId;
     private SessionManager sessionManager;
 
+    // Updates
+    private long lastSyncTime = 0;
+    private final Handler updateHandler = new Handler();
+    private Runnable updateRunnable;
+    private final int PING_INTERVAL = 3000; // Chats feel better with a 3s check
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +77,20 @@ public class CrChatActivity extends AppCompatActivity {
         initViews();
         buttonSwitching();
         loadMessages();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startChatUpdateLoop();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (updateHandler != null && updateRunnable != null) {
+            updateHandler.removeCallbacks(updateRunnable);
+        }
     }
 
     private void initViews() {
@@ -97,7 +120,7 @@ public class CrChatActivity extends AppCompatActivity {
 
         ApiService apiService = RetrofitClient.getApiService();
         MessagesRequest request = new MessagesRequest(sessionManager.getToken(), channelId, 20);
-        
+
         apiService.getMessages(request).enqueue(new Callback<MessagesResponse>() {
             @Override
             public void onResponse(@NonNull Call<MessagesResponse> call, @NonNull Response<MessagesResponse> response) {
@@ -105,20 +128,46 @@ public class CrChatActivity extends AppCompatActivity {
                     messagesList.clear();
                     messagesList.addAll(response.body().getMessages());
                     adapter.notifyDataSetChanged();
-                    // Scroll to bottom
+
+                    // Update local sync time so we don't trigger an immediate refresh loop
+                    lastSyncTime = System.currentTimeMillis();
+
                     if (!messagesList.isEmpty()) {
                         recyclerView.scrollToPosition(messagesList.size() - 1);
                     }
-                } else {
-                    Toast.makeText(CrChatActivity.this, "Failed to load messages", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
-            public void onFailure(@NonNull Call<MessagesResponse> call, @NonNull Throwable t) {
-                Toast.makeText(CrChatActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            public void onFailure(@NonNull Call<MessagesResponse> call, @NonNull Throwable t) {}
         });
+    }
+
+    private void startChatUpdateLoop() {
+        updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                String token = sessionManager.getToken();
+                UpdateRequest updateReq = new UpdateRequest(token, lastSyncTime);
+
+                RetrofitClient.getApiService().checkUpdates(updateReq).enqueue(new Callback<UpdateResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UpdateResponse> call, @NonNull Response<UpdateResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            if (response.body().isUpdateRequired()) {
+                                loadMessages(); // New message found!
+                            }
+                        }
+                        updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UpdateResponse> call, @NonNull Throwable t) {
+                        updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
+                    }
+                });
+            }
+        };
+        updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
     }
 
     public void buttonSwitching() {

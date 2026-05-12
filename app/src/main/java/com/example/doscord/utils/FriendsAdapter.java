@@ -2,6 +2,7 @@ package com.example.doscord.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,11 +10,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.doscord.R;
 import com.example.doscord.activities.chatroom.CrChatActivity;
+import com.example.doscord.activities.menu.RegUserActivity;
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.List;
 
@@ -81,7 +85,14 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
                 .circleCrop() // Optional: makes PFPs round
                 .into(holder.pfp);
 
-        // 5. Click Listener
+        // Update their status
+        if (user.isOnline()) {
+            holder.status.setCardBackgroundColor(ContextCompat.getColor(context, R.color.green));
+        } else {
+            holder.status.setCardBackgroundColor(ContextCompat.getColor(context, R.color.gray));
+        }
+
+        // 6. Click Listener
         final String chatDisplayName = finalDisplayName;
         holder.itemView.setOnClickListener(v -> {
              Intent intent = new Intent(context, CrChatActivity.class);
@@ -97,6 +108,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView pfp;
         TextView name, message, time;
+        MaterialCardView status;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -104,6 +116,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.ViewHold
             name = itemView.findViewById(R.id.itemChatName);
             message = itemView.findViewById(R.id.itemChatMessage);
             time = itemView.findViewById(R.id.itemChatTime);
+            status = itemView.findViewById(R.id.itemChatStatus);
         }
     }
 }

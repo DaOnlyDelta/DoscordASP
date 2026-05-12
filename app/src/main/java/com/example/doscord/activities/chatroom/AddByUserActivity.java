@@ -1,7 +1,6 @@
 package com.example.doscord.activities.chatroom;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,8 +22,6 @@ import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.Helpers;
 import com.example.doscord.utils.User;
-
-import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -62,8 +59,6 @@ public class AddByUserActivity extends AppCompatActivity {
 
         if (me != null) {
             usernameLabel.setText(me.getUsername());
-        } else {
-            Log.e("AddByUserActivity", "me is null");
         }
     }
 

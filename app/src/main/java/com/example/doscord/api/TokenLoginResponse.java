@@ -8,9 +8,11 @@ public class TokenLoginResponse {
     private int activeUserId;
     private List<User> userList;
     private List<Integer> pendingRequests;
+    private long sync_timestamp;
 
     public int getErrorCode() { return errorCode; }
     public int getActiveUserId() { return activeUserId; }
     public List<User> getUserList() { return userList; }
     public List<Integer> getPendingRequests() { return pendingRequests; }
+    public long getSyncTimestamp() { return sync_timestamp; }
 }

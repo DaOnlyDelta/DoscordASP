@@ -60,4 +60,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/itemChatName" />
 
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/itemChatStatus"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="30dp"
+        android:stateListAnimator="@null"
+        app:cardBackgroundColor="@color/uiGray"
+        app:cardCornerRadius="50dp"
+        app:cardElevation="0dp"
+        app:cardMaxElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:strokeColor="@color/uiGray2"
+        app:strokeWidth="4dp">
+
+    </com.google.android.material.card.MaterialCardView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

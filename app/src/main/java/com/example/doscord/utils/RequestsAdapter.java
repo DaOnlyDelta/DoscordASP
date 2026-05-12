@@ -57,7 +57,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
 
         // Load PFP
         Glide.with(context)
-                .load("https://doscord-api.duckdns.org/images/" + user.getPfp())
+                .load("https://doscord.top/api/images/" + user.getPfp())
                 .placeholder(R.drawable.pfp_placeholder)
                 .circleCrop()
                 .into(holder.pfp);
