@@ -42,7 +42,6 @@ public class RegisterActivity extends AppCompatActivity {
     private TextView label, warningTxt, serverWarningTxt;
     private EditText input;
     private Button btnPhone, btnEmail, nextBtn;
-    private ImageButton backBtn;
     private boolean midRequest = false;
 
     @Override
@@ -76,7 +75,6 @@ public class RegisterActivity extends AppCompatActivity {
         btnPhone = findViewById(R.id.regPhoneBtn);
         btnEmail = findViewById(R.id.regEmailBtn);
         nextBtn = findViewById(R.id.regNextBtn);
-        backBtn = findViewById(R.id.regBackBtn);
         warningTxt = findViewById(R.id.regWarning);
         serverWarningTxt = findViewById(R.id.regServerWarning);
     }
@@ -114,11 +112,10 @@ public class RegisterActivity extends AppCompatActivity {
         input.setSelection(input.getText().length());
     }
 
-    public void registerReq() {
+    private void registerReq() {
         // Set up UI for loading state
-        input.setEnabled(false);
         midRequest = true;
-        Helpers.startDotsAnimation(this, nextBtn, backBtn);
+        Helpers.startDotsAnimation(this, nextBtn, input, null);
 
         // Create the request object
         RegisterRequest request = new RegisterRequest();
@@ -138,7 +135,7 @@ public class RegisterActivity extends AppCompatActivity {
                 } else {
                     // Handle Error Codes
                     serverWarningTxt.setVisibility(View.GONE);
-                    Helpers.resetUI(RegisterActivity.this, nextBtn, backBtn, input, null);
+                    Helpers.resetUI(RegisterActivity.this, nextBtn, input, null);
                     midRequest = false;
                     try {
                         // Retrofit won't automatically parse the body on a 400 error,
@@ -155,7 +152,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<RegisterResponse> call, @NonNull Throwable t) {
                 serverWarningTxt.setVisibility(View.VISIBLE);
-                Helpers.resetUI(RegisterActivity.this, nextBtn, backBtn, input, null);
+                Helpers.resetUI(RegisterActivity.this, nextBtn, input, null);
             }
         });
     }

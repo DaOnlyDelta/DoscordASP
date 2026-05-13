@@ -31,6 +31,7 @@ import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.Message;
 import com.example.doscord.utils.MessagesAdapter;
 import com.example.doscord.utils.NotificationHelper;
+import com.example.doscord.utils.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +101,8 @@ public class CrChatActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        channelId = getIntent().getIntExtra("channel_id", -1);
+
         recyclerView = findViewById(R.id.crChatChat);
         messageInput = findViewById(R.id.crChatTextInput);
         chatTitle = findViewById(R.id.crChatTitle);
@@ -111,6 +114,9 @@ public class CrChatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         adapter = new MessagesAdapter(messagesList, this);
         recyclerView.setAdapter(adapter);
+
+        User recipient = getRecipient();
+        adapter.setRecipient(recipient);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -124,7 +130,6 @@ public class CrChatActivity extends AppCompatActivity {
             }
         });
 
-        channelId = getIntent().getIntExtra("channel_id", -1);
         String chatName = getIntent().getStringExtra("chat_name");
         if (chatName != null) {
             chatTitle.setText(chatName);
@@ -381,5 +386,15 @@ public class CrChatActivity extends AppCompatActivity {
 
     public void finish(View v) {
         finish();
+    }
+
+    private User getRecipient() {
+        if (channelId == -1) return null;
+        for (User u : GlobalData.getUserList()) {
+            if (u.getChannelId() != null && u.getChannelId() == channelId) {
+                return u;
+            }
+        }
+        return null;
     }
 }

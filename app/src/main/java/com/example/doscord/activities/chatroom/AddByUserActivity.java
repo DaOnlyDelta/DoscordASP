@@ -52,8 +52,8 @@ public class AddByUserActivity extends AppCompatActivity {
     private void initViews() {
         usernameInput = findViewById(R.id.crAddByUserInput);
         usernameLabel = findViewById(R.id.crAddByUserLabelUsername);
-        backBtn = findViewById(R.id.crAddByUserBackBtn);
-        sendBtn = findViewById(R.id.crAddByUserSend);
+        backBtn = findViewById(R.id.backBtn);
+        sendBtn = findViewById(R.id.crAddByUserBtn);
         warningTxt = findViewById(R.id.crAddByUserWarning);
         me = GlobalData.getMe();
 
@@ -77,7 +77,7 @@ public class AddByUserActivity extends AppCompatActivity {
 
         int userId = GlobalData.getActiveUserId();
 
-        Helpers.startDotsAnimation(this, sendBtn, backBtn);
+        Helpers.startDotsAnimation(this, sendBtn, usernameInput, null);
         FriendRequestRequest request = new FriendRequestRequest(userId, friendUsername);
         RetrofitClient.getApiService().sendFriendRequest(request).enqueue(new Callback<FriendRequestResponse>() {
             @Override
@@ -95,7 +95,7 @@ public class AddByUserActivity extends AppCompatActivity {
                 } else {
                     handleError(98);
                 }
-                Helpers.resetUI(AddByUserActivity.this, sendBtn, backBtn, usernameInput, null);
+                Helpers.resetUI(AddByUserActivity.this, sendBtn, usernameInput, null);
             }
 
             @Override
@@ -103,7 +103,7 @@ public class AddByUserActivity extends AppCompatActivity {
                 handleError(99);
                 warningTxt.setText(R.string.generic_server_error);
                 warningTxt.setTextColor(ContextCompat.getColor(AddByUserActivity.this, R.color.red));
-                Helpers.resetUI(AddByUserActivity.this, sendBtn, backBtn, usernameInput, null);
+                Helpers.resetUI(AddByUserActivity.this, sendBtn, usernameInput, null);
             }
         });
     }

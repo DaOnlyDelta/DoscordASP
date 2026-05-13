@@ -27,10 +27,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int VIEW_TYPE_NORMAL = 1;
     private static final int VIEW_TYPE_SEQUENTIAL = 2;
     private static final int VIEW_TYPE_SPLITTER = 3;
+    private static final int VIEW_TYPE_BEGINNING = 4;
 
     private List<Message> messagesList;
     private final List<Object> displayList = new ArrayList<>();
     private Context context;
+    private User recipient;
     private boolean showLoader = false;
     private boolean isLoaderPlaying = false;
 
@@ -57,11 +59,18 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return displayList;
     }
 
+    public void setRecipient(User recipient) {
+        this.recipient = recipient;
+        updateDisplayList();
+    }
+
     public void updateDisplayList() {
         displayList.clear();
-        // Loader stays at the absolute top (index 0)
+        // Loader or Beginning stays at the absolute top (index 0)
         if (showLoader) {
             displayList.add("LOADER");
+        } else {
+            displayList.add("BEGINNING");
         }
 
         String lastDate = "";
@@ -91,6 +100,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         if (item instanceof String) {
             if (item.equals("LOADER")) return VIEW_TYPE_LOADER;
+            if (item.equals("BEGINNING")) return VIEW_TYPE_BEGINNING;
             return VIEW_TYPE_SPLITTER;
         }
 
@@ -147,6 +157,9 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } else if (viewType == VIEW_TYPE_SPLITTER) {
             View view = inflater.inflate(R.layout.item_message_splitter, parent, false);
             return new SplitterViewHolder(view);
+        } else if (viewType == VIEW_TYPE_BEGINNING) {
+            View view = inflater.inflate(R.layout.item_beginning, parent, false);
+            return new BeginningViewHolder(view);
         } else if (viewType == VIEW_TYPE_SEQUENTIAL) {
             View view = inflater.inflate(R.layout.item_seq_message, parent, false);
             return new SequentialViewHolder(view);
@@ -170,6 +183,11 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     loaderHolder.lottie.setProgress(0f);
                 }
             }
+            return;
+        }
+
+        if (holder instanceof BeginningViewHolder) {
+            bindBeginning((BeginningViewHolder) holder);
             return;
         }
 
@@ -197,6 +215,27 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         holder.itemView.setPadding(horizontalPadding, topPadding, horizontalPadding, bottomPadding);
+    }
+
+    private void bindBeginning(BeginningViewHolder holder) {
+        if (recipient == null) return;
+
+        String displayName = recipient.getUsername();
+        if (displayName == null || displayName.isEmpty()) {
+            displayName = recipient.getDisplayName();
+        }
+        holder.displayName.setText(displayName);
+        holder.username.setText(recipient.getUsername());
+        String label = "This is the very beginning of your legendary conversation with " + displayName + ".";
+        holder.label.setText(label);
+
+        String pfpUrl = "https://doscord.top/api/images/" + recipient.getPfp();
+        Glide.with(context)
+                .load(pfpUrl)
+                .placeholder(R.drawable.pfp_placeholder)
+                .error(R.drawable.pfp_placeholder)
+                .circleCrop()
+                .into(holder.pfp);
     }
 
     private void bindNormalMessage(NormalViewHolder holder, Message message) {
@@ -288,6 +327,22 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         public SplitterViewHolder(@NonNull View itemView) {
             super(itemView);
             dateText = itemView.findViewById(R.id.itemSplitterDate);
+        }
+    }
+
+    public static class BeginningViewHolder extends RecyclerView.ViewHolder {
+        ImageView pfp;
+        TextView displayName, username, label;
+        View removeBtn, blockBtn;
+
+        public BeginningViewHolder(@NonNull View itemView) {
+            super(itemView);
+            pfp = itemView.findViewById(R.id.itemBeginPfp);
+            displayName = itemView.findViewById(R.id.itemBeginDisplayName);
+            username = itemView.findViewById(R.id.itemBeginUsername);
+            label = itemView.findViewById(R.id.itemBeginLabel);
+            removeBtn = itemView.findViewById(R.id.itemBeginRemoveBtnContainer);
+            blockBtn = itemView.findViewById(R.id.itemBeginBlockBtnContainer);
         }
     }
 

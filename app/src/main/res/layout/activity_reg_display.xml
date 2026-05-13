@@ -9,7 +9,7 @@
     tools:context=".activities.menu.RegDisplayActivity">
 
     <ImageButton
-        android:id="@+id/regDBackBtn"
+        android:id="@+id/backBtn"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"

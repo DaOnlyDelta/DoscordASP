@@ -78,7 +78,7 @@
         app:layout_constraintTop_toBottomOf="@+id/regUserPassWarning" />
 
     <ImageButton
-        android:id="@+id/regUserBackBtn"
+        android:id="@+id/backBtn"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="20dp"

@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/crChatBackBtn"
+            android:id="@+id/backBtn"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="10dp"
@@ -42,7 +42,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/crChatBackBtn"
+            app:layout_constraintStart_toEndOf="@id/backBtn"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

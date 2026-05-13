@@ -1,14 +1,12 @@
 package com.example.doscord.utils;
 
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.graphics.Color;
 import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 
 import com.example.doscord.R;
 
@@ -37,28 +35,11 @@ public class Helpers {
         return !currentlyVisible;
     }
 
-    public static void resetUI(Activity activity, Button btn, ImageButton backBtn, EditText input1, EditText input2) {
-        btn.setTextColor(android.graphics.Color.WHITE);
+    public static void resetUI(Activity activity, Button btn, EditText input1, EditText input2) {
+        btn.setTextColor(Color.WHITE);
         btn.setEnabled(true);
-        backBtn.setEnabled(true);
-
-        LinearLayout loadingDots = activity.findViewById(R.id.loadingDots);
-        final View[] dots = {
-                activity.findViewById(R.id.dot1),
-                activity.findViewById(R.id.dot2),
-                activity.findViewById(R.id.dot3)
-        };
-
-        for (View dot : dots) {
-            ObjectAnimator anim = (ObjectAnimator) dot.getTag();
-            if (anim != null) {
-                anim.cancel();
-            }
-            dot.setAlpha(1.0f); // Make sure dots are solid if they ever show up again
-        }
-
-        // Standard UI Reset
-        loadingDots.setVisibility(View.GONE);
+        activity.findViewById(R.id.backBtn).setEnabled(true);
+        activity.findViewById(R.id.lottieAnim).setVisibility(View.GONE);
         if (input1 != null) {
             input1.setEnabled(true);
         }
@@ -67,34 +48,17 @@ public class Helpers {
         }
     }
 
-    public static void startDotsAnimation(Activity activity, Button btn, ImageButton back) {
+    public static void startDotsAnimation(Activity activity, Button btn, EditText input1, EditText input2) {
         closeKeyboard(activity);
-        back.setEnabled(false);
-        btn.setTextColor(android.graphics.Color.TRANSPARENT);
+        activity.findViewById(R.id.backBtn).setEnabled(false);
         btn.setEnabled(false);
-
-        activity.findViewById(R.id.loadingDots).setVisibility(View.VISIBLE);
-        final View[] dots = {
-                activity.findViewById(R.id.dot1),
-                activity.findViewById(R.id.dot2),
-                activity.findViewById(R.id.dot3)
-        };
-
-        for (int i = 0; i < dots.length; i++) {
-            final View dot = dots[i];
-
-            // Start at 30% opacity
-            dot.setAlpha(0.3f);
-
-            // Animate from 0.3 (dim) to 1.0 (bright) and back
-            ObjectAnimator animator = ObjectAnimator.ofFloat(dot, "alpha", 0.3f, 1f, 0.3f);
-            animator.setDuration(2000);
-            animator.setStartDelay(i * 500);
-            animator.setRepeatCount(ValueAnimator.INFINITE);
-            animator.setRepeatMode(ValueAnimator.RESTART);
-
-            dot.setTag(animator);
-            animator.start();
+        btn.setTextColor(Color.TRANSPARENT);
+        activity.findViewById(R.id.lottieAnim).setVisibility(View.VISIBLE);
+        if (input1 != null) {
+            input1.setEnabled(false);
+        }
+        if (input2 != null) {
+            input2.setEnabled(false);
         }
     }
 

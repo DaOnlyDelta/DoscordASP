@@ -31,7 +31,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText identifierInput, passInput;
     private TextView identifierWarningTxt, passWarningTxt, serverWarningTxt;
-    private ImageButton backBtn, eyeBtn;
+    private ImageButton eyeBtn;
     private boolean isPasswordVisible = false;
     private Button loginBtn;
 
@@ -52,9 +52,8 @@ public class LoginActivity extends AppCompatActivity {
     private void initViews() {
         identifierInput = findViewById(R.id.logIdentifierInput);
         passInput = findViewById(R.id.logPassInput);
-        backBtn = findViewById(R.id.logBackBtn);
         eyeBtn = findViewById(R.id.logPassEyeBtn);
-        loginBtn = findViewById(R.id.crAddUserSend);
+        loginBtn = findViewById(R.id.logBtn);
         identifierWarningTxt = findViewById(R.id.logIdentifierWarning);
         passWarningTxt = findViewById(R.id.logPassWarning);
         serverWarningTxt = findViewById(R.id.logServerWarning);
@@ -87,9 +86,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         // Lock UI & Close keyboard
-        Helpers.startDotsAnimation(this, loginBtn, backBtn);
-        identifierInput.setEnabled(false);
-        passInput.setEnabled(false);
+        Helpers.startDotsAnimation(this, loginBtn, identifierInput, passInput);
 
         // Execute (Using the class-level apiService initialized in onCreate)
         LoginRequest loginRequest = new LoginRequest(identifier, password);
@@ -111,14 +108,14 @@ public class LoginActivity extends AppCompatActivity {
                     serverWarningTxt.setVisibility(View.GONE);
                     LogDataHolder.error = true;
                     updateWarningVisibility();
-                    Helpers.resetUI(LoginActivity.this, loginBtn, backBtn, identifierInput, passInput);
+                    Helpers.resetUI(LoginActivity.this, loginBtn, identifierInput, passInput);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<LoginResponse> call, @NonNull Throwable t) {
                 serverWarningTxt.setVisibility(View.VISIBLE);
-                Helpers.resetUI(LoginActivity.this, loginBtn, backBtn, identifierInput, passInput);
+                Helpers.resetUI(LoginActivity.this, loginBtn, identifierInput, passInput);
             }
         });
     }

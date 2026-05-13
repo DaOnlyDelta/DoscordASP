@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -35,7 +34,6 @@ public class RegBdayActivity extends AppCompatActivity {
     private EditText bdayInput;
     private TextView warningTxt, serverWarningTxt;
     private Button createBtn;
-    private ImageButton backBtn;
     private boolean midRequest = false, ignoreFirstPass = true;
     private Calendar c;
 
@@ -58,8 +56,7 @@ public class RegBdayActivity extends AppCompatActivity {
         bdayInput = findViewById(R.id.regBdayInput);
         warningTxt = findViewById(R.id.regBdayWarning);
         serverWarningTxt = findViewById(R.id.regBdayServerWarning);
-        createBtn = findViewById(R.id.regBdayNextBtn);
-        backBtn = findViewById(R.id.regBdayBackBtn);
+        createBtn = findViewById(R.id.regBdayBtn);
         c  = Calendar.getInstance();
 
         if (RegDataHolder.year == null) {
@@ -131,7 +128,7 @@ public class RegBdayActivity extends AppCompatActivity {
 
         // Set up UI for loading state
         midRequest = true;
-        Helpers.startDotsAnimation(this, createBtn, backBtn);
+        Helpers.startDotsAnimation(this, createBtn, bdayInput, null);
 
         // Create the request object
         RegisterRequest request = new RegisterRequest();
@@ -151,7 +148,7 @@ public class RegBdayActivity extends AppCompatActivity {
                 } else {
                     // Handle Error Codes
                     serverWarningTxt.setVisibility(View.GONE);
-                    Helpers.resetUI(RegBdayActivity.this, createBtn, backBtn, null, null);
+                    Helpers.resetUI(RegBdayActivity.this, createBtn, bdayInput, null);
                     midRequest = true;
                     try {
                         // Retrofit won't automatically parse the body on a 400 error,
@@ -168,7 +165,7 @@ public class RegBdayActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<RegisterResponse> call, @NonNull Throwable t) {
                 serverWarningTxt.setVisibility(View.VISIBLE);
-                Helpers.resetUI(RegBdayActivity.this, createBtn, backBtn, null, null);
+                Helpers.resetUI(RegBdayActivity.this, createBtn, bdayInput, null);
             }
         });
     }
