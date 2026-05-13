@@ -30,6 +30,7 @@ import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.Message;
 import com.example.doscord.utils.MessagesAdapter;
+import com.example.doscord.utils.NotificationHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,7 @@ import retrofit2.Response;
 
 public class CrChatActivity extends AppCompatActivity {
 
+    public static int activeChannelId = -1;
     private RecyclerView recyclerView;
     private EditText messageInput;
     private TextView chatTitle;
@@ -68,8 +70,8 @@ public class CrChatActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, Math.max(systemBars.bottom, ime.bottom));
             
             // Scroll to bottom if keyboard opened and we have messages
-            if (ime.bottom > 0 && !messagesList.isEmpty()) {
-                recyclerView.postDelayed(() -> recyclerView.scrollToPosition(messagesList.size() - 1), 100);
+            if (ime.bottom > 0 && adapter != null && adapter.getItemCount() > 0) {
+                recyclerView.postDelayed(() -> recyclerView.scrollToPosition(adapter.getItemCount() - 1), 100);
             }
 
             return insets;
@@ -83,12 +85,15 @@ public class CrChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        activeChannelId = channelId;
+        NotificationHelper.clearActiveStyle(channelId);
         startChatUpdateLoop();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        activeChannelId = -1;
         if (updateHandler != null && updateRunnable != null) {
             updateHandler.removeCallbacks(updateRunnable);
         }
@@ -102,6 +107,7 @@ public class CrChatActivity extends AppCompatActivity {
         sendBtn = findViewById(R.id.crChatSendContainer);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
         adapter = new MessagesAdapter(messagesList, this);
         recyclerView.setAdapter(adapter);
@@ -150,6 +156,8 @@ public class CrChatActivity extends AppCompatActivity {
                     adapter.setShowLoader(canLoadMore);
                     adapter.updateDisplayList();
                     adapter.notifyDataSetChanged();
+
+                    updateLastSeenTimestamp();
 
                     recyclerView.post(() -> recyclerView.scrollToPosition(adapter.getItemCount() - 1));
                 }
@@ -289,6 +297,8 @@ public class CrChatActivity extends AppCompatActivity {
                         adapter.updateDisplayList();
                         adapter.notifyDataSetChanged();
 
+                        updateLastSeenTimestamp();
+
                         if (forceScroll || isAtBottom) {
                             recyclerView.smoothScrollToPosition(adapter.getItemCount() - 1);
                         }
@@ -358,6 +368,15 @@ public class CrChatActivity extends AppCompatActivity {
                 // Handle Network Error
             }
         });
+    }
+
+    private void updateLastSeenTimestamp() {
+        if (messagesList.isEmpty()) return;
+        String latestTime = messagesList.get(messagesList.size() - 1).getSentAt();
+        getSharedPreferences("notif_prefs", MODE_PRIVATE)
+                .edit()
+                .putString("last_msg_time_" + channelId, latestTime)
+                .apply();
     }
 
     public void finish(View v) {

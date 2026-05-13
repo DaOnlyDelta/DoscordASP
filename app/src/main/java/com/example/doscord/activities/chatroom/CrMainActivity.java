@@ -34,11 +34,14 @@ import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.RegDataHolder;
 import com.example.doscord.utils.User;
+import com.example.doscord.utils.NotificationHelper;
 import com.example.doscord.utils.RequestsAdapter;
 import com.example.doscord.utils.SessionManager;
+import com.example.doscord.utils.WorkManagerHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -70,11 +73,13 @@ public class CrMainActivity extends AppCompatActivity {
         });
 
         initViews();
+        WorkManagerHelper.startMessagePolling(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        fetchData();
         startUpdateLoop(); // Start pinging
     }
 
@@ -108,7 +113,6 @@ public class CrMainActivity extends AppCompatActivity {
         profileLayout = findViewById(R.id.crMainProfileContainer);
 
         overlayLayout = findViewById(R.id.crMainOverlay);
-        fetchData();
     }
 
     private void fetchData() {
@@ -120,6 +124,9 @@ public class CrMainActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<TokenLoginResponse> call, @NonNull Response<TokenLoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    // Check for notifications before updating local data
+                    checkForNewMessages(response.body().getUserList(), response.body().getActiveUserId());
+
                     // FILL THE STATIC REPOSITORY
                     GlobalData.updateData(response.body());
 
@@ -347,6 +354,9 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     public void openSettings(View v) {
+        // Stop polling
+        WorkManagerHelper.stopMessagePolling(this);
+
         // Placeholder
         // Logout
         SessionManager sessionManager = new SessionManager(this);
@@ -366,5 +376,46 @@ public class CrMainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void checkForNewMessages(List<User> users, Integer activeUserId) {
+        android.content.SharedPreferences prefs = getSharedPreferences("notif_prefs", android.content.Context.MODE_PRIVATE);
+        android.content.SharedPreferences.Editor editor = prefs.edit();
+
+        for (User user : users) {
+            // Don't notify for messages sent by the active user
+            if (Objects.equals(user.getLastMessageSenderId(), activeUserId)) {
+                // Still update the saved time so we don't notify when they reply
+                editor.putString("last_msg_time_" + user.getChannelId(), user.getLastMessageTime());
+                continue;
+            }
+
+            if (user.getLastMessageTime() != null) {
+                String key = "last_msg_time_" + user.getChannelId();
+                String savedTime = prefs.getString(key, "");
+
+                // If the message is newer than what we last saw
+                if (!user.getLastMessageTime().equals(savedTime)) {
+                    editor.putString(key, user.getLastMessageTime());
+
+                    String senderName = user.getNickname();
+                    if (senderName == null || senderName.isEmpty()) {
+                        senderName = user.getDisplayName();
+                    }
+                    if (senderName == null || senderName.isEmpty()) {
+                        senderName = user.getUsername();
+                    }
+
+                    NotificationHelper.showMessageNotification(
+                            this,
+                            senderName,
+                            user.getLastMessage(),
+                            user.getPfp(),
+                            user.getChannelId()
+                    );
+                }
+            }
+        }
+        editor.apply();
     }
 }

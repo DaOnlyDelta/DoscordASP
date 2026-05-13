@@ -123,8 +123,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 long diffMillis = currentDate.getTime() - previousDate.getTime();
                 long diffMinutes = diffMillis / (60 * 1000);
 
-                // Same sender within 1 minute -> sequential
-                if (diffMinutes < 1) {
+                // Same sender within 5 minute -> sequential
+                if (diffMinutes < 5) {
                     return VIEW_TYPE_SEQUENTIAL;
                 }
             }
