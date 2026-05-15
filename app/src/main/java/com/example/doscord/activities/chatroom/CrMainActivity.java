@@ -2,6 +2,7 @@ package com.example.doscord.activities.chatroom;
 
 import android.content.Intent;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.example.doscord.R;
 import com.example.doscord.activities.menu.MainActivity;
 import com.example.doscord.api.LogoutRequest;
@@ -48,7 +50,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CrMainActivity extends AppCompatActivity {
-    private ImageView homeIcon, notifIcon, pfpImg;
+    private ImageView homeIcon, notifIcon, pfpImg, profileIcon;
     private TextView homeTxt, notifTxt, pfpTxt;
     private int selected = 0;
     private RecyclerView homeChatsView;
@@ -111,6 +113,7 @@ public class CrMainActivity extends AppCompatActivity {
 
         // Profile
         profileLayout = findViewById(R.id.crMainProfileContainer);
+        profileIcon = findViewById(R.id.crProfileIcon);
 
         overlayLayout = findViewById(R.id.crMainOverlay);
     }
@@ -178,26 +181,29 @@ public class CrMainActivity extends AppCompatActivity {
     private void loadPfp(String path) {
         // Try to load from RegDataHolder first to avoid API wait after registration
         if (RegDataHolder.selectedImageUri != null) {
-            Glide.with(this)
+            RequestBuilder<Drawable> glideRequest = Glide.with(this)
                     .load(RegDataHolder.selectedImageUri)
                     .centerCrop()
-                    .circleCrop()
-                    .into(pfpImg);
+                    .circleCrop();
+            glideRequest.into(pfpImg);
+            glideRequest.into(profileIcon);
         } else if (RegDataHolder.defaultPfpDrawable != -1) {
-            Glide.with(this)
+            RequestBuilder<Drawable> glideRequest = Glide.with(this)
                     .load(RegDataHolder.defaultPfpDrawable)
                     .centerCrop()
-                    .circleCrop()
-                    .into(pfpImg);
+                    .circleCrop();
+            glideRequest.into(pfpImg);
+            glideRequest.into(profileIcon);
         } else {
             String fullPath = "https://doscord.top/api/images/" + path;
-            Glide.with(this)
+            RequestBuilder<Drawable> glideRequest = Glide.with(this)
                     .load(fullPath)
                     .placeholder(R.drawable.pfp_placeholder) // Show this while it's loading
                     .error(R.drawable.icon)   // Show this if the link is broken
                     .centerCrop()
-                    .circleCrop()
-                    .into(pfpImg);
+                    .circleCrop();
+            glideRequest.into(pfpImg);
+            glideRequest.into(profileIcon);
         }
 
         // RegDataHolder is no longer cleared here to avoid wiping ID during PFP upload flow
