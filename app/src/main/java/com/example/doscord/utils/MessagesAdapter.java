@@ -183,31 +183,22 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     loaderHolder.lottie.setProgress(0f);
                 }
             }
-            return;
-        }
-
-        if (holder instanceof BeginningViewHolder) {
+        } else if (holder instanceof BeginningViewHolder) {
             bindBeginning((BeginningViewHolder) holder);
-            return;
-        }
-
-        if (holder instanceof SplitterViewHolder) {
+        } else if (holder instanceof SplitterViewHolder) {
             ((SplitterViewHolder) holder).dateText.setText((String) item);
-            return;
-        }
-
-        Message message = (Message) item;
-
-        if (holder instanceof NormalViewHolder) {
-            bindNormalMessage((NormalViewHolder) holder, message);
+        } else if (holder instanceof NormalViewHolder) {
+            bindNormalMessage((NormalViewHolder) holder, (Message) item);
         } else if (holder instanceof SequentialViewHolder) {
-            bindSequentialMessage((SequentialViewHolder) holder, message);
+            bindSequentialMessage((SequentialViewHolder) holder, (Message) item);
         }
 
         // PADDING LOGIC
         float density = context.getResources().getDisplayMetrics().density;
         int horizontalPadding = (int) (16 * density);
         int topPadding = holder.itemView.getPaddingTop();
+        
+        // If it's the last item (could be Beginning or Loader if no messages), add bottom padding
         int bottomPadding = (position == getItemCount() - 1) ? (int) (30 * density) : 0;
 
         if (position != getItemCount() - 1 && holder instanceof SequentialViewHolder) {

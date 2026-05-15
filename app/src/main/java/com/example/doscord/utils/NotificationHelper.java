@@ -148,7 +148,9 @@ public class NotificationHelper {
     }
     
     // Call this when the user opens a chat or clears notifications
-    public static void clearActiveStyle(int channelId) {
+    public static void clearActiveStyle(Context context, int channelId) {
         activeStyles.remove(channelId);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(channelId);
     }
 }

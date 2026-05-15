@@ -200,8 +200,7 @@ public class CrMainActivity extends AppCompatActivity {
                     .into(pfpImg);
         }
 
-        // Clear RegDataHolder now that we've used the data
-        RegDataHolder.clear();
+        // RegDataHolder is no longer cleared here to avoid wiping ID during PFP upload flow
         LogDataHolder.clear();
     }
 
@@ -245,8 +244,8 @@ public class CrMainActivity extends AppCompatActivity {
         RequestsAdapter requestsAdapter = new RequestsAdapter(requestsOnly, this, new RequestsAdapter.OnRequestHandledListener() {
             @Override
             public void onRequestProcessed() {
-                // This runs whenever a button is clicked and successful!
-                setupRecyclerView();
+                // Trigger a full fetch from server to get new channel IDs/data
+                fetchData();
             }
         });
 

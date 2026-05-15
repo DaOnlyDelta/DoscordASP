@@ -10,6 +10,7 @@
         android:id="@+id/itemBeginPfpContainer"
         android:layout_width="100dp"
         android:layout_height="100dp"
+        android:background="@null"
         app:cardCornerRadius="100dp"
         app:cardElevation="0dp"
         app:cardMaxElevation="0dp"
@@ -21,6 +22,7 @@
             android:id="@+id/itemBeginPfp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@android:color/transparent"
             android:scaleType="centerCrop"
             android:src="@drawable/pfp_placeholder" />
 

@@ -29,7 +29,9 @@ public class RetrofitClient {
 
             OkHttpClient client = new OkHttpClient.Builder()
                     .dns(dns) // Force the app to use Google's encrypted DNS
-                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .writeTimeout(30, TimeUnit.SECONDS)
                     .build();
 
             retrofit = new Retrofit.Builder()

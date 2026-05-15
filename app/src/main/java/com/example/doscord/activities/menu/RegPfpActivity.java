@@ -12,6 +12,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -48,6 +49,7 @@ public class RegPfpActivity extends AppCompatActivity {
     private TableLayout tableLayout;
     private Uri selectedImageUri = null; // Stores the local phone path
     private ActivityResultLauncher<Intent> galleryLauncher;
+    private int localUserId = -1;
 
     private final int[] avatarResources = {
             R.drawable.defaults1,
@@ -65,6 +67,10 @@ public class RegPfpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_reg_pfp);
+        
+        // CAPTURE ID IMMEDIATELY
+        localUserId = RegDataHolder.id;
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -74,7 +80,6 @@ public class RegPfpActivity extends AppCompatActivity {
         initLauncher();
         initViews();
         setupAvatarGrid();
-        RegDataHolder.registered = false;
     }
 
     private void initLauncher() {
@@ -86,7 +91,7 @@ public class RegPfpActivity extends AppCompatActivity {
 
                         // Check file size (e.g., limit to 5MB)
                         if (isImageTooLarge(selectedImageUri)) {
-                            // Error: Image is too large (over 5MB)
+                            Toast.makeText(this, "Image is too large (max 5MB)", Toast.LENGTH_SHORT).show();
                             selectedImageUri = null;
                             return;
                         }
@@ -206,67 +211,78 @@ public class RegPfpActivity extends AppCompatActivity {
 
     public void sendPfpToServer(View v) {
         ApiService apiService = RetrofitClient.getApiService();
-        String userId = String.valueOf(RegDataHolder.id);
+        
+        // Try local, then global, then static holder
+        String userId = String.valueOf(localUserId != -1 ? localUserId : RegDataHolder.id);
+
+        if (userId.equals("-1")) {
+            Toast.makeText(this, "Internal Error: User ID not found.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         // Case 1: User hasn't changed anything (still defaults0)
-        // We just treat this as a skip.
         if (currentSelectedPath.equals("defaults/defaults0.png")) {
-            finish(null);
+            RegDataHolder.registered = false;
+            finish();
             return;
         }
 
         if (currentSelectedPath.equals("custom")) {
-            // --- CUSTOM GALLERY UPLOAD ---
             if (selectedImageUri == null) {
-                // Error: No image to upload
+                Toast.makeText(this, "Please select an image first", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             try {
                 InputStream is = getContentResolver().openInputStream(selectedImageUri);
-                if (is == null) return; // Error: Image gone
+                if (is == null) return;
                 byte[] bytes = getBytes(is);
 
-                RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), bytes);
-                MultipartBody.Part body = MultipartBody.Part.createFormData("pfp", "upload.jpg", requestFile);
-                RequestBody userIdPart = RequestBody.create(MediaType.parse("text/plain"), userId);
+                // 1. Detect if it's a PNG or just use PNG as the default for uploads
+                // PNG is safer for "profile pictures" because it preserves quality and transparency
+                RequestBody requestFile = RequestBody.create(bytes, MediaType.parse("image/png"));
 
+                // 2. Change the filename extension to .png
+                MultipartBody.Part body = MultipartBody.Part.createFormData("pfp", "upload.png", requestFile);
+
+                RequestBody userIdPart = RequestBody.create(userId, MediaType.parse("text/plain"));
                 apiService.updatePfpCustom(userIdPart, body).enqueue(new Callback<>() {
                     @Override
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if (response.isSuccessful()) {
                             RegDataHolder.selectedImageUri = selectedImageUri;
-                            finish(null); // Success! Move to next screen
+                            RegDataHolder.registered = false;
+                            finish();
                         } else {
-                            // Error: Server returned status like 500
+                            Toast.makeText(RegPfpActivity.this, "Server error during upload", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                        // Error: Network failure
+                        Toast.makeText(RegPfpActivity.this, "Network connection error", Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (Exception e) {
-                // Error: Critical file access error
+                Toast.makeText(this, "Error processing image", Toast.LENGTH_SHORT).show();
             }
 
         } else {
-            // --- DEFAULT AVATAR SELECTION ---
             PfpRequest request = new PfpRequest(userId, currentSelectedPath);
-            apiService.updatePfpDefault(request).enqueue(new Callback<>() {
+            apiService.updatePfpDefault(request).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     if (response.isSuccessful()) {
-                        finish(null); // Success! Move to next screen
+                        RegDataHolder.registered = false;
+                        finish();
                     } else {
-                        // Error: Server rejected selection
+                        Toast.makeText(RegPfpActivity.this, "Server error", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                    // Error: Connection lost
+                    Toast.makeText(RegPfpActivity.this, "Network connection error", Toast.LENGTH_SHORT).show();
                 }
             });
         }

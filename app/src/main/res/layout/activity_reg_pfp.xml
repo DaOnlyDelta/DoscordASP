@@ -72,18 +72,68 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/crPfpTitle" />
 
-    <ImageButton
-        android:id="@+id/crPfpBtn"
-        android:layout_width="175dp"
-        android:layout_height="175dp"
-        android:layout_marginStart="10dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/crPfpContainer"
+        android:layout_width="190dp"
+        android:layout_height="190dp"
         android:layout_marginTop="30dp"
-        android:background="@null"
-        android:contentDescription="@string/click_to_select_profile_picture"
-        android:onClick="openLauncher"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/crPfpSubtitle" />
+        app:layout_constraintTop_toBottomOf="@id/crPfpSubtitle">
+
+        <View
+            android:id="@+id/crPfpBorder"
+            android:layout_width="185dp"
+            android:layout_height="185dp"
+            android:background="@drawable/dashed_border"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/crPfpBtn"
+            android:layout_width="170dp"
+            android:layout_height="170dp"
+            android:background="@null"
+            android:contentDescription="@string/click_to_select_profile_picture"
+            android:onClick="openLauncher"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/crPfpPlusContainer"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="2dp"
+            app:cardBackgroundColor="@color/blue"
+            app:cardCornerRadius="50dp"
+            app:cardElevation="0dp"
+            app:cardMaxElevation="0dp"
+            app:layout_constraintCircle="@+id/crPfpBtn"
+            app:layout_constraintCircleAngle="45"
+            app:layout_constraintCircleRadius="85dp"
+            app:layout_constraintEnd_toStartOf="@+id/crPfpBtn"
+            app:layout_constraintTop_toBottomOf="@+id/crPfpBtn"
+            app:strokeColor="@color/bgGray"
+            app:strokeWidth="5dp"
+            tools:ignore="MissingConstraints">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/plus"
+                android:src="@drawable/plus"
+                app:tint="@color/white" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:id="@+id/crPfpSubtitle2"
@@ -99,7 +149,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/crPfpBtn" />
+        app:layout_constraintTop_toBottomOf="@+id/crPfpContainer" />
 
     <TableLayout
         android:id="@+id/crPfpTableLayout"

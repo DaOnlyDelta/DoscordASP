@@ -9,7 +9,7 @@ public class NotificationDeleteReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         int channelId = intent.getIntExtra("channel_id", -1);
         if (channelId != -1) {
-            NotificationHelper.clearActiveStyle(channelId);
+            NotificationHelper.clearActiveStyle(context, channelId);
         }
     }
 }

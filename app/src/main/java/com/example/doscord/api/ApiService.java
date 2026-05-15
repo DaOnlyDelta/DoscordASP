@@ -35,7 +35,7 @@ public interface ApiService {
     @POST("update-pfp-custom")
     Call<Void> updatePfpCustom(
             @Part("userId") RequestBody userId,
-            @Part MultipartBody.Part image
+            @Part MultipartBody.Part pfp
     );
 
     @POST("send-friend-request")

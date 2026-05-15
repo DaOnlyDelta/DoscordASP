@@ -69,4 +69,5 @@
     <string name="emojis">Emojis</string>
     <string name="send">send</string>
     <string name="messages">Messages</string>
+    <string name="plus">Add</string>
 </resources>

@@ -31,6 +31,7 @@ import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.Message;
 import com.example.doscord.utils.MessagesAdapter;
 import com.example.doscord.utils.NotificationHelper;
+import com.example.doscord.utils.SessionManager;
 import com.example.doscord.utils.User;
 
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ public class CrChatActivity extends AppCompatActivity {
     private boolean canLoadMore = true; // Track if the server has more history
     private boolean isLoading = false;
     private boolean isLoadingNew = false;
+    private String token;
 
     // Updates
     private final Handler updateHandler = new Handler();
@@ -87,7 +89,7 @@ public class CrChatActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         activeChannelId = channelId;
-        NotificationHelper.clearActiveStyle(channelId);
+        NotificationHelper.clearActiveStyle(this, channelId);
         startChatUpdateLoop();
     }
 
@@ -117,6 +119,7 @@ public class CrChatActivity extends AppCompatActivity {
 
         User recipient = getRecipient();
         adapter.setRecipient(recipient);
+        token = (new SessionManager(this)).getToken();
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -281,11 +284,15 @@ public class CrChatActivity extends AppCompatActivity {
     }
 
     private void fetchNewMessages(boolean forceScroll) {
-        if (messagesList.isEmpty() || isLoadingNew) return;
-        isLoadingNew = true;
+        if (channelId == -1 || isLoadingNew) return;
 
-        int newestId = messagesList.get(messagesList.size() - 1).getId();
-        NewMessagesRequest req = new NewMessagesRequest(channelId, newestId);
+        int newestId = 0;
+        if (!messagesList.isEmpty()) {
+            newestId = messagesList.get(messagesList.size() - 1).getId();
+        }
+
+        isLoadingNew = true;
+        NewMessagesRequest req = new NewMessagesRequest(channelId, newestId, token);
 
         RetrofitClient.getApiService().getNewMessages(req).enqueue(new Callback<MessagesResponse>() {
             @SuppressLint("NotifyDataSetChanged")

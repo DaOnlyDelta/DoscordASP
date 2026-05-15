@@ -503,13 +503,11 @@
                 android:layout_marginTop="10dp"
                 android:alpha="0.5"
                 android:background="@null"
-                android:backgroundTint="@color/bgGray"
                 android:clickable="false"
                 android:contentDescription="@string/profile"
                 android:focusable="false"
                 android:scaleType="centerCrop"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.48"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/pfp_placeholder" />
