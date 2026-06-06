@@ -1,4 +1,4 @@
-package com.example.doscord.utils;
+package com.example.doscord.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,6 +12,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.example.doscord.R;
+import com.example.doscord.models.Channel;
+import com.example.doscord.models.User;
+import com.example.doscord.utils.GlobalData;
+import com.example.doscord.models.Message;
+import com.example.doscord.utils.PfpUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,7 +36,9 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private List<Message> messagesList;
     private final List<Object> displayList = new ArrayList<>();
     private Context context;
-    private User recipient;
+
+    // Instead of forcing a single user model, pass the active channel context
+    private Channel currentChannel;
     private boolean showLoader = false;
     private boolean isLoaderPlaying = false;
 
@@ -41,7 +48,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         updateDisplayList();
     }
 
-    // Method to toggle the loader from CrChatActivity
     public void setShowLoader(boolean showLoader) {
         this.showLoader = showLoader;
         updateDisplayList();
@@ -58,14 +64,14 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return displayList;
     }
 
-    public void setRecipient(User recipient) {
-        this.recipient = recipient;
+    // Pass the active channel info to draw the header components
+    public void setChannelContext(Channel channel) {
+        this.currentChannel = channel;
         updateDisplayList();
     }
 
     public void updateDisplayList() {
         displayList.clear();
-        // Loader or Beginning stays at the absolute top (index 0)
         if (showLoader) {
             displayList.add("LOADER");
         } else {
@@ -104,8 +110,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         Message current = (Message) item;
-
-        // Find previous message in displayList to check for sequential
         Message previous = null;
         for (int i = position - 1; i >= 0; i--) {
             if (displayList.get(i) instanceof Message) {
@@ -114,14 +118,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
         }
 
-        if (previous == null) {
-            return VIEW_TYPE_NORMAL;
-        }
-
-        // Different sender -> normal message
-        if (!current.getSenderId().equals(previous.getSenderId())) {
-            return VIEW_TYPE_NORMAL;
-        }
+        if (previous == null) return VIEW_TYPE_NORMAL;
+        if (!current.getSenderId().equals(previous.getSenderId())) return VIEW_TYPE_NORMAL;
 
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
@@ -132,7 +130,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 long diffMillis = currentDate.getTime() - previousDate.getTime();
                 long diffMinutes = diffMillis / (60 * 1000);
 
-                // Same sender within 5 minute -> sequential
                 if (diffMinutes < 5) {
                     return VIEW_TYPE_SEQUENTIAL;
                 }
@@ -150,7 +147,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         if (viewType == VIEW_TYPE_LOADER) {
-            // Reusing your FrameLayout/Lottie idea from earlier
             View view = inflater.inflate(R.layout.item_loader, parent, false);
             return new LoaderViewHolder(view);
         } else if (viewType == VIEW_TYPE_SPLITTER) {
@@ -189,15 +185,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } else if (holder instanceof NormalViewHolder) {
             bindNormalMessage((NormalViewHolder) holder, (Message) item);
         } else if (holder instanceof SequentialViewHolder) {
-            bindSequentialMessage((SequentialViewHolder) holder, (Message) item);
+            ((SequentialViewHolder) holder).content.setText(((Message) item).getMessageText());
         }
 
-        // PADDING LOGIC
         float density = context.getResources().getDisplayMetrics().density;
         int horizontalPadding = (int) (16 * density);
         int topPadding = holder.itemView.getPaddingTop();
-        
-        // If it's the last item (could be Beginning or Loader if no messages), add bottom padding
         int bottomPadding = (position == getItemCount() - 1) ? (int) (30 * density) : 0;
 
         if (position != getItemCount() - 1 && holder instanceof SequentialViewHolder) {
@@ -208,54 +201,65 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private void bindBeginning(BeginningViewHolder holder) {
-        if (recipient == null) return;
+        if (currentChannel == null) return;
 
-        String displayName = recipient.getUsername();
-        if (displayName == null || displayName.isEmpty()) {
-            displayName = recipient.getDisplayName();
+        if (currentChannel.isGroup()) {
+            String gName = currentChannel.getGroupName() != null ? currentChannel.getGroupName() : "Group Chat";
+            holder.displayName.setText(gName);
+            holder.username.setText("Group ID: #" + currentChannel.getChannelId());
+            holder.label.setText("Welcome to the very start of the " + gName + " group server.");
+
+            // Hide friendship relationship controls inside groups
+            if (holder.removeBtn != null) holder.removeBtn.setVisibility(View.GONE);
+            if (holder.blockBtn != null) holder.blockBtn.setVisibility(View.GONE);
+
+            PfpUtils.loadGroupPfp(context, currentChannel.getGroupPfp(), holder.pfp);
+        } else {
+            String dName = currentChannel.getDmDisplayNameOrNickname();
+            if (dName == null || dName.isEmpty()) {
+                dName = currentChannel.getDmRecipientUsername();
+            }
+            holder.displayName.setText(dName);
+            holder.username.setText("@" + currentChannel.getDmRecipientUsername());
+            holder.label.setText("This is the very beginning of your legendary conversation with " + dName + ".");
+
+            if (holder.removeBtn != null) holder.removeBtn.setVisibility(View.VISIBLE);
+            if (holder.blockBtn != null) holder.blockBtn.setVisibility(View.VISIBLE);
+
+            PfpUtils.loadPfp(context, currentChannel.getDmRecipientPfp(), holder.pfp);
         }
-        holder.displayName.setText(displayName);
-        holder.username.setText(recipient.getUsername());
-        String label = "This is the very beginning of your legendary conversation with " + displayName + ".";
-        holder.label.setText(label);
-
-        PfpUtils.loadPfp(context, recipient.getPfp(), holder.pfp);
     }
 
     private void bindNormalMessage(NormalViewHolder holder, Message message) {
         holder.content.setText(message.getMessageText());
-
-        // Find sender
-        User sender = null;
-        for (User u : GlobalData.getUserList()) {
-            if (u.getId() == message.getSenderId()) {
-                sender = u;
-                break;
-            }
-        }
-
-        if (sender != null) {
-            String displayName = sender.getNickname();
-            if (displayName == null || displayName.isEmpty()) {
-                displayName = sender.getDisplayName();
-            }
-
-            if (displayName == null || displayName.isEmpty()) {
-                displayName = sender.getUsername();
-            }
-            holder.username.setText(displayName);
-
-            PfpUtils.loadPfp(context, sender.getPfp(), holder.pfp);
-        } else {
-            holder.username.setText("Unknown User");
-            holder.pfp.setImageResource(R.drawable.pfp_placeholder);
-        }
-
         holder.time.setText(formattedTime(message.getSentAt()));
-    }
 
-    private void bindSequentialMessage(SequentialViewHolder holder, Message message) {
-        holder.content.setText(message.getMessageText());
+        // 1. Check if the message sender is you
+        if (message.getSenderId().equals(GlobalData.getActiveUserId())) {
+            User me = GlobalData.getMyProfile();
+            if (me != null) {
+                holder.username.setText(me.getDisplayName() != null ? me.getDisplayName() : me.getUsername());
+                PfpUtils.loadPfp(context, me.getPfp(), holder.pfp);
+            } else {
+                holder.username.setText("You");
+                holder.pfp.setImageResource(R.drawable.icon);
+            }
+            return;
+        }
+
+        // 2. Check if the message sender matches the current 1-to-1 DM profile cached metadata
+        if (currentChannel != null && !currentChannel.isGroup()
+                && message.getSenderId().equals(currentChannel.getDmRecipientId())) {
+            holder.username.setText(currentChannel.getDmDisplayNameOrNickname());
+            PfpUtils.loadPfp(context, currentChannel.getDmRecipientPfp(), holder.pfp);
+            return;
+        }
+
+        // 3. Fallback/Group members processing lookup strategy
+        // Inside a group chat, fallback to standard markers for other users until your message pipeline
+        // includes sender profile joins from your messages API routes.
+        holder.username.setText("User #" + message.getSenderId());
+        holder.pfp.setImageResource(R.drawable.icon);
     }
 
     @Override
@@ -263,18 +267,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         Object item = displayList.get(position);
         if (item instanceof String) {
             if (item.equals("LOADER")) return -1;
-            
-            // For splitters, tie the identity to the first message of that day.
-            // This ensures that if we load older messages for the same day, 
-            // the splitter "moves" with the new top of the day rather than staying 
-            // stuck at a fixed position relative to the viewport.
             for (int i = position + 1; i < displayList.size(); i++) {
                 Object next = displayList.get(i);
                 if (next instanceof Message) {
-                    // Combine date hash and message ID to create a unique ID for this 'day-start'
                     return ((long) item.hashCode() << 32) | (((Message) next).getId() & 0xFFFFFFFFL);
                 }
-                if (next instanceof String) break; 
+                if (next instanceof String) break;
             }
             return item.hashCode();
         } else if (item instanceof Message) {
@@ -345,52 +343,33 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    // =========================
-    // TIME FORMATTER
-    // =========================
-
     private String formattedTime(String rawTime) {
-        if (rawTime == null || rawTime.isEmpty()) {
-            return "";
-        }
-
+        if (rawTime == null || rawTime.isEmpty()) return "";
         try {
-            SimpleDateFormat sdf =
-                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             Date messageDate = sdf.parse(rawTime);
-            if (messageDate == null) {
-                return "";
-            }
+            if (messageDate == null) return "";
 
             Calendar now = Calendar.getInstance();
             Calendar msg = Calendar.getInstance();
             msg.setTime(messageDate);
 
-            SimpleDateFormat timeFormat =
-                    new SimpleDateFormat("h:mm a", Locale.getDefault());
+            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
             String fTime = timeFormat.format(messageDate);
 
-            // Today
             if (now.get(Calendar.YEAR) == msg.get(Calendar.YEAR)
                     && now.get(Calendar.DAY_OF_YEAR) == msg.get(Calendar.DAY_OF_YEAR)) {
-
                 return fTime;
             }
 
-            // Yesterday
             Calendar yesterday = Calendar.getInstance();
             yesterday.add(Calendar.DAY_OF_YEAR, -1);
             if (yesterday.get(Calendar.YEAR) == msg.get(Calendar.YEAR)
                     && yesterday.get(Calendar.DAY_OF_YEAR) == msg.get(Calendar.DAY_OF_YEAR)) {
-
                 return "Yesterday at " + fTime;
             }
 
-            // Older
-            SimpleDateFormat dateFormat =
-                    new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             return dateFormat.format(messageDate) + " " + fTime;
         } catch (Exception e) {
             e.printStackTrace();

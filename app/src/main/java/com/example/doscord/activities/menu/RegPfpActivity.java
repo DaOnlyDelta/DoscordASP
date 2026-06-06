@@ -28,6 +28,8 @@ import com.example.doscord.R;
 import com.example.doscord.api.ApiService;
 import com.example.doscord.api.PfpRequest;
 import com.example.doscord.api.RetrofitClient;
+import com.example.doscord.utils.GlobalData;
+import com.example.doscord.utils.PfpUtils;
 import com.example.doscord.utils.RegDataHolder;
 
 import java.io.ByteArrayOutputStream;
@@ -48,6 +50,7 @@ public class RegPfpActivity extends AppCompatActivity {
     private String currentSelectedPath = "defaults/defaults0.png";
     private TableLayout tableLayout;
     private Uri selectedImageUri = null; // Stores the local phone path
+    private int selectedDefaultResId = -1;
     private ActivityResultLauncher<Intent> galleryLauncher;
     private int localUserId = -1;
 
@@ -69,7 +72,7 @@ public class RegPfpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reg_pfp);
         
         // CAPTURE ID IMMEDIATELY
-        localUserId = RegDataHolder.id;
+        localUserId = (RegDataHolder.id == -1) ? GlobalData.getActiveUserId() : RegDataHolder.id;
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -98,6 +101,8 @@ public class RegPfpActivity extends AppCompatActivity {
 
                         // Update UI and class variable
                         currentSelectedPath = "custom"; // Mark that we aren't using a default icon
+                        selectedDefaultResId = -1;
+
                         Glide.with(this)
                                 .load(selectedImageUri)
                                 .centerCrop()
@@ -112,11 +117,9 @@ public class RegPfpActivity extends AppCompatActivity {
         mainPfpBtn = findViewById(R.id.crPfpBtn);
         tableLayout = findViewById(R.id.crPfpTableLayout);
 
-        // Set initial placeholder for the big button
-        Glide.with(this)
-                .load(R.drawable.icon)
-                .circleCrop()
-                .into(mainPfpBtn);
+        // Use PfpUtils to load the initial profile picture correctly
+        String pfpPath = (GlobalData.getMyProfile() != null) ? GlobalData.getMyProfile().getPfp() : null;
+        PfpUtils.loadMyPfp(this, pfpPath, mainPfpBtn);
     }
 
     private void setupAvatarGrid() {
@@ -162,7 +165,7 @@ public class RegPfpActivity extends AppCompatActivity {
                 // 2. Save selection to the class-level variable
                 selectedImageUri = null;
                 currentSelectedPath = pfpPath;
-                RegDataHolder.defaultPfpDrawable = selectedDrawableId;
+                selectedDefaultResId = selectedDrawableId;
 
                 // 3. Clear other borders and set the new one
                 clearAllBorders(tableLayout);
@@ -211,9 +214,8 @@ public class RegPfpActivity extends AppCompatActivity {
 
     public void sendPfpToServer(View v) {
         ApiService apiService = RetrofitClient.getApiService();
-        
-        // Try local, then global, then static holder
-        String userId = String.valueOf(localUserId != -1 ? localUserId : RegDataHolder.id);
+
+        String userId = String.valueOf(localUserId);
 
         if (userId.equals("-1")) {
             Toast.makeText(this, "Internal Error: User ID not found.", Toast.LENGTH_SHORT).show();
@@ -250,8 +252,13 @@ public class RegPfpActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if (response.isSuccessful()) {
+                            // COMMIT selection to RegDataHolder for instant update in CrMain
                             RegDataHolder.selectedImageUri = selectedImageUri;
+                            RegDataHolder.defaultPfpDrawable = -1;
                             RegDataHolder.registered = false;
+
+                            // Clear Glide memory to force reload if needed
+                            Glide.get(getApplicationContext()).clearMemory();
                             finish();
                         } else {
                             Toast.makeText(RegPfpActivity.this, "Server error during upload", Toast.LENGTH_SHORT).show();
@@ -269,11 +276,17 @@ public class RegPfpActivity extends AppCompatActivity {
 
         } else {
             PfpRequest request = new PfpRequest(userId, currentSelectedPath);
-            apiService.updatePfpDefault(request).enqueue(new Callback<Void>() {
+            apiService.updatePfpDefault(request).enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     if (response.isSuccessful()) {
+                        // COMMIT selection to RegDataHolder for instant update in CrMain
+                        RegDataHolder.selectedImageUri = null;
+                        RegDataHolder.defaultPfpDrawable = selectedDefaultResId;
                         RegDataHolder.registered = false;
+
+                        // Clear Glide memory to force reload if needed
+                        Glide.get(getApplicationContext()).clearMemory();
                         finish();
                     } else {
                         Toast.makeText(RegPfpActivity.this, "Server error", Toast.LENGTH_SHORT).show();

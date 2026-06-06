@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:paddingHorizontal="16dp">
+
+    <ImageView
+        android:id="@+id/itemSystemArrow"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/right_arrow"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/green" />
+
+    <TextView
+        android:id="@+id/itemSystemText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textColor="@color/textGray"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/itemSystemArrow"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Delta added Delta to the group. 14:49" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

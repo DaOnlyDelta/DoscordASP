@@ -1,100 +1,68 @@
-package com.example.doscord.utils;
+package com.example.doscord.utils; // Keep it here or move it to a .repository package if you want
 
 import com.example.doscord.api.TokenLoginResponse;
+import com.example.doscord.models.Channel;
+import com.example.doscord.models.User;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class GlobalData {
     private static Integer activeUserId;
-    private static List<User> userList = new ArrayList<>();
-    private static List<Integer> pendingRequestIds;
+    private static User myProfile;
+    private static List<Channel> channelList = new ArrayList<>();
+    private static List<User> pendingRequests = new ArrayList<>();
 
-    // Fill the static data
+    // Fill and sort the static data
     public static void updateData(TokenLoginResponse response) {
-        userList.clear();
-        List<User> list = response.getUserList();
-
-        list.sort((u1, u2) -> {
-
-            // Put your own profile at the top
-            boolean u1IsProfile = u1.getId() == response.getActiveUserId();
-            boolean u2IsProfile = u2.getId() == response.getActiveUserId();
-
-            if (u1IsProfile && !u2IsProfile) return -1;
-            if (!u1IsProfile && u2IsProfile) return 1;
-
-            // Handle null timestamps safely
-            String s1 = u1.getLastMessageTime();
-            String s2 = u2.getLastMessageTime();
-
-            long t1 = (s1 != null) ? Helpers.dateStringToMillis(s1) : 0;
-            long t2 = (s2 != null) ? Helpers.dateStringToMillis(s2) : 0;
-
-            // Descending order
-            return Long.compare(t2, t1);
-        });
-
-        userList = list;
-
         activeUserId = response.getActiveUserId();
-        pendingRequestIds = response.getPendingRequests();
-    }
+        myProfile = response.getProfile();
+        pendingRequests = response.getPendingRequests();
 
-    public static List<User> getUserList() {
-        return userList;
+        channelList.clear();
+        List<Channel> incomingChannels = response.getChannels();
+
+        if (incomingChannels != null) {
+            // Sort channels so that the most recently active ones appear at the top
+            incomingChannels.sort((c1, c2) -> {
+                String s1 = c1.getLastMessageTime();
+                String s2 = c2.getLastMessageTime();
+
+                long t1 = (s1 != null) ? Helpers.dateStringToMillis(s1) : 0;
+                long t2 = (s2 != null) ? Helpers.dateStringToMillis(s2) : 0;
+
+                // Descending order (newest messages first)
+                return Long.compare(t2, t1);
+            });
+            channelList = incomingChannels;
+        }
     }
 
     public static Integer getActiveUserId() {
         return activeUserId;
     }
 
-    // Helper: Get the "Me" user object specifically
-    public static User getMe() {
-        for (User u : userList) {
-            if (u.getId() == activeUserId) return u;
-        }
-        return null;
+    public static User getMyProfile() {
+        return myProfile;
     }
 
-    public static List<Integer> getPendingRequestIds() {
-        return pendingRequestIds != null ? pendingRequestIds : new ArrayList<>();
+    public static List<Channel> getChannelList() {
+        return channelList;
     }
 
-    // Helper to get actual User objects for those pending IDs
-    public static List<User> getPendingUserObjects() {
-        List<User> pendingUsers = new ArrayList<>();
-        if (userList == null || pendingRequestIds == null) return pendingUsers;
-
-        for (User user : userList) {
-            if (pendingRequestIds.contains(user.getId())) {
-                pendingUsers.add(user);
-            }
-        }
-        return pendingUsers;
+    public static List<User> getPendingRequests() {
+        return pendingRequests != null ? pendingRequests : new ArrayList<>();
     }
 
     public static void removePending(int idToRemove) {
-        if (pendingRequestIds != null) {
-            pendingRequestIds.removeIf(id -> id == idToRemove);
-        }
-
-        // Move the user to the top of the list so they appear first in the main view
-        User foundUser = null;
-        for (User u : userList) {
-            if (u.getId() == idToRemove) {
-                foundUser = u;
-                break;
-            }
-        }
-
-        if (foundUser != null) {
-            userList.remove(foundUser);
-            userList.add(0, foundUser);
+        if (pendingRequests != null) {
+            pendingRequests.removeIf(user -> user.getId() == idToRemove);
         }
     }
 
     public static void clear() {
-        activeUserId = null; userList.clear();
+        activeUserId = null;
+        myProfile = null;
+        channelList.clear();
+        pendingRequests.clear();
     }
 }

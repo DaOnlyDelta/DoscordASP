@@ -10,7 +10,7 @@ public class MessageRequest {
     private String senderId;
     private String messageText;
 
-    public MessageRequest(int channelId, int senderId, int receiverId, String messageText) {
+    public MessageRequest(int channelId, int senderId, String messageText) {
         this.channelId = String.valueOf(channelId);
         this.senderId = String.valueOf(senderId);
         this.messageText = messageText;

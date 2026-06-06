@@ -21,7 +21,7 @@ import com.example.doscord.api.FriendRequestResponse;
 import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.Helpers;
-import com.example.doscord.utils.User;
+import com.example.doscord.models.User;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,7 +55,7 @@ public class AddByUserActivity extends AppCompatActivity {
         backBtn = findViewById(R.id.backBtn);
         sendBtn = findViewById(R.id.crAddByUserBtn);
         warningTxt = findViewById(R.id.crAddByUserWarning);
-        me = GlobalData.getMe();
+        me = GlobalData.getMyProfile();
 
         if (me != null) {
             usernameLabel.setText(me.getUsername());

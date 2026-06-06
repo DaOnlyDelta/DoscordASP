@@ -1,7 +1,6 @@
 package com.example.doscord.utils;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -18,39 +17,63 @@ public class PfpUtils {
      */
     public static void loadPfp(Context context, String path, ImageView imageView) {
         if (path == null || path.isEmpty() || path.equals("defaults/defaults0.png")) {
-            // Default to app icon or a specific placeholder if defaults0 is not a real file
             Glide.with(context)
                     .load(R.drawable.icon)
+                    .centerCrop()
                     .circleCrop()
                     .into(imageView);
             return;
         }
 
-        // Check if it's a local default avatar
         int localResId = getLocalDefaultResId(path);
         if (localResId != -1) {
             Glide.with(context)
                     .load(localResId)
+                    .centerCrop()
                     .circleCrop()
                     .into(imageView);
         } else {
-            // Load from server with caching
             String fullPath = BASE_IMAGE_URL + path;
             Glide.with(context)
                     .load(fullPath)
-                    .placeholder(R.drawable.pfp_placeholder)
-                    .error(R.drawable.pfp_placeholder)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL) // Cache both original and resized
+                    .placeholder(R.drawable.icon)
+                    .error(R.drawable.icon)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .centerCrop()
                     .circleCrop()
                     .into(imageView);
         }
     }
 
     /**
+     * Loads a group server profile picture. Falls back to a group placeholder drawable
+     * if no custom banner or icon path is provided by the server.
+     */
+    public static void loadGroupPfp(Context context, String path, ImageView imageView) {
+        if (path == null || path.isEmpty()) {
+            Glide.with(context)
+                    .load(R.drawable.pfp_group_placeholder)
+                    .centerCrop()
+                    .circleCrop()
+                    .into(imageView);
+            return;
+        }
+
+        String fullPath = BASE_IMAGE_URL + path;
+        Glide.with(context)
+                .load(fullPath)
+                .placeholder(R.drawable.pfp_group_placeholder)
+                .error(R.drawable.pfp_group_placeholder)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .circleCrop()
+                .into(imageView);
+    }
+
+    /**
      * Special version for the current user that respects RegDataHolder for immediate updates.
      */
     public static void loadMyPfp(Context context, String path, ImageView... imageViews) {
-        // Try to load from RegDataHolder first to avoid API wait after registration/update
         if (RegDataHolder.selectedImageUri != null) {
             for (ImageView iv : imageViews) {
                 Glide.with(context)
@@ -77,10 +100,9 @@ public class PfpUtils {
     private static int getLocalDefaultResId(String path) {
         if (path.startsWith("defaults/defaults")) {
             try {
-                // Expecting "defaults/defaultsX.png"
                 String numPart = path.substring("defaults/defaults".length(), path.lastIndexOf("."));
                 int index = Integer.parseInt(numPart);
-                
+
                 switch (index) {
                     case 1: return R.drawable.defaults1;
                     case 2: return R.drawable.defaults2;

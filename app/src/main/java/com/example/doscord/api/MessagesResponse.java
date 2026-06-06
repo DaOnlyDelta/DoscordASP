@@ -1,6 +1,6 @@
 package com.example.doscord.api;
 
-import com.example.doscord.utils.Message;
+import com.example.doscord.models.Message;
 import java.util.List;
 
 public class MessagesResponse {

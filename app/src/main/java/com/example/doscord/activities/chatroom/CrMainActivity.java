@@ -21,29 +21,25 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
 import com.example.doscord.R;
 import com.example.doscord.activities.menu.MainActivity;
+import com.example.doscord.activities.menu.RegPfpActivity;
 import com.example.doscord.api.LogoutRequest;
 import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.api.TokenLoginResponse;
 import com.example.doscord.api.UpdateRequest;
 import com.example.doscord.api.UpdateResponse;
-import com.example.doscord.utils.ChatsAdapter;
+import com.example.doscord.adapters.ChatsAdapter;
+import com.example.doscord.models.Channel;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.PfpUtils;
 import com.example.doscord.utils.RegDataHolder;
-import com.example.doscord.utils.User;
-import com.example.doscord.utils.NotificationHelper;
-import com.example.doscord.utils.RequestsAdapter;
+import com.example.doscord.models.User;
+import com.example.doscord.adapters.RequestsAdapter;
 import com.example.doscord.utils.SessionManager;
-import com.example.doscord.utils.WorkManagerHelper;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -75,26 +71,24 @@ public class CrMainActivity extends AppCompatActivity {
         });
 
         initViews();
-        WorkManagerHelper.startMessagePolling(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         fetchData();
-        startUpdateLoop(); // Start pinging
+        startUpdateLoop();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         if (updateHandler != null && updateRunnable != null) {
-            updateHandler.removeCallbacks(updateRunnable); // Stop pinging
+            updateHandler.removeCallbacks(updateRunnable);
         }
     }
 
     private void initViews() {
-        // Bottom
         homeIcon = findViewById(R.id.crMainHomeIcon);
         homeTxt = findViewById(R.id.crMainHomeText);
         notifIcon = findViewById(R.id.crMainNotifIcon);
@@ -102,16 +96,13 @@ public class CrMainActivity extends AppCompatActivity {
         pfpImg = findViewById(R.id.crMainPfpIcon);
         pfpTxt = findViewById(R.id.crMainPfpText);
 
-        // Home
         homeLayout = findViewById(R.id.crMainHomeContainer);
         homeChatsView = findViewById(R.id.crMainRecyclerView);
         homeChatsView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Notif
         notifLayout = findViewById(R.id.crMainNotifContainer);
         emptyNotifLayout = findViewById(R.id.crMainEmptyNotifLayout);
 
-        // Profile
         profileLayout = findViewById(R.id.crMainProfileContainer);
         profileIcon = findViewById(R.id.crProfileIcon);
 
@@ -122,18 +113,14 @@ public class CrMainActivity extends AppCompatActivity {
         SessionManager sessionManager = new SessionManager(this);
         String token = sessionManager.getToken();
 
-        // Use our new renamed method
         RetrofitClient.getApiService().tokenLogin(token).enqueue(new Callback<TokenLoginResponse>() {
             @Override
             public void onResponse(@NonNull Call<TokenLoginResponse> call, @NonNull Response<TokenLoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // Check for notifications before updating local data
-                    checkForNewMessages(response.body().getUserList(), response.body().getActiveUserId());
-
-                    // FILL THE STATIC REPOSITORY
+                    // FILL THE STATIC REPOSITORY FIRST
                     GlobalData.updateData(response.body());
 
-                    // SAVE THE TIMESTAMP FROM BACKEND (we added this to auth.js earlier)
+                    // SAVE THE TIMESTAMP FROM BACKEND
                     lastSyncTime = response.body().getSyncTimestamp();
 
                     displayData();
@@ -158,18 +145,17 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     private void displayData() {
-        User me = GlobalData.getMe();
+        User me = GlobalData.getMyProfile(); // Updated to getMyProfile()
         if (me != null) {
             PfpUtils.loadMyPfp(this, me.getPfp(), pfpImg, profileIcon);
         } else {
-            Log.e("CrMainActivity", "GlobalData.getMe() returned null!");
+            Log.e("CrMainActivity", "GlobalData.getMyProfile() returned null!");
         }
         setupRecyclerView();
 
-        // Animate alpha from 1 to 0
         overlayLayout.animate()
                 .alpha(0f)
-                .setDuration(500) // 500ms
+                .setDuration(500)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
@@ -179,39 +165,19 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        // RegDataHolder is no longer cleared here to avoid wiping ID during PFP upload flow
         LogDataHolder.clear();
 
-        // Get the list but remove "Self" (activeUserId) so you don't chat with yourself
-        List<User> friendsOnly = new ArrayList<>();
-        List<User> requestsOnly = new ArrayList<>();
-        List<Integer> pendingIds = GlobalData.getPendingRequestIds();
-        int myId = GlobalData.getActiveUserId();
-
-        for (User u : GlobalData.getUserList()) {
-            if (u.getId() == myId) continue;
-
-            // Case A: They sent ME a request (It's in the pendingIds list)
-            if (pendingIds.contains(u.getId())) {
-                requestsOnly.add(u);
-            }
-            // Case B: We are already accepted friends
-            // We check the "friends_since" field (it's NULL for pending requests in our query)
-            else if (u.getFriendsSince() != null) {
-                friendsOnly.add(u);
-            }
-            // Case C: I sent THEM a request, and it's still pending
-            else {
-                // Optional: Add to a "Sent Requests" list or just ignore for now
-                Log.d("DoscordAuth", "Outgoing request to " + u.getDisplayName() + " is still pending.");
-            }
-        }
+        // 1. Load active communication rows directly via Channel channels payload
+        List<Channel> channels = GlobalData.getChannelList();
 
         RecyclerView recyclerView = findViewById(R.id.crMainRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        ChatsAdapter adapter = new ChatsAdapter(friendsOnly, this);
+
+        ChatsAdapter adapter = new ChatsAdapter(channels, this);
         recyclerView.setAdapter(adapter);
 
+        // 2. Load dedicated complete pending User arrays straight to notifications matching fragment layout
+        List<User> requestsOnly = GlobalData.getPendingRequests();
         updateRequests(requestsOnly);
     }
 
@@ -221,7 +187,6 @@ public class CrMainActivity extends AppCompatActivity {
         RequestsAdapter requestsAdapter = new RequestsAdapter(requestsOnly, this, new RequestsAdapter.OnRequestHandledListener() {
             @Override
             public void onRequestProcessed() {
-                // Trigger a full fetch from server to get new channel IDs/data
                 fetchData();
             }
         });
@@ -258,27 +223,21 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     private void clearSelected() {
-        // 1. Get your colors from resources
         int selectedColor = ContextCompat.getColor(this, R.color.selected);
         int unselectedColor = ContextCompat.getColor(this, R.color.unselected);
 
-        // 2. Reset everything to unselected first
-        // Icons
         homeIcon.setColorFilter(unselectedColor, PorterDuff.Mode.SRC_IN);
         notifIcon.setColorFilter(unselectedColor, PorterDuff.Mode.SRC_IN);
         pfpImg.setAlpha(0.5f);
 
-        // Text
         homeTxt.setTextColor(unselectedColor);
         notifTxt.setTextColor(unselectedColor);
         pfpTxt.setTextColor(unselectedColor);
 
-        // Layouts
         homeLayout.setVisibility(View.GONE);
         notifLayout.setVisibility(View.GONE);
         profileLayout.setVisibility(View.GONE);
 
-        // 3. Highlight the one that matches the 'selected' variable
         switch (selected) {
             case 0:
                 homeLayout.setVisibility(View.VISIBLE);
@@ -303,7 +262,6 @@ public class CrMainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 String token = new SessionManager(CrMainActivity.this).getToken();
-
                 UpdateRequest updateReq = new UpdateRequest(token, lastSyncTime);
 
                 RetrofitClient.getApiService().checkUpdates(updateReq).enqueue(new Callback<UpdateResponse>() {
@@ -311,16 +269,14 @@ public class CrMainActivity extends AppCompatActivity {
                     public void onResponse(@NonNull Call<UpdateResponse> call, @NonNull Response<UpdateResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             if (response.body().isUpdateRequired()) {
-                                fetchData(); // Trigger existing full refresh
+                                fetchData();
                             }
                         }
-                        // Schedule next check
                         updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<UpdateResponse> call, @NonNull Throwable t) {
-                        // Even if it fails, try again later
                         updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
                     }
                 });
@@ -329,16 +285,10 @@ public class CrMainActivity extends AppCompatActivity {
         updateHandler.postDelayed(updateRunnable, PING_INTERVAL);
     }
 
-    public void openSettings(View v) {
-        // Stop polling
-        WorkManagerHelper.stopMessagePolling(this);
-
-        // Placeholder
-        // Logout
+    public void logout(View v) {
         SessionManager sessionManager = new SessionManager(this);
         String token = sessionManager.getToken();
 
-        // Tell the server (Don't even wait for response, just fire and forget)
         RetrofitClient.getApiService().logout(new LogoutRequest(token)).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {}
@@ -346,52 +296,16 @@ public class CrMainActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
         });
         sessionManager.logout();
-
         GlobalData.clear();
+        RegDataHolder.clear();
 
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
     }
 
-    private void checkForNewMessages(List<User> users, Integer activeUserId) {
-        android.content.SharedPreferences prefs = getSharedPreferences("notif_prefs", android.content.Context.MODE_PRIVATE);
-        android.content.SharedPreferences.Editor editor = prefs.edit();
-
-        for (User user : users) {
-            // Don't notify for messages sent by the active user
-            if (Objects.equals(user.getLastMessageSenderId(), activeUserId)) {
-                // Still update the saved time so we don't notify when they reply
-                editor.putString("last_msg_time_" + user.getChannelId(), user.getLastMessageTime());
-                continue;
-            }
-
-            if (user.getLastMessageTime() != null) {
-                String key = "last_msg_time_" + user.getChannelId();
-                String savedTime = prefs.getString(key, "");
-
-                // If the message is newer than what we last saw
-                if (!user.getLastMessageTime().equals(savedTime)) {
-                    editor.putString(key, user.getLastMessageTime());
-
-                    String senderName = user.getNickname();
-                    if (senderName == null || senderName.isEmpty()) {
-                        senderName = user.getDisplayName();
-                    }
-                    if (senderName == null || senderName.isEmpty()) {
-                        senderName = user.getUsername();
-                    }
-
-                    NotificationHelper.showMessageNotification(
-                            this,
-                            senderName,
-                            user.getLastMessage(),
-                            user.getPfp(),
-                            user.getChannelId()
-                    );
-                }
-            }
-        }
-        editor.apply();
+    public void changePfp(View v) {
+        Intent intent = new Intent(this, RegPfpActivity.class);
+        startActivity(intent);
     }
 }

@@ -27,12 +27,11 @@ import com.example.doscord.api.MessagesResponse;
 import com.example.doscord.api.NewMessagesRequest;
 import com.example.doscord.api.OlderMessagesRequest;
 import com.example.doscord.api.RetrofitClient;
+import com.example.doscord.models.Channel;
 import com.example.doscord.utils.GlobalData;
-import com.example.doscord.utils.Message;
-import com.example.doscord.utils.MessagesAdapter;
-import com.example.doscord.utils.NotificationHelper;
+import com.example.doscord.models.Message;
+import com.example.doscord.adapters.MessagesAdapter;
 import com.example.doscord.utils.SessionManager;
-import com.example.doscord.utils.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,15 +51,15 @@ public class CrChatActivity extends AppCompatActivity {
     private MessagesAdapter adapter;
     private final List<Message> messagesList = new ArrayList<>();
     private int channelId;
-    private boolean canLoadMore = true; // Track if the server has more history
+    private boolean canLoadMore = true;
     private boolean isLoading = false;
     private boolean isLoadingNew = false;
     private String token;
+    private Channel currentChannel; // Store the channel object globally inside activity
 
-    // Updates
     private final Handler updateHandler = new Handler();
     private Runnable updateRunnable;
-    private final int PING_INTERVAL = 3000; // Chats feel better with a 3s check
+    private final int PING_INTERVAL = 3000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,12 +70,10 @@ public class CrChatActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, Math.max(systemBars.bottom, ime.bottom));
-            
-            // Scroll to bottom if keyboard opened and we have messages
+
             if (ime.bottom > 0 && adapter != null && adapter.getItemCount() > 0) {
                 recyclerView.postDelayed(() -> recyclerView.scrollToPosition(adapter.getItemCount() - 1), 100);
             }
-
             return insets;
         });
 
@@ -89,7 +86,6 @@ public class CrChatActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         activeChannelId = channelId;
-        NotificationHelper.clearActiveStyle(this, channelId);
         startChatUpdateLoop();
     }
 
@@ -114,19 +110,22 @@ public class CrChatActivity extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(layoutManager);
+
         adapter = new MessagesAdapter(messagesList, this);
         recyclerView.setAdapter(adapter);
 
-        User recipient = getRecipient();
-        adapter.setRecipient(recipient);
+        // Find the current channel context from our repository
+        currentChannel = lookupChannel();
+        if (currentChannel != null) {
+            adapter.setChannelContext(currentChannel);
+        }
+
         token = (new SessionManager(this)).getToken();
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
-
-                // If scrolling up and we see the loader, trigger "loadOlder"
                 if (canLoadMore && !isLoading && dy < 0 && lm != null && lm.findFirstVisibleItemPosition() == 0) {
                     loadOlder();
                 }
@@ -141,9 +140,6 @@ public class CrChatActivity extends AppCompatActivity {
         micBtn.setOnClickListener(v -> Toast.makeText(this, "Voice messages coming soon!", Toast.LENGTH_SHORT).show());
     }
 
-    /**
-     * Call this once in onCreate. Gets the most recent 25 messages.
-     */
     private void loadMessages() {
         if (channelId == -1 || isLoading) return;
         isLoading = true;
@@ -178,15 +174,11 @@ public class CrChatActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Triggers when user hits the top. Fetches messages BEFORE the oldest current ID.
-     */
     private void loadOlder() {
         if (messagesList.isEmpty() || !canLoadMore || isLoading) return;
         isLoading = true;
         adapter.setLoaderPlaying(true);
 
-        // Save anchor for scroll restoration
         LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
         int anchorId = -1;
         int anchorTop = 0;
@@ -202,7 +194,6 @@ public class CrChatActivity extends AppCompatActivity {
                         if (item instanceof Message) {
                             anchorId = ((Message) item).getId();
                         } else {
-                            // Find first message to pin to
                             for (int i = firstVisible + 1; i < currentDisplayList.size(); i++) {
                                 if (currentDisplayList.get(i) instanceof Message) {
                                     anchorId = ((Message) currentDisplayList.get(i)).getId();
@@ -217,9 +208,7 @@ public class CrChatActivity extends AppCompatActivity {
             }
         }
 
-        // Cursor: The ID of our oldest message
         int oldestId = messagesList.get(0).getId();
-
         OlderMessagesRequest req = new OlderMessagesRequest(channelId, oldestId);
         final int finalAnchorId = anchorId;
         final int finalAnchorTop = anchorTop;
@@ -239,7 +228,6 @@ public class CrChatActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // Prepend data
                     canLoadMore = response.body().isHasMore();
                     messagesList.addAll(0, olderMessages);
 
@@ -247,7 +235,6 @@ public class CrChatActivity extends AppCompatActivity {
                     adapter.updateDisplayList();
                     adapter.notifyDataSetChanged();
 
-                    // Restore scroll relative to anchor
                     if (lm != null && finalAnchorId != -1) {
                         List<Object> displayList = adapter.getDisplayList();
                         for (int i = 0; i < displayList.size(); i++) {
@@ -269,9 +256,6 @@ public class CrChatActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * The Update Loop: Only fetches messages AFTER the newest current ID.
-     */
     private void startChatUpdateLoop() {
         updateRunnable = new Runnable() {
             @Override
@@ -349,15 +333,15 @@ public class CrChatActivity extends AppCompatActivity {
     public void send(View v) {
         String text = messageInput.getText().toString().trim();
         if (!text.isEmpty()) {
-            MessageRequest request = new MessageRequest(channelId, GlobalData.getActiveUserId(), -1, text);
+            // Updated constructor variables to match your Message backend expectations
+            MessageRequest request = new MessageRequest(channelId, GlobalData.getActiveUserId(), text);
             executeSendMessage(request, new ArrayList<>());
         }
     }
 
     public void executeSendMessage(MessageRequest request, List<MultipartBody.Part> files) {
-        // Convert strings to RequestBody parts
-        MultipartBody.Part cId = MultipartBody.Part.createFormData("channel_id", request.getChannelId());
-        MultipartBody.Part sId = MultipartBody.Part.createFormData("sender_id", request.getSenderId());
+        MultipartBody.Part cId = MultipartBody.Part.createFormData("channel_id", String.valueOf(request.getChannelId()));
+        MultipartBody.Part sId = MultipartBody.Part.createFormData("sender_id", String.valueOf(request.getSenderId()));
         MultipartBody.Part msg = MultipartBody.Part.createFormData("message_text", request.getMessageText());
 
         ApiService apiService = RetrofitClient.getApiService();
@@ -366,7 +350,6 @@ public class CrChatActivity extends AppCompatActivity {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                // response.isSuccessful() checks for 2xx range (like your 201 Created)
                 if (response.isSuccessful()) {
                     messageInput.setText("");
                     fetchNewMessages(true);
@@ -377,7 +360,7 @@ public class CrChatActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                // Handle Network Error
+                Toast.makeText(CrChatActivity.this, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -395,11 +378,12 @@ public class CrChatActivity extends AppCompatActivity {
         finish();
     }
 
-    private User getRecipient() {
+    // Safely look up the exact channel object mapping from our shared repository
+    private Channel lookupChannel() {
         if (channelId == -1) return null;
-        for (User u : GlobalData.getUserList()) {
-            if (u.getChannelId() != null && u.getChannelId() == channelId) {
-                return u;
+        for (Channel c : GlobalData.getChannelList()) {
+            if (c.getChannelId() == channelId) {
+                return c;
             }
         }
         return null;

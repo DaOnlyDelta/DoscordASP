@@ -1,4 +1,4 @@
-package com.example.doscord.utils;
+package com.example.doscord.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,6 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.doscord.R;
 import com.example.doscord.api.RetrofitClient;
+import com.example.doscord.models.User;
+import com.example.doscord.utils.GlobalData;
+import com.example.doscord.utils.Helpers;
+import com.example.doscord.utils.PfpUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,14 +61,20 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         // Load PFP
         PfpUtils.loadPfp(context, user.getPfp(), holder.pfp);
 
-        // Green Check Clicked
+        // Green Check Clicked - Grab fresh position dynamically via holder
         holder.btnAccept.setOnClickListener(v -> {
-            handleRequest(user.getId(), "accepted", position);
+            int currentPos = holder.getBindingAdapterPosition();
+            if (currentPos != RecyclerView.NO_POSITION) {
+                handleRequest(user.getId(), "accepted", currentPos);
+            }
         });
 
-        // Red Cross Clicked
+        // Red Cross Clicked - Grab fresh position dynamically via holder
         holder.btnDecline.setOnClickListener(v -> {
-            handleRequest(user.getId(), "declined", position);
+            int currentPos = holder.getBindingAdapterPosition();
+            if (currentPos != RecyclerView.NO_POSITION) {
+                handleRequest(user.getId(), "declined", currentPos);
+            }
         });
     }
 
@@ -80,10 +90,13 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
-                    // Success (Status 200)
-                    requestList.remove(position);
-                    notifyItemRemoved(position);
-                    notifyItemRangeChanged(position, requestList.size());
+                    // Double-check index bounds to ensure safety against fast-clicking users
+                    if (position >= 0 && position < requestList.size()) {
+                        requestList.remove(position);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, requestList.size());
+                    }
+
                     if (action.equals("accepted")) {
                         GlobalData.removePending(senderId);
 
@@ -92,7 +105,6 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
                         }
                     }
                 } else {
-                    // Error (Status 400 or 500)
                     Toast.makeText(context, "Server error: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
