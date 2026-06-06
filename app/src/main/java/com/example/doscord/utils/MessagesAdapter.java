@@ -11,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.bumptech.glide.Glide;
 import com.example.doscord.R;
 
 import java.text.SimpleDateFormat;
@@ -220,13 +219,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         String label = "This is the very beginning of your legendary conversation with " + displayName + ".";
         holder.label.setText(label);
 
-        String pfpUrl = "https://doscord.top/api/images/" + recipient.getPfp();
-        Glide.with(context)
-                .load(pfpUrl)
-                .placeholder(R.drawable.pfp_placeholder)
-                .error(R.drawable.pfp_placeholder)
-                .circleCrop()
-                .into(holder.pfp);
+        PfpUtils.loadPfp(context, recipient.getPfp(), holder.pfp);
     }
 
     private void bindNormalMessage(NormalViewHolder holder, Message message) {
@@ -252,13 +245,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
             holder.username.setText(displayName);
 
-            String pfpUrl = "https://doscord.top/api/images/" + sender.getPfp();
-            Glide.with(context)
-                    .load(pfpUrl)
-                    .placeholder(R.drawable.pfp_placeholder)
-                    .error(R.drawable.pfp_placeholder)
-                    .circleCrop()
-                    .into(holder.pfp);
+            PfpUtils.loadPfp(context, sender.getPfp(), holder.pfp);
         } else {
             holder.username.setText("Unknown User");
             holder.pfp.setImageResource(R.drawable.pfp_placeholder);

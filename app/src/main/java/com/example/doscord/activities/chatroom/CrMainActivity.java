@@ -2,7 +2,6 @@ package com.example.doscord.activities.chatroom;
 
 import android.content.Intent;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -34,6 +33,7 @@ import com.example.doscord.api.UpdateResponse;
 import com.example.doscord.utils.ChatsAdapter;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.LogDataHolder;
+import com.example.doscord.utils.PfpUtils;
 import com.example.doscord.utils.RegDataHolder;
 import com.example.doscord.utils.User;
 import com.example.doscord.utils.NotificationHelper;
@@ -160,7 +160,7 @@ public class CrMainActivity extends AppCompatActivity {
     private void displayData() {
         User me = GlobalData.getMe();
         if (me != null) {
-            loadPfp(me.getPfp());
+            PfpUtils.loadMyPfp(this, me.getPfp(), pfpImg, profileIcon);
         } else {
             Log.e("CrMainActivity", "GlobalData.getMe() returned null!");
         }
@@ -178,39 +178,10 @@ public class CrMainActivity extends AppCompatActivity {
                 });
     }
 
-    private void loadPfp(String path) {
-        // Try to load from RegDataHolder first to avoid API wait after registration
-        if (RegDataHolder.selectedImageUri != null) {
-            RequestBuilder<Drawable> glideRequest = Glide.with(this)
-                    .load(RegDataHolder.selectedImageUri)
-                    .centerCrop()
-                    .circleCrop();
-            glideRequest.into(pfpImg);
-            glideRequest.into(profileIcon);
-        } else if (RegDataHolder.defaultPfpDrawable != -1) {
-            RequestBuilder<Drawable> glideRequest = Glide.with(this)
-                    .load(RegDataHolder.defaultPfpDrawable)
-                    .centerCrop()
-                    .circleCrop();
-            glideRequest.into(pfpImg);
-            glideRequest.into(profileIcon);
-        } else {
-            String fullPath = "https://doscord.top/api/images/" + path;
-            RequestBuilder<Drawable> glideRequest = Glide.with(this)
-                    .load(fullPath)
-                    .placeholder(R.drawable.pfp_placeholder) // Show this while it's loading
-                    .error(R.drawable.icon)   // Show this if the link is broken
-                    .centerCrop()
-                    .circleCrop();
-            glideRequest.into(pfpImg);
-            glideRequest.into(profileIcon);
-        }
-
+    private void setupRecyclerView() {
         // RegDataHolder is no longer cleared here to avoid wiping ID during PFP upload flow
         LogDataHolder.clear();
-    }
 
-    private void setupRecyclerView() {
         // Get the list but remove "Self" (activeUserId) so you don't chat with yourself
         List<User> friendsOnly = new ArrayList<>();
         List<User> requestsOnly = new ArrayList<>();

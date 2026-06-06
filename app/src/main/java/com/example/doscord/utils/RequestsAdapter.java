@@ -11,7 +11,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.doscord.R;
 import com.example.doscord.api.RetrofitClient;
 
@@ -56,11 +55,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         holder.time.setText(Helpers.formatTime(user.getFriendsSince()));
 
         // Load PFP
-        Glide.with(context)
-                .load("https://doscord.top/api/images/" + user.getPfp())
-                .placeholder(R.drawable.pfp_placeholder)
-                .circleCrop()
-                .into(holder.pfp);
+        PfpUtils.loadPfp(context, user.getPfp(), holder.pfp);
 
         // Green Check Clicked
         holder.btnAccept.setOnClickListener(v -> {

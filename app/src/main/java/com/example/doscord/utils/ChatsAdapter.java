@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.doscord.R;
 import com.example.doscord.activities.chatroom.CrChatActivity;
 import com.google.android.material.card.MaterialCardView;
@@ -75,13 +74,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
         }
 
         // 4. Load PFP
-        String pfpUrl = "https://doscord.top/api/images/" + user.getPfp();
-        Glide.with(context)
-                .load(pfpUrl)
-                .placeholder(R.drawable.pfp_placeholder)
-                .error(R.drawable.pfp_placeholder) // Fallback if image fails
-                .circleCrop() // Optional: makes PFPs round
-                .into(holder.pfp);
+        PfpUtils.loadPfp(context, user.getPfp(), holder.pfp);
 
         // Update their status
         if (user.isOnline()) {
