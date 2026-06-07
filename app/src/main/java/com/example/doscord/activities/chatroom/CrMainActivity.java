@@ -47,7 +47,7 @@ import retrofit2.Response;
 
 public class CrMainActivity extends AppCompatActivity {
     private ImageView homeIcon, notifIcon, pfpImg, profileIcon;
-    private TextView homeTxt, notifTxt, pfpTxt;
+    private TextView homeTxt, notifTxt, pfpTxt, profileDisplayName, profileUsername;
     private int selected = 0;
     private RecyclerView homeChatsView;
     private ConstraintLayout homeLayout, notifLayout, emptyNotifLayout, profileLayout, overlayLayout;
@@ -105,6 +105,8 @@ public class CrMainActivity extends AppCompatActivity {
 
         profileLayout = findViewById(R.id.crMainProfileContainer);
         profileIcon = findViewById(R.id.crProfileIcon);
+        profileUsername = findViewById(R.id.crProfileUsernameTxt);
+        profileDisplayName = findViewById(R.id.crProfileDisplayNameTxt);
 
         overlayLayout = findViewById(R.id.crMainOverlay);
     }
@@ -148,6 +150,8 @@ public class CrMainActivity extends AppCompatActivity {
         User me = GlobalData.getMyProfile(); // Updated to getMyProfile()
         if (me != null) {
             PfpUtils.loadMyPfp(this, me.getPfp(), pfpImg, profileIcon);
+            profileUsername.setText(me.getUsername());
+            profileDisplayName.setText((me.getDisplayName() != null) ? me.getDisplayName() : me.getUsername());
         } else {
             Log.e("CrMainActivity", "GlobalData.getMyProfile() returned null!");
         }

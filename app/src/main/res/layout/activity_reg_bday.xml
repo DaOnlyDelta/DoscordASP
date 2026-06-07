@@ -124,7 +124,7 @@
         app:layout_constraintTop_toBottomOf="@id/regBdayWarning">
 
         <Button
-            android:id="@+id/regBdayBtn"
+            android:id="@+id/crProfileEditBtn"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:backgroundTint="#5865f2"
