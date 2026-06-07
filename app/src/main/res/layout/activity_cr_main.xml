@@ -344,34 +344,6 @@
                 android:layout_marginEnd="15dp"
                 android:layout_marginBottom="15dp">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/crMainNewChatContainer"
-                    android:layout_width="55dp"
-                    android:layout_height="55dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="15dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:stateListAnimator="@null"
-                    app:cardBackgroundColor="@color/blue"
-                    app:cardCornerRadius="55dp"
-                    app:cardElevation="0dp"
-                    app:cardMaxElevation="0dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:strokeWidth="0dp">
-
-                    <ImageView
-                        android:id="@+id/crMainNewChatIcon"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="14dp"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/new_chat"
-                        app:tint="@color/white" />
-
-                </com.google.android.material.card.MaterialCardView>
-
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/crMainHeaderLayout"
                     android:layout_width="0dp"
@@ -480,6 +452,35 @@
                     app:layout_constraintTop_toBottomOf="@id/crMainHeaderLayout"
                     tools:listitem="@layout/item_chat" />
 
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/crMainNewChatContainer"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="15dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:onClick="newChat"
+                    android:stateListAnimator="@null"
+                    app:cardBackgroundColor="@color/blue"
+                    app:cardCornerRadius="55dp"
+                    app:cardElevation="0dp"
+                    app:cardMaxElevation="0dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:rippleColor="@android:color/transparent"
+                    app:strokeWidth="0dp">
+
+                    <ImageView
+                        android:id="@+id/crMainNewChatIcon"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="14dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/new_chat"
+                        app:tint="@color/white" />
+
+                </com.google.android.material.card.MaterialCardView>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </com.google.android.material.card.MaterialCardView>
@@ -618,7 +619,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/bgGray"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

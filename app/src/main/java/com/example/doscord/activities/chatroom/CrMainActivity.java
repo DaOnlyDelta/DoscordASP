@@ -312,4 +312,9 @@ public class CrMainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, RegPfpActivity.class);
         startActivity(intent);
     }
+
+    public void newChat(View v) {
+        Intent intent = new Intent(this, CrNewChatActivity.class);
+        startActivity(intent);
+    }
 }

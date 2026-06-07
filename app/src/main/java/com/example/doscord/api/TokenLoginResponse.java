@@ -10,12 +10,14 @@ public class TokenLoginResponse {
     private User profile;
     private List<Channel> channels;
     private List<User> pendingRequests;
+    private List<User> friends;
     private long sync_timestamp;
 
     public Integer getErrorCode() { return errorCode; }
     public Integer getActiveUserId() { return activeUserId; }
     public User getProfile() { return profile; }
     public List<Channel> getChannels() { return channels; }
-    public List<User> getPendingRequests() { return pendingRequests; } // Changed return type
+    public List<User> getPendingRequests() { return pendingRequests; }
+    public List<User> getFriends() { return friends; }
     public long getSyncTimestamp() { return sync_timestamp; }
 }

@@ -11,12 +11,14 @@ public class GlobalData {
     private static User myProfile;
     private static List<Channel> channelList = new ArrayList<>();
     private static List<User> pendingRequests = new ArrayList<>();
+    private static List<User> friendList = new ArrayList<>();
 
     // Fill and sort the static data
     public static void updateData(TokenLoginResponse response) {
         activeUserId = response.getActiveUserId();
         myProfile = response.getProfile();
         pendingRequests = response.getPendingRequests();
+        friendList = response.getFriends();
 
         channelList.clear();
         List<Channel> incomingChannels = response.getChannels();
@@ -53,6 +55,10 @@ public class GlobalData {
         return pendingRequests != null ? pendingRequests : new ArrayList<>();
     }
 
+    public static List<User> getFriends() {
+        return friendList != null ? friendList : new ArrayList<>();
+    }
+
     public static void removePending(int idToRemove) {
         if (pendingRequests != null) {
             pendingRequests.removeIf(user -> user.getId() == idToRemove);
@@ -64,5 +70,6 @@ public class GlobalData {
         myProfile = null;
         channelList.clear();
         pendingRequests.clear();
+        friendList.clear();
     }
 }
