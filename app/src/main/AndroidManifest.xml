@@ -71,6 +71,10 @@
             android:resource="@array/preloaded_fonts" />
 
         <activity
+            android:name=".activities.chatroom.CrNewGroupActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".activities.chatroom.CrNewChatActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

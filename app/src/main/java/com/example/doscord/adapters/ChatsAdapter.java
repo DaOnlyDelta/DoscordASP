@@ -47,10 +47,23 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
 
         // 1. Differentiate between Group Chat and 1-to-1 DM
         if (channel.isGroup()) {
-            chatDisplayName = channel.getGroupName() != null ? channel.getGroupName() : "Group Chat";
-            PfpUtils.loadGroupPfp(context, channel.getGroupPfp(), holder.pfp);
+            String rawGroupName = channel.getGroupName();
 
-            // Groups don't use a single online indicator ring on the channel icon
+            if (rawGroupName == null || rawGroupName.trim().isEmpty()) {
+                chatDisplayName = "Empty Group";
+            } else {
+                // Count how many commas are in the string to see if we hit our limit of 4
+                String[] parts = rawGroupName.split(", ");
+                if (parts.length > 3) {
+                    // Take just the first 3 names and append trailing dots
+                    chatDisplayName = parts[0] + ", " + parts[1] + ", " + parts[2] + "...";
+                } else {
+                    // It's 1, 2, or 3 other users - display the string exactly as is!
+                    chatDisplayName = rawGroupName;
+                }
+            }
+
+            PfpUtils.loadGroupPfp(context, channel.getGroupPfp(), holder.pfp);
             holder.status.setVisibility(View.GONE);
         } else {
             chatDisplayName = channel.getDmDisplayNameOrNickname();

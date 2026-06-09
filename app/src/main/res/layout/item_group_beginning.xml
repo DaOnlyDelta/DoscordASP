@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="16dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/itemGroupBeginPfpContainer"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@null"
+        app:cardCornerRadius="100dp"
+        app:cardElevation="0dp"
+        app:cardMaxElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:strokeWidth="0dp">
+
+        <ImageView
+            android:id="@+id/itemGroupBeginPfp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/icon" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/itemGroupBeginDisplayName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:textColor="@color/white"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/itemGroupBeginPfpContainer"
+        tools:text="DisplayName" />
+
+    <TextView
+        android:id="@+id/itemGroupBeginLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/itemGroupBeginDisplayName"
+        tools:text="Welcome to the beginning of the " />
+
+    <TextView
+        android:id="@+id/itemGroupBeginName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        app:layout_constraintStart_toEndOf="@+id/itemGroupBeginLabel"
+        app:layout_constraintTop_toBottomOf="@+id/itemGroupBeginDisplayName"
+        tools:text="name" />
+
+    <TextView
+        android:id="@+id/itemGroupBeginLabel2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        app:layout_constraintStart_toEndOf="@+id/itemGroupBeginName"
+        app:layout_constraintTop_toBottomOf="@+id/itemGroupBeginDisplayName"
+        tools:text=" group." />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/itemGroupBeginInviteBtnContainer"
+        android:layout_width="150dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="15dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:stateListAnimator="@null"
+        app:cardBackgroundColor="@color/blue"
+        app:cardCornerRadius="45dp"
+        app:cardElevation="0dp"
+        app:cardMaxElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/itemGroupBeginLabel"
+        app:strokeWidth="0dp">
+
+        <TextView
+            android:id="@+id/itemGroupBeginInviteBtn"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Invite to Group DM"
+            android:textColor="@color/selected"
+            android:textStyle="bold" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/itemGroupBeginEditBtnContainer"
+        android:layout_width="100dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="15dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:stateListAnimator="@null"
+        app:cardBackgroundColor="@color/uiGray"
+        app:cardCornerRadius="45dp"
+        app:cardElevation="0dp"
+        app:cardMaxElevation="0dp"
+        app:layout_constraintStart_toEndOf="@id/itemGroupBeginInviteBtnContainer"
+        app:layout_constraintTop_toBottomOf="@id/itemGroupBeginLabel"
+        app:strokeWidth="0dp">
+
+        <TextView
+            android:id="@+id/itemGroupBeginEditBtn"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Edit Group"
+            android:textColor="@color/selected"
+            android:textStyle="bold" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

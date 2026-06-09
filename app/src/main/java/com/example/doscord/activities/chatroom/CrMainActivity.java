@@ -127,6 +127,14 @@ public class CrMainActivity extends AppCompatActivity {
 
                     displayData();
                 } else {
+                    // ADD DEBUGGING LOGS HERE
+                    Log.e("DEBUG_NETWORK", "Token Login Failed! Status: " + response.code());
+                    try {
+                        if (response.errorBody() != null) {
+                            Log.e("DEBUG_NETWORK", "Error Body: " + response.errorBody().string());
+                        }
+                    } catch (Exception ignored) {}
+
                     if (attempt < 2) {
                         attempt++;
                         fetchData();

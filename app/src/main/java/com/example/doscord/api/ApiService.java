@@ -67,4 +67,7 @@ public interface ApiService {
 
     @POST("get-updates")
     Call<UpdateResponse> checkUpdates(@Body UpdateRequest request);
+
+    @POST("groups/create")
+    Call<CreateGroupResponse> createGroup(@Body CreateGroupRequest request);
 }

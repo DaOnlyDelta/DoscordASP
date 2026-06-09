@@ -37,7 +37,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private final List<Object> displayList = new ArrayList<>();
     private Context context;
 
-    // Instead of forcing a single user model, pass the active channel context
     private Channel currentChannel;
     private boolean showLoader = false;
     private boolean isLoaderPlaying = false;
@@ -64,7 +63,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return displayList;
     }
 
-    // Pass the active channel info to draw the header components
     public void setChannelContext(Channel channel) {
         this.currentChannel = channel;
         updateDisplayList();
@@ -153,8 +151,14 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             View view = inflater.inflate(R.layout.item_message_splitter, parent, false);
             return new SplitterViewHolder(view);
         } else if (viewType == VIEW_TYPE_BEGINNING) {
-            View view = inflater.inflate(R.layout.item_beginning, parent, false);
-            return new BeginningViewHolder(view);
+            // Dynamically select the layout file based on group status
+            if (currentChannel != null && currentChannel.isGroup()) {
+                View view = inflater.inflate(R.layout.item_group_beginning, parent, false);
+                return new BeginningViewHolder(view, true);
+            } else {
+                View view = inflater.inflate(R.layout.item_beginning, parent, false);
+                return new BeginningViewHolder(view, false);
+            }
         } else if (viewType == VIEW_TYPE_SEQUENTIAL) {
             View view = inflater.inflate(R.layout.item_seq_message, parent, false);
             return new SequentialViewHolder(view);
@@ -204,23 +208,58 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (currentChannel == null) return;
 
         if (currentChannel.isGroup()) {
-            String gName = currentChannel.getGroupName() != null ? currentChannel.getGroupName() : "Group Chat";
-            holder.displayName.setText(gName);
-            holder.username.setText("Group ID: #" + currentChannel.getChannelId());
-            holder.label.setText("Welcome to the very start of the " + gName + " group server.");
+            String rawGroupName = currentChannel.getGroupName();
+            String gName;
 
-            // Hide friendship relationship controls inside groups
-            if (holder.removeBtn != null) holder.removeBtn.setVisibility(View.GONE);
-            if (holder.blockBtn != null) holder.blockBtn.setVisibility(View.GONE);
+            if (rawGroupName == null || rawGroupName.trim().isEmpty() || rawGroupName.equalsIgnoreCase("null")) {
+                gName = "Empty Group";
+            } else {
+                String[] parts = rawGroupName.split(", ");
+                if (parts.length > 3) {
+                    gName = parts[0] + ", " + parts[1] + ", " + parts[2] + "...";
+                } else {
+                    gName = rawGroupName;
+                }
+            }
 
-            PfpUtils.loadGroupPfp(context, currentChannel.getGroupPfp(), holder.pfp);
+            if (holder.isGroupForm) {
+                // Binding specifically to item_group_beginning fields
+                holder.displayName.setText(gName);
+                if (holder.groupBeginLabel != null) holder.groupBeginLabel.setText("Welcome to the beginning of the ");
+                if (holder.groupBeginName != null) holder.groupBeginName.setText(gName);
+                if (holder.groupBeginLabel2 != null) holder.groupBeginLabel2.setText(" group.");
+
+                PfpUtils.loadGroupPfp(context, currentChannel.getGroupPfp(), holder.pfp);
+
+                // Set up click listeners for your new group action buttons
+                if (holder.groupInviteBtn != null) {
+                    holder.groupInviteBtn.setOnClickListener(v -> {
+                        // TODO: Implement Invite Action
+                    });
+                }
+                if (holder.groupEditBtn != null) {
+                    holder.groupEditBtn.setOnClickListener(v -> {
+                        // TODO: Implement Edit Group settings action
+                    });
+                }
+            } else {
+                // Fallback safe rendering if view type recycled weirdly
+                holder.displayName.setText(gName);
+                if (holder.username != null) holder.username.setVisibility(View.GONE);
+                holder.label.setText("Welcome to the beginning of the " + gName + " group.");
+                PfpUtils.loadGroupPfp(context, currentChannel.getGroupPfp(), holder.pfp);
+            }
         } else {
+            // Binding standard 1-to-1 Direct Messages
             String dName = currentChannel.getDmDisplayNameOrNickname();
             if (dName == null || dName.isEmpty()) {
                 dName = currentChannel.getDmRecipientUsername();
             }
             holder.displayName.setText(dName);
-            holder.username.setText("@" + currentChannel.getDmRecipientUsername());
+            if (holder.username != null) {
+                holder.username.setVisibility(View.VISIBLE);
+                holder.username.setText("@" + currentChannel.getDmRecipientUsername());
+            }
             holder.label.setText("This is the very beginning of your legendary conversation with " + dName + ".");
 
             if (holder.removeBtn != null) holder.removeBtn.setVisibility(View.VISIBLE);
@@ -234,7 +273,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.content.setText(message.getMessageText());
         holder.time.setText(formattedTime(message.getSentAt()));
 
-        // 1. Check if the message sender is you
         if (message.getSenderId().equals(GlobalData.getActiveUserId())) {
             User me = GlobalData.getMyProfile();
             if (me != null) {
@@ -247,7 +285,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return;
         }
 
-        // 2. Check if the message sender matches the current 1-to-1 DM profile cached metadata
         if (currentChannel != null && !currentChannel.isGroup()
                 && message.getSenderId().equals(currentChannel.getDmRecipientId())) {
             holder.username.setText(currentChannel.getDmDisplayNameOrNickname());
@@ -255,9 +292,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return;
         }
 
-        // 3. Fallback/Group members processing lookup strategy
-        // Inside a group chat, fallback to standard markers for other users until your message pipeline
-        // includes sender profile joins from your messages API routes.
         holder.username.setText("User #" + message.getSenderId());
         holder.pfp.setImageResource(R.drawable.icon);
     }
@@ -307,18 +341,37 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public static class BeginningViewHolder extends RecyclerView.ViewHolder {
+        boolean isGroupForm;
         ImageView pfp;
         TextView displayName, username, label;
+
+        // DM Layout Specifics
         View removeBtn, blockBtn;
 
-        public BeginningViewHolder(@NonNull View itemView) {
+        // Group Layout Specifics
+        TextView groupBeginLabel, groupBeginName, groupBeginLabel2;
+        View groupInviteBtn, groupEditBtn;
+
+        public BeginningViewHolder(@NonNull View itemView, boolean isGroupForm) {
             super(itemView);
-            pfp = itemView.findViewById(R.id.itemBeginPfp);
-            displayName = itemView.findViewById(R.id.itemBeginDisplayName);
-            username = itemView.findViewById(R.id.itemBeginUsername);
-            label = itemView.findViewById(R.id.itemBeginLabel);
-            removeBtn = itemView.findViewById(R.id.itemBeginRemoveBtnContainer);
-            blockBtn = itemView.findViewById(R.id.itemBeginBlockBtnContainer);
+            this.isGroupForm = isGroupForm;
+
+            if (isGroupForm) {
+                pfp = itemView.findViewById(R.id.itemGroupBeginPfp);
+                displayName = itemView.findViewById(R.id.itemGroupBeginDisplayName);
+                groupBeginLabel = itemView.findViewById(R.id.itemGroupBeginLabel);
+                groupBeginName = itemView.findViewById(R.id.itemGroupBeginName);
+                groupBeginLabel2 = itemView.findViewById(R.id.itemGroupBeginLabel2);
+                groupInviteBtn = itemView.findViewById(R.id.itemGroupBeginInviteBtnContainer);
+                groupEditBtn = itemView.findViewById(R.id.itemGroupBeginEditBtnContainer);
+            } else {
+                pfp = itemView.findViewById(R.id.itemBeginPfp);
+                displayName = itemView.findViewById(R.id.itemBeginDisplayName);
+                username = itemView.findViewById(R.id.itemBeginUsername);
+                label = itemView.findViewById(R.id.itemBeginLabel);
+                removeBtn = itemView.findViewById(R.id.itemBeginRemoveBtnContainer);
+                blockBtn = itemView.findViewById(R.id.itemBeginBlockBtnContainer);
+            }
         }
     }
 
