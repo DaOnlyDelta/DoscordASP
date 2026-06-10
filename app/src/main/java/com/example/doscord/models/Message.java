@@ -6,6 +6,7 @@ public class Message {
     private Integer channel_id;
     private String message_text;
     private String sent_at;
+    private String type; // Will be "normal" or "system"
 
     public Message(Integer senderId, String content, String sentAt) {
         this.sender_id = senderId;
@@ -19,4 +20,7 @@ public class Message {
     public Integer getChannelId() { return channel_id; }
     public String getMessageText() { return message_text; }
     public String getSentAt() { return sent_at; }
+    public String getType() {
+        return type != null ? type : "normal";
+    }
 }

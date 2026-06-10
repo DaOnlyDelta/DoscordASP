@@ -1,6 +1,7 @@
 package com.example.doscord.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.example.doscord.R;
+import com.example.doscord.activities.chatroom.CrMainActivity;
+import com.example.doscord.activities.chatroom.CrNewGroupActivity;
 import com.example.doscord.models.Channel;
 import com.example.doscord.models.User;
 import com.example.doscord.utils.GlobalData;
@@ -32,6 +35,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int VIEW_TYPE_SEQUENTIAL = 2;
     private static final int VIEW_TYPE_SPLITTER = 3;
     private static final int VIEW_TYPE_BEGINNING = 4;
+    private static final int VIEW_TYPE_SYSTEM = 5;
 
     private List<Message> messagesList;
     private final List<Object> displayList = new ArrayList<>();
@@ -108,11 +112,20 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         Message current = (Message) item;
+
+        if ("system".equalsIgnoreCase(current.getType())) {
+            return VIEW_TYPE_SYSTEM;
+        }
+
         Message previous = null;
         for (int i = position - 1; i >= 0; i--) {
+            // Ensure sequential processing skips over system row objects gracefully
             if (displayList.get(i) instanceof Message) {
-                previous = (Message) displayList.get(i);
-                break;
+                Message temp = (Message) displayList.get(i);
+                if (!"system".equalsIgnoreCase(temp.getType())) {
+                    previous = temp;
+                    break;
+                }
             }
         }
 
@@ -159,6 +172,9 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 View view = inflater.inflate(R.layout.item_beginning, parent, false);
                 return new BeginningViewHolder(view, false);
             }
+        } else if (viewType == VIEW_TYPE_SYSTEM) {
+            View view = inflater.inflate(R.layout.item_system_message, parent, false);
+            return new SystemViewHolder(view);
         } else if (viewType == VIEW_TYPE_SEQUENTIAL) {
             View view = inflater.inflate(R.layout.item_seq_message, parent, false);
             return new SequentialViewHolder(view);
@@ -188,20 +204,38 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             ((SplitterViewHolder) holder).dateText.setText((String) item);
         } else if (holder instanceof NormalViewHolder) {
             bindNormalMessage((NormalViewHolder) holder, (Message) item);
+        } else if (holder instanceof SystemViewHolder) {
+            SystemViewHolder sysHolder = (SystemViewHolder) holder;
+            Message msg = (Message) item;
+
+            sysHolder.text.setText(msg.getMessageText());
+            sysHolder.date.setText(formattedTime(msg.getSentAt()));
+
+            // Check for red action
+            if (msg.getMessageText().split(" ")[1].equals("removed")) {
+                sysHolder.arrow.setRotationY(0f);
+                // Fetch the color from your resources and apply it as a tint list
+                sysHolder.arrow.setImageTintList(android.content.res.ColorStateList.valueOf(
+                        context.getColor(R.color.red)
+                ));
+            }
         } else if (holder instanceof SequentialViewHolder) {
             ((SequentialViewHolder) holder).content.setText(((Message) item).getMessageText());
         }
 
-        float density = context.getResources().getDisplayMetrics().density;
-        int horizontalPadding = (int) (16 * density);
-        int topPadding = holder.itemView.getPaddingTop();
-        int bottomPadding = (position == getItemCount() - 1) ? (int) (30 * density) : 0;
+        // Only modify message bubbles padding properties, leave system alerts clean
+        if (!(holder instanceof SystemViewHolder)) {
+            float density = context.getResources().getDisplayMetrics().density;
+            int horizontalPadding = (int) (16 * density);
+            int topPadding = holder.itemView.getPaddingTop();
+            int bottomPadding = (position == getItemCount() - 1) ? (int) (30 * density) : 0;
 
-        if (position != getItemCount() - 1 && holder instanceof SequentialViewHolder) {
-            bottomPadding = (int) (2 * density);
+            if (position != getItemCount() - 1 && holder instanceof SequentialViewHolder) {
+                bottomPadding = (int) (2 * density);
+            }
+
+            holder.itemView.setPadding(horizontalPadding, topPadding, horizontalPadding, bottomPadding);
         }
-
-        holder.itemView.setPadding(horizontalPadding, topPadding, horizontalPadding, bottomPadding);
     }
 
     private void bindBeginning(BeginningViewHolder holder) {
@@ -222,32 +256,18 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 }
             }
 
-            if (holder.isGroupForm) {
-                // Binding specifically to item_group_beginning fields
-                holder.displayName.setText(gName);
-                if (holder.groupBeginLabel != null) holder.groupBeginLabel.setText("Welcome to the beginning of the ");
-                if (holder.groupBeginName != null) holder.groupBeginName.setText(gName);
-                if (holder.groupBeginLabel2 != null) holder.groupBeginLabel2.setText(" group.");
+            // Binding specifically to item_group_beginning fields
+            holder.displayName.setText(gName);
+            PfpUtils.loadGroupPfp(context, currentChannel.getGroupPfp(), holder.pfp);
 
-                PfpUtils.loadGroupPfp(context, currentChannel.getGroupPfp(), holder.pfp);
-
-                // Set up click listeners for your new group action buttons
-                if (holder.groupInviteBtn != null) {
-                    holder.groupInviteBtn.setOnClickListener(v -> {
-                        // TODO: Implement Invite Action
-                    });
-                }
-                if (holder.groupEditBtn != null) {
-                    holder.groupEditBtn.setOnClickListener(v -> {
-                        // TODO: Implement Edit Group settings action
-                    });
-                }
-            } else {
-                // Fallback safe rendering if view type recycled weirdly
-                holder.displayName.setText(gName);
-                if (holder.username != null) holder.username.setVisibility(View.GONE);
-                holder.label.setText("Welcome to the beginning of the " + gName + " group.");
-                PfpUtils.loadGroupPfp(context, currentChannel.getGroupPfp(), holder.pfp);
+            // Set up click listeners for your new group action buttons
+            if (holder.groupInviteBtn != null) {
+                holder.groupInviteBtn.setOnClickListener(v -> {
+                    Intent intent = new Intent(context, CrNewGroupActivity.class);
+                    intent.putExtra("isAddingMembers", true);
+                    intent.putExtra("channelId", currentChannel.getChannelId());
+                    context.startActivity(intent);
+                });
             }
         } else {
             // Binding standard 1-to-1 Direct Messages
@@ -273,27 +293,21 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.content.setText(message.getMessageText());
         holder.time.setText(formattedTime(message.getSentAt()));
 
-        if (message.getSenderId().equals(GlobalData.getActiveUserId())) {
-            User me = GlobalData.getMyProfile();
-            if (me != null) {
-                holder.username.setText(me.getDisplayName() != null ? me.getDisplayName() : me.getUsername());
-                PfpUtils.loadPfp(context, me.getPfp(), holder.pfp);
-            } else {
-                holder.username.setText("You");
-                holder.pfp.setImageResource(R.drawable.icon);
-            }
-            return;
-        }
+        // Dynamically resolve the user model from our local GlobalData caches
+        User sender = GlobalData.findUserById(message.getSenderId());
 
-        if (currentChannel != null && !currentChannel.isGroup()
-                && message.getSenderId().equals(currentChannel.getDmRecipientId())) {
-            holder.username.setText(currentChannel.getDmDisplayNameOrNickname());
-            PfpUtils.loadPfp(context, currentChannel.getDmRecipientPfp(), holder.pfp);
-            return;
-        }
+        if (sender != null) {
+            String nameToDisplay = sender.getDisplayName() != null && !sender.getDisplayName().isEmpty()
+                    ? sender.getDisplayName()
+                    : sender.getUsername();
 
-        holder.username.setText("User #" + message.getSenderId());
-        holder.pfp.setImageResource(R.drawable.icon);
+            holder.username.setText(nameToDisplay);
+            PfpUtils.loadPfp(context, sender.getPfp(), holder.pfp);
+        } else {
+            // Fallback layout state if the user profile isn't cached anywhere locally yet
+            holder.username.setText("User #" + message.getSenderId());
+            holder.pfp.setImageResource(R.drawable.icon);
+        }
     }
 
     @Override
@@ -349,7 +363,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         View removeBtn, blockBtn;
 
         // Group Layout Specifics
-        TextView groupBeginLabel, groupBeginName, groupBeginLabel2;
+        TextView groupBeginLabel;
         View groupInviteBtn, groupEditBtn;
 
         public BeginningViewHolder(@NonNull View itemView, boolean isGroupForm) {
@@ -360,10 +374,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 pfp = itemView.findViewById(R.id.itemGroupBeginPfp);
                 displayName = itemView.findViewById(R.id.itemGroupBeginDisplayName);
                 groupBeginLabel = itemView.findViewById(R.id.itemGroupBeginLabel);
-                groupBeginName = itemView.findViewById(R.id.itemGroupBeginName);
-                groupBeginLabel2 = itemView.findViewById(R.id.itemGroupBeginLabel2);
                 groupInviteBtn = itemView.findViewById(R.id.itemGroupBeginInviteBtnContainer);
-                groupEditBtn = itemView.findViewById(R.id.itemGroupBeginEditBtnContainer);
             } else {
                 pfp = itemView.findViewById(R.id.itemBeginPfp);
                 displayName = itemView.findViewById(R.id.itemBeginDisplayName);
@@ -393,6 +404,18 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         public SequentialViewHolder(@NonNull View itemView) {
             super(itemView);
             content = itemView.findViewById(R.id.itemMsgContent);
+        }
+    }
+
+    public static class SystemViewHolder extends RecyclerView.ViewHolder {
+        ImageView arrow;
+        TextView text, date;
+
+        public SystemViewHolder(@NonNull View itemView) {
+            super(itemView);
+            arrow = itemView.findViewById(R.id.itemSystemArrow);
+            text = itemView.findViewById(R.id.itemSystemText);
+            date = itemView.findViewById(R.id.itemSystemDate);
         }
     }
 

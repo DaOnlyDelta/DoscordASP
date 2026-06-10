@@ -39,6 +39,47 @@ public class GlobalData {
         }
     }
 
+    public static User findUserById(int userId) {
+        if (activeUserId != null && activeUserId == userId) {
+            return myProfile;
+        }
+
+        // 1. Search in friends list
+        if (friendList != null) {
+            for (User user : friendList) {
+                if (user.getId() == userId) {
+                    return user;
+                }
+            }
+        }
+
+        // 2. Search in pending requests
+        if (pendingRequests != null) {
+            for (User user : pendingRequests) {
+                if (user.getId() == userId) {
+                    return user;
+                }
+            }
+        }
+
+        // 3. Search inside active DM channels for cached recipient metadata
+        if (channelList != null) {
+            for (Channel channel : channelList) {
+                if (!channel.isGroup() && channel.getDmRecipientId() != null && channel.getDmRecipientId() == userId) {
+                    // Reconstruct a user model out of the channel's DM metadata cache
+                    User cachedUser = new User();
+                    cachedUser.setId(channel.getDmRecipientId());
+                    cachedUser.setUsername(channel.getDmRecipientUsername());
+                    cachedUser.setDisplayName(channel.getDmRecipientDisplayName());
+                    cachedUser.setPfp(channel.getDmRecipientPfp());
+                    return cachedUser;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public static Integer getActiveUserId() {
         return activeUserId;
     }

@@ -27,6 +27,7 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
     private final Context context;
     private final Set<Integer> selectedUserIds = new HashSet<>();
     private final OnSelectionChangedListener listener;
+    private final Set<Integer> existingUserIds = new HashSet<>();
 
     public interface OnSelectionChangedListener {
         void onSelectionChanged(int count);
@@ -37,6 +38,15 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         this.context = context;
         this.listener = listener;
         sortUsers(this.users);
+    }
+
+    public void setExistingMembers(List<Integer> ids) {
+        existingUserIds.clear();
+        if (ids != null) {
+            existingUserIds.addAll(ids);
+            selectedUserIds.addAll(ids); // Pre-check them automatically
+        }
+        notifyDataSetChanged();
     }
 
     private void sortUsers(List<User> list) {
@@ -69,24 +79,45 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         holder.username.setText(user.getUsername());
         PfpUtils.loadPfp(context, user.getPfp(), holder.pfp);
 
+        boolean isExisting = existingUserIds.contains(user.getId());
         boolean isSelected = selectedUserIds.contains(user.getId());
-        updateSelectionUI(holder, isSelected);
 
-        holder.itemView.setOnClickListener(v -> {
-            if (selectedUserIds.contains(user.getId())) {
-                selectedUserIds.remove(user.getId());
-            } else {
-                if (selectedUserIds.size() < 10) {
-                    selectedUserIds.add(user.getId());
+        // Update checkbox color and state
+        if (isSelected) {
+            int bgColor = isExisting ? context.getColor(R.color.textGray) : context.getColor(R.color.blue);
+            holder.checkboxCard.setCardBackgroundColor(bgColor);
+            holder.checkboxCard.setStrokeWidth(0);
+            holder.checkMark.setVisibility(View.VISIBLE);
+        } else {
+            holder.checkboxCard.setCardBackgroundColor(Color.TRANSPARENT);
+            holder.checkboxCard.setStrokeWidth((int) (2 * context.getResources().getDisplayMetrics().density));
+            holder.checkboxCard.setStrokeColor(context.getColor(R.color.textGray));
+            holder.checkMark.setVisibility(View.GONE);
+        }
+
+        // Apply immutable visual state and click logic
+        if (isExisting) {
+            holder.itemView.setAlpha(0.4f);
+            holder.itemView.setOnClickListener(null);
+        } else {
+            holder.itemView.setAlpha(1.0f);
+            holder.itemView.setOnClickListener(v -> {
+                if (selectedUserIds.contains(user.getId())) {
+                    selectedUserIds.remove(user.getId());
+                } else {
+                    int newlySelectedCount = selectedUserIds.size() - existingUserIds.size();
+                    if (newlySelectedCount < 10) {
+                        selectedUserIds.add(user.getId());
+                    }
                 }
-            }
-            notifyItemChanged(position);
-            if (listener != null) {
-                listener.onSelectionChanged(selectedUserIds.size());
-            }
-        });
+                notifyItemChanged(position);
+                if (listener != null) {
+                    int pendingNewCount = selectedUserIds.size() - existingUserIds.size();
+                    listener.onSelectionChanged(pendingNewCount);
+                }
+            });
+        }
 
-        // Divider logic
         holder.divider.setVisibility(position < users.size() - 1 ? View.VISIBLE : View.GONE);
     }
 
@@ -127,5 +158,15 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
             checkMark = itemView.findViewById(R.id.itemGroupSelectCheck);
             divider = itemView.findViewById(R.id.itemGroupSelectDivider);
         }
+    }
+
+    public List<Integer> getNewSelectedUserIds() {
+        List<Integer> newlyAdded = new ArrayList<>();
+        for (Integer id : selectedUserIds) {
+            if (!existingUserIds.contains(id)) {
+                newlyAdded.add(id);
+            }
+        }
+        return newlyAdded;
     }
 }

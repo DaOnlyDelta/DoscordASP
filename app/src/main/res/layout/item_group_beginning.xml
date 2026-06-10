@@ -14,6 +14,7 @@
         app:cardCornerRadius="100dp"
         app:cardElevation="0dp"
         app:cardMaxElevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:strokeWidth="0dp">
@@ -31,101 +32,93 @@
     <TextView
         android:id="@+id/itemGroupBeginDisplayName"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginTop="7dp"
+        android:gravity="center"
         android:textColor="@color/white"
-        android:textSize="26sp"
+        android:textSize="28sp"
         android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/itemGroupBeginPfpContainer"
+        app:layout_constraintTop_toBottomOf="@+id/itemGroupBeginPfpContainer"
         tools:text="DisplayName" />
 
     <TextView
         android:id="@+id/itemGroupBeginLabel"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="5dp"
+        android:layout_marginEnd="10dp"
+        android:gravity="center"
+        android:text="Welcome to your new group! Invite friends whenever you're ready."
         android:textColor="@color/white"
-        android:textSize="17sp"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemGroupBeginDisplayName"
-        tools:text="Welcome to the beginning of the " />
-
-    <TextView
-        android:id="@+id/itemGroupBeginName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:textColor="@color/white"
-        android:textSize="17sp"
-        app:layout_constraintStart_toEndOf="@+id/itemGroupBeginLabel"
-        app:layout_constraintTop_toBottomOf="@+id/itemGroupBeginDisplayName"
-        tools:text="name" />
-
-    <TextView
-        android:id="@+id/itemGroupBeginLabel2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:textColor="@color/white"
-        android:textSize="17sp"
-        app:layout_constraintStart_toEndOf="@+id/itemGroupBeginName"
-        app:layout_constraintTop_toBottomOf="@+id/itemGroupBeginDisplayName"
-        tools:text=" group." />
+        app:layout_constraintTop_toBottomOf="@+id/itemGroupBeginDisplayName" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/itemGroupBeginInviteBtnContainer"
-        android:layout_width="150dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="18dp"
+        android:layout_width="0dp"
+        android:layout_height="65dp"
         android:layout_marginTop="15dp"
         android:clickable="true"
         android:focusable="true"
         android:stateListAnimator="@null"
-        app:cardBackgroundColor="@color/blue"
-        app:cardCornerRadius="45dp"
+        app:cardBackgroundColor="@color/uiGray2"
+        app:cardCornerRadius="10dp"
         app:cardElevation="0dp"
         app:cardMaxElevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/itemGroupBeginLabel"
         app:strokeWidth="0dp">
 
-        <TextView
-            android:id="@+id/itemGroupBeginInviteBtn"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="Invite to Group DM"
-            android:textColor="@color/selected"
-            android:textStyle="bold" />
+            android:layout_height="match_parent">
 
-    </com.google.android.material.card.MaterialCardView>
+            <ImageView
+                android:id="@+id/itemGroupBeginImg1"
+                android:layout_width="60dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/addtogroup"
+                app:tint="@color/white" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/itemGroupBeginEditBtnContainer"
-        android:layout_width="100dp"
-        android:layout_height="35dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="15dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:stateListAnimator="@null"
-        app:cardBackgroundColor="@color/uiGray"
-        app:cardCornerRadius="45dp"
-        app:cardElevation="0dp"
-        app:cardMaxElevation="0dp"
-        app:layout_constraintStart_toEndOf="@id/itemGroupBeginInviteBtnContainer"
-        app:layout_constraintTop_toBottomOf="@id/itemGroupBeginLabel"
-        app:strokeWidth="0dp">
+            <TextView
+                android:id="@+id/itemGroupBeginInviteBtn"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:gravity="center_vertical"
+                android:text="Add Members"
+                android:textColor="@color/selected"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/itemGroupBeginImg2"
+                app:layout_constraintStart_toEndOf="@id/itemGroupBeginImg1"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/itemGroupBeginEditBtn"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="Edit Group"
-            android:textColor="@color/selected"
-            android:textStyle="bold" />
+            <ImageView
+                android:id="@+id/itemGroupBeginImg2"
+                android:layout_width="25dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="22dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="22dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/right_arrow"
+                app:tint="@color/white" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
 

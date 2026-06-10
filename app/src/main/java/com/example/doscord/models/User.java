@@ -15,4 +15,21 @@ public class User {
     public String getPfp() { return pfp; }
     public boolean isOnline() { return is_online == 1; }
     public String getFriendsSince() { return friends_since; }
+
+    // Setters
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.display_name = displayName;
+    }
+
+    public void setPfp(String pfp) {
+        this.pfp = pfp;
+    }
 }

@@ -70,4 +70,7 @@ public interface ApiService {
 
     @POST("groups/create")
     Call<CreateGroupResponse> createGroup(@Body CreateGroupRequest request);
+
+    @POST("groups/add")
+    Call<Void> addMembersToGroup(@Body AddMembersRequest request);
 }
