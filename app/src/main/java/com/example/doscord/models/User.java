@@ -7,6 +7,7 @@ public class User {
     private String pfp;
     private int is_online;
     private String friends_since;
+    private String created_at;
 
     // Getters
     public int getId() { return id; }
@@ -15,6 +16,7 @@ public class User {
     public String getPfp() { return pfp; }
     public boolean isOnline() { return is_online == 1; }
     public String getFriendsSince() { return friends_since; }
+    public String getcreated_at() { return created_at; }
 
     // Setters
     public void setId(int id) {

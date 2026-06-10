@@ -17,6 +17,7 @@ public class Channel {
     private String last_message;
     private String last_message_time;
     private Integer last_message_sender_id;
+    private String created_at;
 
     // Getters
     public Integer getChannelId() { return channel_id; }
@@ -43,4 +44,5 @@ public class Channel {
     public String getLastMessage() { return last_message; }
     public String getLastMessageTime() { return last_message_time; }
     public Integer getLastMessageSenderId() { return last_message_sender_id; }
+    public String getCreatedAt() { return created_at; }
 }

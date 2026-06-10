@@ -32,6 +32,7 @@ import com.example.doscord.api.UpdateResponse;
 import com.example.doscord.adapters.ChatsAdapter;
 import com.example.doscord.models.Channel;
 import com.example.doscord.utils.GlobalData;
+import com.example.doscord.utils.Helpers;
 import com.example.doscord.utils.LogDataHolder;
 import com.example.doscord.utils.PfpUtils;
 import com.example.doscord.utils.RegDataHolder;
@@ -47,7 +48,7 @@ import retrofit2.Response;
 
 public class CrMainActivity extends AppCompatActivity {
     private ImageView homeIcon, notifIcon, pfpImg, profileIcon;
-    private TextView homeTxt, notifTxt, pfpTxt, profileDisplayName, profileUsername;
+    private TextView homeTxt, notifTxt, pfpTxt, profileDisplayName, profileUsername, profileCreatedAt, profileNFriends;
     private int selected = 0;
     private RecyclerView homeChatsView;
     private ConstraintLayout homeLayout, notifLayout, emptyNotifLayout, profileLayout, overlayLayout;
@@ -107,6 +108,8 @@ public class CrMainActivity extends AppCompatActivity {
         profileIcon = findViewById(R.id.crProfileIcon);
         profileUsername = findViewById(R.id.crProfileUsernameTxt);
         profileDisplayName = findViewById(R.id.crProfileDisplayNameTxt);
+        profileCreatedAt = findViewById(R.id.crMainProfileMemberSinceTxt);
+        profileNFriends = findViewById(R.id.crMainProfileNFriendsTxt);
 
         overlayLayout = findViewById(R.id.crMainOverlay);
     }
@@ -158,8 +161,11 @@ public class CrMainActivity extends AppCompatActivity {
         User me = GlobalData.getMyProfile(); // Updated to getMyProfile()
         if (me != null) {
             PfpUtils.loadMyPfp(this, me.getPfp(), pfpImg, profileIcon);
-            profileUsername.setText(me.getUsername());
+            String atUser = "@" + me.getUsername();
+            profileUsername.setText(atUser);
             profileDisplayName.setText((me.getDisplayName() != null) ? me.getDisplayName() : me.getUsername());
+            profileCreatedAt.setText(Helpers.formatDate(me.getcreated_at()));
+            profileNFriends.setText(String.valueOf(GlobalData.getFriends().size()));
         } else {
             Log.e("CrMainActivity", "GlobalData.getMyProfile() returned null!");
         }

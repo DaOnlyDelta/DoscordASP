@@ -24,15 +24,28 @@ public class GlobalData {
         List<Channel> incomingChannels = response.getChannels();
 
         if (incomingChannels != null) {
-            // Sort channels so that the most recently active ones appear at the top
+            // Sort channels based on activity or creation time
             incomingChannels.sort((c1, c2) -> {
                 String s1 = c1.getLastMessageTime();
                 String s2 = c2.getLastMessageTime();
 
-                long t1 = (s1 != null) ? Helpers.dateStringToMillis(s1) : 0;
-                long t2 = (s2 != null) ? Helpers.dateStringToMillis(s2) : 0;
+                // If s1 or s2 are "null" as string, treat as null
+                if ("null".equals(s1)) s1 = null;
+                if ("null".equals(s2)) s2 = null;
 
-                // Descending order (newest messages first)
+                long t1 = (s1 != null && !s1.isEmpty()) ? Helpers.dateStringToMillis(s1) : 0;
+                long t2 = (s2 != null && !s2.isEmpty()) ? Helpers.dateStringToMillis(s2) : 0;
+
+                // Fallback to channel creation time if no messages exist
+                if (t1 == 0) t1 = Helpers.dateStringToMillis(c1.getCreatedAt());
+                if (t2 == 0) t2 = Helpers.dateStringToMillis(c2.getCreatedAt());
+
+                if (t1 == t2) {
+                    // Final tie-breaker
+                    return Integer.compare(c2.getChannelId(), c1.getChannelId());
+                }
+
+                // Descending order (newest activity/creation first)
                 return Long.compare(t2, t1);
             });
             channelList = incomingChannels;

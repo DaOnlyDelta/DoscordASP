@@ -13,9 +13,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.doscord.R;
+import com.example.doscord.activities.chatroom.CrChatActivity;
+import com.example.doscord.models.Channel;
 import com.example.doscord.models.User;
+import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.PfpUtils;
 import com.google.android.material.card.MaterialCardView;
+
+import android.content.Intent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +50,21 @@ public class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         @Override int getType() { return TYPE_FRIEND_GROUP; }
     }
 
+    private OnFriendClickListener listener;
+
+    public interface OnFriendClickListener {
+        void onFriendClick(User user);
+    }
+
     public FriendsAdapter(List<User> friends, Context context) {
         this.context = context;
         this.items = processFriends(friends);
+    }
+
+    public FriendsAdapter(List<User> friends, Context context, OnFriendClickListener listener) {
+        this.context = context;
+        this.items = processFriends(friends);
+        this.listener = listener;
     }
 
     private List<FriendListItem> processFriends(List<User> friends) {
@@ -132,6 +149,15 @@ public class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 } else {
                     status.setCardBackgroundColor(context.getColor(R.color.gray));
                 }
+
+                row.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onFriendClick(user);
+                    } else {
+                        // Default behavior if no listener is provided (backwards compatibility or default)
+                        openChat(user);
+                    }
+                });
                 
                 f.container.addView(row);
                 
@@ -146,6 +172,25 @@ public class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 }
             }
         }
+    }
+
+    private void openChat(User user) {
+        // Find if a channel already exists for this friend
+        List<Channel> channels = GlobalData.getChannelList();
+        Integer channelId = -1;
+        String chatName = user.getDisplayName() != null ? user.getDisplayName() : user.getUsername();
+
+        for (Channel channel : channels) {
+            if (!channel.isGroup() && channel.getDmRecipientId() != null && channel.getDmRecipientId() == user.getId()) {
+                channelId = channel.getChannelId();
+                break;
+            }
+        }
+
+        Intent intent = new Intent(context, CrChatActivity.class);
+        intent.putExtra("channel_id", channelId);
+        intent.putExtra("chat_name", chatName);
+        context.startActivity(intent);
     }
 
     @Override

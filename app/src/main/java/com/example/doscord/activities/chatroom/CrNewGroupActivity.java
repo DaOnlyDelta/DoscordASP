@@ -1,5 +1,6 @@
 package com.example.doscord.activities.chatroom;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -102,7 +103,10 @@ public class CrNewGroupActivity extends AppCompatActivity {
         RetrofitClient.getApiService().createGroup(request).enqueue(new Callback<CreateGroupResponse>() {
             @Override
             public void onResponse(@NonNull Call<CreateGroupResponse> call, @NonNull Response<CreateGroupResponse> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Intent intent = new Intent(CrNewGroupActivity.this, CrMainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
                     finish();
                 }
             }

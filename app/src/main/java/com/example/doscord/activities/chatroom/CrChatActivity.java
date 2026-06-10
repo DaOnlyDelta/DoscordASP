@@ -27,6 +27,7 @@ import com.example.doscord.api.MessagesResponse;
 import com.example.doscord.api.NewMessagesRequest;
 import com.example.doscord.api.OlderMessagesRequest;
 import com.example.doscord.api.RetrofitClient;
+import com.example.doscord.api.TokenLoginResponse;
 import com.example.doscord.models.Channel;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.models.Message;
@@ -86,6 +87,8 @@ public class CrChatActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         activeChannelId = channelId;
+        fetchData();
+        fetchNewMessages(true);
         startChatUpdateLoop();
     }
 
@@ -284,12 +287,27 @@ public class CrChatActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<MessagesResponse> call, @NonNull Response<MessagesResponse> response) {
                 isLoadingNew = false;
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Message> newOnes = response.body().getMessages();
-                    if (!newOnes.isEmpty()) {
+                    List<Message> incoming = response.body().getMessages();
+                    if (incoming != null && !incoming.isEmpty()) {
+                        // Avoid duplicates by filtering only IDs greater than our current newest
+                        int currentMaxId = 0;
+                        if (!messagesList.isEmpty()) {
+                            currentMaxId = messagesList.get(messagesList.size() - 1).getId();
+                        }
+
+                        List<Message> filtered = new ArrayList<>();
+                        for (Message m : incoming) {
+                            if (m.getId() > currentMaxId) {
+                                filtered.add(m);
+                            }
+                        }
+
+                        if (filtered.isEmpty()) return;
+
                         LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
                         boolean isAtBottom = lm != null && lm.findLastVisibleItemPosition() >= adapter.getItemCount() - 2;
 
-                        messagesList.addAll(newOnes);
+                        messagesList.addAll(filtered);
                         adapter.updateDisplayList();
                         adapter.notifyDataSetChanged();
 
@@ -379,6 +397,34 @@ public class CrChatActivity extends AppCompatActivity {
     }
 
     // Safely look up the exact channel object mapping from our shared repository
+    private void fetchData() {
+        SessionManager sessionManager = new SessionManager(this);
+        String token = sessionManager.getToken();
+
+        RetrofitClient.getApiService().tokenLogin(token).enqueue(new Callback<TokenLoginResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<TokenLoginResponse> call, @NonNull Response<TokenLoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    GlobalData.updateData(response.body());
+                    
+                    // Update current channel context
+                    currentChannel = lookupChannel();
+                    if (currentChannel != null) {
+                        adapter.setChannelContext(currentChannel);
+                        if (currentChannel.isGroup()) {
+                            chatTitle.setText(currentChannel.getGroupName());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TokenLoginResponse> call, @NonNull Throwable t) {
+                // Silently fail or retry
+            }
+        });
+    }
+
     private Channel lookupChannel() {
         if (channelId == -1) return null;
         for (Channel c : GlobalData.getChannelList()) {

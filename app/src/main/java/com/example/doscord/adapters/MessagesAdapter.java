@@ -1,5 +1,6 @@
 package com.example.doscord.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -67,9 +68,11 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return displayList;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setChannelContext(Channel channel) {
         this.currentChannel = channel;
         updateDisplayList();
+        notifyDataSetChanged();
     }
 
     public void updateDisplayList() {
@@ -223,17 +226,22 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             ((SequentialViewHolder) holder).content.setText(((Message) item).getMessageText());
         }
 
-        // Only modify message bubbles padding properties, leave system alerts clean
-        if (!(holder instanceof SystemViewHolder)) {
-            float density = context.getResources().getDisplayMetrics().density;
-            int horizontalPadding = (int) (16 * density);
-            int topPadding = holder.itemView.getPaddingTop();
-            int bottomPadding = (position == getItemCount() - 1) ? (int) (30 * density) : 0;
+        // Apply message bubbles padding properties, including system alerts if at the end
+        float density = context.getResources().getDisplayMetrics().density;
+        int horizontalPadding = (int) (16 * density);
+        int topPadding = holder.itemView.getPaddingTop();
+        int bottomPadding = (position == getItemCount() - 1) ? (int) (30 * density) : 0;
 
-            if (position != getItemCount() - 1 && holder instanceof SequentialViewHolder) {
-                bottomPadding = (int) (2 * density);
+        if (position != getItemCount() - 1 && holder instanceof SequentialViewHolder) {
+            bottomPadding = (int) (2 * density);
+        }
+
+        // SystemViewHolder only gets padding if it's the last item
+        if (holder instanceof SystemViewHolder) {
+            if (position == getItemCount() - 1) {
+                holder.itemView.setPadding(holder.itemView.getPaddingLeft(), topPadding, holder.itemView.getPaddingRight(), bottomPadding);
             }
-
+        } else {
             holder.itemView.setPadding(horizontalPadding, topPadding, horizontalPadding, bottomPadding);
         }
     }

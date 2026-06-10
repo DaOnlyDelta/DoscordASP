@@ -55,8 +55,33 @@ public class CrNewChatActivity extends AppCompatActivity {
     private void loadFriends() {
         allFriends = GlobalData.getFriends();
         
-        adapter = new FriendsAdapter(allFriends, this);
+        adapter = new FriendsAdapter(allFriends, this, user -> {
+            // Clicked a friend
+            openChat(user);
+        });
         recyclerView.setAdapter(adapter);
+    }
+
+    private void openChat(User user) {
+        // Find if a channel already exists for this friend
+        List<com.example.doscord.models.Channel> channels = GlobalData.getChannelList();
+        int channelId = -1;
+        String chatName = user.getDisplayName() != null && !user.getDisplayName().isEmpty() 
+                ? user.getDisplayName() 
+                : user.getUsername();
+
+        for (com.example.doscord.models.Channel channel : channels) {
+            if (!channel.isGroup() && channel.getDmRecipientId() != null && channel.getDmRecipientId() == user.getId()) {
+                channelId = channel.getChannelId();
+                break;
+            }
+        }
+
+        Intent intent = new Intent(this, CrChatActivity.class);
+        intent.putExtra("channel_id", channelId);
+        intent.putExtra("chat_name", chatName);
+        startActivity(intent);
+        finish(); // Close newChat activity
     }
 
     private void setupSearch() {
@@ -76,7 +101,7 @@ public class CrNewChatActivity extends AppCompatActivity {
 
     private void filterFriends(String query) {
         if (query.isEmpty()) {
-            adapter = new FriendsAdapter(allFriends, this);
+            adapter = new FriendsAdapter(allFriends, this, this::openChat);
         } else {
             List<User> filtered = new ArrayList<>();
             for (User user : allFriends) {
@@ -86,7 +111,7 @@ public class CrNewChatActivity extends AppCompatActivity {
                     filtered.add(user);
                 }
             }
-            adapter = new FriendsAdapter(filtered, this);
+            adapter = new FriendsAdapter(filtered, this, this::openChat);
         }
         recyclerView.setAdapter(adapter);
     }

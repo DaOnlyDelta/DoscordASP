@@ -146,6 +146,20 @@ public class Helpers {
         }
     }
 
+    public static String formatDate(String rawDate) {
+        if (rawDate == null || rawDate.isEmpty()) return "";
+
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+            SimpleDateFormat outputFormat = new SimpleDateFormat("MMM d, yyyy", Locale.US);
+            Date date = inputFormat.parse(rawDate);
+            return (date != null) ? outputFormat.format(date) : rawDate;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return rawDate;
+        }
+    }
+
     public static long dateStringToMillis(String dateString) {
         if (dateString == null || dateString.isEmpty()) return 0;
 
