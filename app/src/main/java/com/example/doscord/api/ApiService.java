@@ -73,4 +73,7 @@ public interface ApiService {
 
     @POST("groups/add")
     Call<Void> addMembersToGroup(@Body AddMembersRequest request);
+
+    @POST("update-user")
+    Call<UpdateUserResponse> updateUser(@Body UpdateUserRequest request);
 }

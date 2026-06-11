@@ -56,7 +56,7 @@ public class RegBdayActivity extends AppCompatActivity {
         bdayInput = findViewById(R.id.regBdayInput);
         warningTxt = findViewById(R.id.regBdayWarning);
         serverWarningTxt = findViewById(R.id.regBdayServerWarning);
-        createBtn = findViewById(R.id.crProfileEditBtn);
+        createBtn = findViewById(R.id.crMainProfileEditBtn);
         c  = Calendar.getInstance();
 
         if (RegDataHolder.year == null) {

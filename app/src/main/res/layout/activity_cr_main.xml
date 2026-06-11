@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
+    android:animateLayoutChanges="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#131318"
@@ -54,6 +55,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="105dp"
+            android:animateLayoutChanges="true"
             android:background="#1c1d23"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
@@ -62,44 +64,206 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/crProfileDisplayNameTxt"
-                android:layout_width="wrap_content"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/crMainProfileDataContainer"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="80dp"
-                android:text="@string/display_name"
-                android:textColor="@color/white"
-                android:textSize="24sp"
-                android:textStyle="bold"
+                android:layout_marginTop="60dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/crProfileUsernameTxt"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/crMainProfileDisplayNameTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/display_name"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/crMainProfileUsernameTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:letterSpacing="0.01"
+                    android:text="username"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/crMainProfileDisplayNameTxt" />
+
+                <Button
+                    android:id="@+id/crMainProfileEditBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:layout_marginTop="16dp"
+                    android:backgroundTint="#5865f2"
+                    android:onClick="editProfile"
+                    android:text="@string/edit_profile"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/crMainProfileUsernameTxt" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/crMainProfileEditContainer"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
-                android:letterSpacing="0.01"
-                android:text="username"
-                android:textColor="@color/white"
-                android:textSize="18sp"
+                android:layout_marginTop="65dp"
+                android:stateListAnimator="@null"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/uiGray2"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:cardMaxElevation="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/crProfileDisplayNameTxt" />
+                app:layout_constraintTop_toBottomOf="@id/crMainProfileDataContainer"
+                app:strokeWidth="0dp">
 
-            <Button
-                android:id="@+id/crProfileEditBtn"
-                android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:layout_marginTop="15dp"
-                android:backgroundTint="#5865f2"
-                android:text="@string/edit_profile"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/crProfileUsernameTxt" />
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/crMainProfileEditDisplayNameLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:labelFor="@id/crMainProfileDisplayNameInputContainer"
+                        android:letterSpacing="0.01"
+                        android:text="Display Name"
+                        android:textColor="@color/labelGray"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/crMainProfileDisplayNameInputContainer"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:stateListAnimator="@null"
+                        app:cardBackgroundColor="#131418"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="0dp"
+                        app:cardMaxElevation="0dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/crMainProfileEditDisplayNameLabel"
+                        app:strokeWidth="0dp">
+
+                        <EditText
+                            android:id="@+id/crMainProfileEditDisplayNameInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:autofillHints="Display name"
+                            android:background="@null"
+                            android:paddingStart="15dp"
+                            android:paddingEnd="15dp"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/crMainProfileEditDisplayNameLabel" />
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:id="@+id/crMainProfileEditDisplayNameWarning"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:textColor="@color/red"
+                        android:textSize="14sp"
+                        android:visibility="gone"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/crMainProfileDisplayNameInputContainer"
+                        tools:text="This display name is invalid."
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/crMainProfileEditIdentifierLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:labelFor="@id/crMainProfileIdentifierInputContainer"
+                        android:letterSpacing="0.01"
+                        android:textColor="@color/labelGray"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/crMainProfileEditDisplayNameWarning"
+                        tools:text="Identifier" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/crMainProfileIdentifierInputContainer"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:stateListAnimator="@null"
+                        app:cardBackgroundColor="#131418"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="0dp"
+                        app:cardMaxElevation="0dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/crMainProfileEditIdentifierLabel"
+                        app:strokeWidth="0dp">
+
+                        <EditText
+                            android:id="@+id/crMainProfileEditIdentifierInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:autofillHints="Username"
+                            android:background="@null"
+                            android:paddingStart="15dp"
+                            android:paddingEnd="15dp"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/crMainProfileEditDisplayNameLabel" />
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:id="@+id/crMainProfileEditIdentifierWarning"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:textColor="@color/red"
+                        android:textSize="14sp"
+                        android:visibility="gone"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/crMainProfileIdentifierInputContainer"
+                        tools:text="This identifier is already taken."
+                        tools:visibility="visible" />
+
+                    <Button
+                        android:id="@+id/crMainProfileEditSaveBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="55dp"
+                        android:layout_marginTop="20dp"
+                        android:backgroundTint="#5865f2"
+                        android:onClick="saveProfileChanges"
+                        android:text="Save"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/crMainProfileEditIdentifierWarning" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/crMainProfileMemberSinceContainer"
@@ -113,7 +277,7 @@
                 app:cardMaxElevation="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/crProfileEditBtn"
+                app:layout_constraintTop_toBottomOf="@id/crMainProfileEditContainer"
                 app:strokeWidth="0dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -211,38 +375,73 @@
             </com.google.android.material.card.MaterialCardView>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.google.android.material.card.MaterialCardView
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/crProfileIconContainer"
             android:layout_width="110dp"
             android:layout_height="110dp"
             android:layout_marginTop="-55dp"
-            android:onClick="changePfp"
-            android:stateListAnimator="@null"
-            app:cardBackgroundColor="#1c1d23"
-            app:cardCornerRadius="50dp"
-            app:cardElevation="0dp"
-            app:cardMaxElevation="0dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/constraintLayout2"
-            app:layout_constraintTop_toTopOf="@+id/constraintLayout2"
-            app:strokeWidth="0dp">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/constraintLayout2">
 
-            <ImageButton
-                android:id="@+id/crProfileIcon"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_gravity="center"
-                android:background="@null"
-                android:clickable="false"
-                android:contentDescription="@string/profile"
-                android:focusable="false"
-                android:scaleType="centerCrop"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/crPfpCard"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:onClick="changePfp"
+                android:stateListAnimator="@null"
+                app:cardBackgroundColor="#1c1d23"
+                app:cardCornerRadius="50dp"
+                app:cardElevation="0dp"
+                app:cardMaxElevation="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/icon" />
+                app:rippleColor="@android:color/transparent"
+                app:strokeWidth="0dp">
 
-        </com.google.android.material.card.MaterialCardView>
+                <ImageButton
+                    android:id="@+id/crProfileIcon"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center"
+                    android:background="@null"
+                    android:clickable="false"
+                    android:contentDescription="@string/profile"
+                    android:focusable="false"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/icon" />
 
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/crMainProfilePlusContainer"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="2dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/blue"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:cardMaxElevation="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:strokeColor="@color/bgGray"
+                app:strokeWidth="3dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/plus"
+                    android:src="@drawable/plus"
+                    app:tint="@color/white" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

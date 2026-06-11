@@ -4,8 +4,12 @@ import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,6 +33,8 @@ import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.api.TokenLoginResponse;
 import com.example.doscord.api.UpdateRequest;
 import com.example.doscord.api.UpdateResponse;
+import com.example.doscord.api.UpdateUserRequest;
+import com.example.doscord.api.UpdateUserResponse;
 import com.example.doscord.adapters.ChatsAdapter;
 import com.example.doscord.models.Channel;
 import com.example.doscord.utils.GlobalData;
@@ -39,6 +45,7 @@ import com.example.doscord.utils.RegDataHolder;
 import com.example.doscord.models.User;
 import com.example.doscord.adapters.RequestsAdapter;
 import com.example.doscord.utils.SessionManager;
+import com.google.android.material.card.MaterialCardView;
 
 import java.util.List;
 
@@ -48,11 +55,16 @@ import retrofit2.Response;
 
 public class CrMainActivity extends AppCompatActivity {
     private ImageView homeIcon, notifIcon, pfpImg, profileIcon;
-    private TextView homeTxt, notifTxt, pfpTxt, profileDisplayName, profileUsername, profileCreatedAt, profileNFriends;
+    private TextView homeTxt, notifTxt, pfpTxt, profileDisplayName, profileUsername, profileCreatedAt, profileNFriends, editIdentifierLabel;
+    private TextView editIdentifierWarning;
+    private EditText editDisplayNameInput, editIdentifierInput;
+    private Button editSaveBtn;
     private int selected = 0;
     private RecyclerView homeChatsView;
-    private ConstraintLayout homeLayout, notifLayout, emptyNotifLayout, profileLayout, overlayLayout;
+    private MaterialCardView profileEditContainer, profilePlusContainer;
+    private ConstraintLayout homeLayout, notifLayout, emptyNotifLayout, profileLayout, overlayLayout, profileDataLayout;
     private int attempt = 0;
+    private boolean editable = false;
 
     // Updates
     private long lastSyncTime = 0;
@@ -106,12 +118,22 @@ public class CrMainActivity extends AppCompatActivity {
 
         profileLayout = findViewById(R.id.crMainProfileContainer);
         profileIcon = findViewById(R.id.crProfileIcon);
-        profileUsername = findViewById(R.id.crProfileUsernameTxt);
-        profileDisplayName = findViewById(R.id.crProfileDisplayNameTxt);
+        profileUsername = findViewById(R.id.crMainProfileUsernameTxt);
+        profileDisplayName = findViewById(R.id.crMainProfileDisplayNameTxt);
+        profileDataLayout = findViewById(R.id.crMainProfileDataContainer);
+        profileEditContainer = findViewById(R.id.crMainProfileEditContainer);
         profileCreatedAt = findViewById(R.id.crMainProfileMemberSinceTxt);
         profileNFriends = findViewById(R.id.crMainProfileNFriendsTxt);
 
+        editDisplayNameInput = findViewById(R.id.crMainProfileEditDisplayNameInput);
+        editIdentifierInput = findViewById(R.id.crMainProfileEditIdentifierInput);
+        editIdentifierLabel = findViewById(R.id.crMainProfileEditIdentifierLabel);
+        profilePlusContainer = findViewById(R.id.crMainProfilePlusContainer);
+        editIdentifierWarning = findViewById(R.id.crMainProfileEditIdentifierWarning);
+        editSaveBtn = findViewById(R.id.crMainProfileEditSaveBtn);
+
         overlayLayout = findViewById(R.id.crMainOverlay);
+        setupTextListener();
     }
 
     private void fetchData() {
@@ -164,8 +186,22 @@ public class CrMainActivity extends AppCompatActivity {
             String atUser = "@" + me.getUsername();
             profileUsername.setText(atUser);
             profileDisplayName.setText((me.getDisplayName() != null) ? me.getDisplayName() : me.getUsername());
-            profileCreatedAt.setText(Helpers.formatDate(me.getcreated_at()));
+            profileCreatedAt.setText(Helpers.formatDate(me.getCreated_at()));
             profileNFriends.setText(String.valueOf(GlobalData.getFriends().size()));
+
+            // Populate edit fields if not currently editing to avoid overwriting user input
+            if (!editable) {
+                editDisplayNameInput.setText(me.getDisplayName() != null ? me.getDisplayName() : "");
+
+                if (me.getEmail() != null && !me.getEmail().isEmpty()) {
+                    editIdentifierLabel.setText("Email");
+                    editIdentifierInput.setText(me.getEmail());
+                } else if (me.getPhone() != null && !me.getPhone().isEmpty()) {
+                    editIdentifierLabel.setText("Phone Number");
+                    editIdentifierInput.setText(me.getPhone());
+                }
+            }
+
         } else {
             Log.e("CrMainActivity", "GlobalData.getMyProfile() returned null!");
         }
@@ -323,6 +359,7 @@ public class CrMainActivity extends AppCompatActivity {
     }
 
     public void changePfp(View v) {
+        if (!editable) return;
         Intent intent = new Intent(this, RegPfpActivity.class);
         startActivity(intent);
     }
@@ -330,5 +367,108 @@ public class CrMainActivity extends AppCompatActivity {
     public void newChat(View v) {
         Intent intent = new Intent(this, CrNewChatActivity.class);
         startActivity(intent);
+    }
+
+    private void setupTextListener() {
+        editIdentifierInput.addTextChangedListener(new TextWatcher(){
+            @Override
+            public void afterTextChanged(Editable editable) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                editIdentifierWarning.setVisibility(View.GONE);
+                if (charSequence.length() == 0) {
+                    editSaveBtn.setEnabled(false);
+                    editSaveBtn.setAlpha(0.5f);
+                } else {
+                    editSaveBtn.setEnabled(true);
+                    editSaveBtn.setAlpha(1.0f);
+                }
+            }
+        });
+    }
+
+    public void editProfile(View v) {
+        editable = true;
+        profileDataLayout.setVisibility(View.GONE);
+        profilePlusContainer.setVisibility(View.VISIBLE);
+        profileEditContainer.setVisibility(View.VISIBLE);
+    }
+
+    public void saveProfileChanges(View v) {
+        User me = GlobalData.getMyProfile();
+        if (me == null) return;
+
+        String newDisplayName = editDisplayNameInput.getText().toString().trim();
+        String newIdentifier = editIdentifierInput.getText().toString().trim();
+
+        if (newIdentifier.equals(me.getEmail()) || newIdentifier.equals(me.getPhone())) {
+            if (newDisplayName.equals(me.getDisplayName())) {
+                editable = false;
+                profileDataLayout.setVisibility(View.VISIBLE);
+                profilePlusContainer.setVisibility(View.GONE);
+                profileEditContainer.setVisibility(View.GONE);
+                return;
+            }
+        }
+
+        // Double check email validity if in email mode
+        if (me.getEmail() != null && !me.getEmail().isEmpty()) {
+            if (!Helpers.isValidEmail(newIdentifier)) {
+                editIdentifierWarning.setVisibility(View.VISIBLE);
+                editIdentifierWarning.setText(R.string.please_enter_a_valid_email_address);
+                editIdentifierWarning.setTextColor(ContextCompat.getColor(this, R.color.red));
+                return;
+            }
+        }
+
+        String token = new SessionManager(this).getToken();
+        String email = null;
+        String phone = null;
+
+        if (me.getEmail() != null && !me.getEmail().isEmpty()) {
+            email = newIdentifier;
+        } else {
+            phone = newIdentifier;
+        }
+
+        editSaveBtn.setEnabled(false);
+        editSaveBtn.setAlpha(0.5f);
+
+        RetrofitClient.getApiService().updateUser(new UpdateUserRequest(token, newDisplayName, email, phone))
+                .enqueue(new Callback<UpdateUserResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UpdateUserResponse> call, @NonNull Response<UpdateUserResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            int code = response.body().getErrorCode();
+                            if (code == 0) {
+                                editable = false;
+                                profileEditContainer.setVisibility(View.GONE);
+                                profileDataLayout.setVisibility(View.VISIBLE);
+                                fetchData(); // Refresh data to show changes
+                            } else if (code == 1) {
+                                String type = (me.getEmail() != null && !me.getEmail().isEmpty()) ? "email" : "phone number";
+                                editIdentifierWarning.setText("This " + type + " is already taken!");
+                                editIdentifierWarning.setTextColor(ContextCompat.getColor(CrMainActivity.this, R.color.red));
+                                editIdentifierWarning.setVisibility(View.VISIBLE);
+                            } else {
+                                editIdentifierWarning.setText("Update failed");
+                                editIdentifierWarning.setVisibility(View.VISIBLE);
+                            }
+                        } else {
+                            editIdentifierWarning.setText("Server error");
+                            editIdentifierWarning.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UpdateUserResponse> call, @NonNull Throwable t) {
+                        editIdentifierWarning.setText("Network error");
+                        editIdentifierWarning.setVisibility(View.VISIBLE);
+                    }
+                });
     }
 }
