@@ -81,5 +81,8 @@ public interface ApiService {
     Call<Void> removeFriend(@Body RemoveFriendRequest request);
 
     @POST("block-friend")
-    Call<Void> removeFriend(@Body BlockFriendRequest request);
+    Call<Void> blockFriend(@Body BlockFriendRequest request);
+
+    @POST("update-nickname")
+    Call<Void> updateNickname(@Body UpdateNicknameRequest request);
 }

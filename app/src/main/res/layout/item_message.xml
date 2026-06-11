@@ -11,6 +11,7 @@
         android:id="@+id/itemMsgPfpContainer"
         android:layout_width="40dp"
         android:layout_height="40dp"
+        app:cardBackgroundColor="@android:color/transparent"
         app:cardCornerRadius="40dp"
         app:cardElevation="0dp"
         app:cardMaxElevation="0dp"

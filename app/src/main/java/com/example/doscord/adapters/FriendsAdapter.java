@@ -140,7 +140,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 TextView username = row.findViewById(R.id.itemFriendUsername);
                 MaterialCardView status = row.findViewById(R.id.itemFriendStatus);
                 
-                displayName.setText(user.getDisplayName() != null ? user.getDisplayName() : user.getUsername());
+                displayName.setText(user.getNameToDisplay());
                 username.setText(user.getUsername());
                 PfpUtils.loadPfp(context, user.getPfp(), pfp);
                 

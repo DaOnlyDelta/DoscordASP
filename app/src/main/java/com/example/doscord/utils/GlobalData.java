@@ -39,6 +39,13 @@ public class GlobalData {
                     }
                     if (isFriend) {
                         filteredChannels.add(channel);
+                        // Sync nickname from channel payload to friend user object for consistent display elsewhere
+                        for (User friend : friendList) {
+                            if (friend.getId() == channel.getDmRecipientId()) {
+                                friend.setNickname(channel.getDmRecipientNickname());
+                                break;
+                            }
+                        }
                     }
                 }
             }

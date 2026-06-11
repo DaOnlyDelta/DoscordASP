@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,6 +39,10 @@ import retrofit2.Response;
 
 public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    public interface UpdateListener {
+        void onUpdateRequired();
+    }
+
     private static final int VIEW_TYPE_LOADER = 0;
     private static final int VIEW_TYPE_NORMAL = 1;
     private static final int VIEW_TYPE_SEQUENTIAL = 2;
@@ -51,6 +54,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private List<Message> messagesList;
     private final List<Object> displayList = new ArrayList<>();
     private Context context;
+    private UpdateListener updateListener;
 
     private Channel currentChannel;
     private boolean showLoader = false;
@@ -60,6 +64,10 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         this.messagesList = messagesList;
         this.context = context;
         updateDisplayList();
+    }
+
+    public void setUpdateListener(UpdateListener updateListener) {
+        this.updateListener = updateListener;
     }
 
     public void setShowLoader(boolean showLoader) {
@@ -327,7 +335,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
                             @Override
                             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                                Toast.makeText(context, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -340,7 +347,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                         int friendId = currentChannel.getDmRecipientId();
 
                         BlockFriendRequest req = new BlockFriendRequest(activeUserId, friendId);
-                        Call<Void> call = RetrofitClient.getApiService().removeFriend(req);
+                        Call<Void> call = RetrofitClient.getApiService().blockFriend(req);
                         call.enqueue(new Callback<>() {
                             @Override
                             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
@@ -354,7 +361,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
                             @Override
                             public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                                Toast.makeText(context, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -371,11 +377,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         User sender = GlobalData.findUserById(message.getSenderId());
 
         if (sender != null) {
-            String nameToDisplay = sender.getDisplayName() != null && !sender.getDisplayName().isEmpty()
-                    ? sender.getDisplayName()
-                    : sender.getUsername();
-
-            holder.username.setText(nameToDisplay);
+            holder.username.setText(sender.getNameToDisplay());
             PfpUtils.loadPfp(context, sender.getPfp(), holder.pfp);
         } else {
             // Fallback layout state if the user profile isn't cached anywhere locally yet
