@@ -1,6 +1,7 @@
 package com.example.doscord.activities.chatroom;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -48,7 +49,7 @@ public class CrChatActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private EditText messageInput;
     private TextView chatTitle;
-    private View micBtn, sendBtn;
+    private View micBtn, sendBtn, addMemberBtn;
     private MessagesAdapter adapter;
     private final List<Message> messagesList = new ArrayList<>();
     private int channelId;
@@ -109,6 +110,7 @@ public class CrChatActivity extends AppCompatActivity {
         chatTitle = findViewById(R.id.crChatTitle);
         micBtn = findViewById(R.id.crChatVMContainer);
         sendBtn = findViewById(R.id.crChatSendContainer);
+        addMemberBtn = findViewById(R.id.crChatAddMemberContainer);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true);
@@ -122,6 +124,11 @@ public class CrChatActivity extends AppCompatActivity {
         currentChannel = lookupChannel();
         if (currentChannel != null) {
             adapter.setChannelContext(currentChannel);
+            if (currentChannel.isGroup()) {
+                addMemberBtn.setVisibility(View.VISIBLE);
+            } else {
+                addMemberBtn.setVisibility(View.GONE);
+            }
         }
 
         token = (new SessionManager(this)).getToken();
@@ -397,6 +404,15 @@ public class CrChatActivity extends AppCompatActivity {
         finish();
     }
 
+    public void addMember(View v) {
+        if (currentChannel != null && currentChannel.isGroup()) {
+            Intent intent = new Intent(this, CrNewGroupActivity.class);
+            intent.putExtra("isAddingMembers", true);
+            intent.putExtra("channelId", currentChannel.getChannelId());
+            startActivity(intent);
+        }
+    }
+
     // Safely look up the exact channel object mapping from our shared repository
     private void fetchData() {
         SessionManager sessionManager = new SessionManager(this);
@@ -414,8 +430,10 @@ public class CrChatActivity extends AppCompatActivity {
                         adapter.setChannelContext(currentChannel);
                         if (currentChannel.isGroup()) {
                             chatTitle.setText(currentChannel.getGroupName());
+                            addMemberBtn.setVisibility(View.VISIBLE);
                         } else {
                             chatTitle.setText(currentChannel.getDmDisplayNameOrNickname());
+                            addMemberBtn.setVisibility(View.GONE);
                         }
                     }
                 }

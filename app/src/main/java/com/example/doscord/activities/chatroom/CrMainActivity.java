@@ -55,7 +55,7 @@ import retrofit2.Response;
 
 public class CrMainActivity extends AppCompatActivity {
     private ImageView homeIcon, notifIcon, pfpImg, profileIcon;
-    private TextView homeTxt, notifTxt, pfpTxt, profileDisplayName, profileUsername, profileCreatedAt, profileNFriends, editIdentifierLabel;
+    private TextView homeTxt, notifTxt, pfpTxt, profileDisplayName, profileUsername, profileCreatedAt, profileNFriends, profileNBlocked, editIdentifierLabel;
     private TextView editIdentifierWarning;
     private EditText editDisplayNameInput, editIdentifierInput;
     private Button editSaveBtn;
@@ -124,6 +124,7 @@ public class CrMainActivity extends AppCompatActivity {
         profileEditContainer = findViewById(R.id.crMainProfileEditContainer);
         profileCreatedAt = findViewById(R.id.crMainProfileMemberSinceTxt);
         profileNFriends = findViewById(R.id.crMainProfileNFriendsTxt);
+        profileNBlocked = findViewById(R.id.crMainProfileBlockedTxt);
 
         editDisplayNameInput = findViewById(R.id.crMainProfileEditDisplayNameInput);
         editIdentifierInput = findViewById(R.id.crMainProfileEditIdentifierInput);
@@ -188,6 +189,7 @@ public class CrMainActivity extends AppCompatActivity {
             profileDisplayName.setText((me.getDisplayName() != null) ? me.getDisplayName() : me.getUsername());
             profileCreatedAt.setText(Helpers.formatDate(me.getCreated_at()));
             profileNFriends.setText(String.valueOf(GlobalData.getFriends().size()));
+            profileNBlocked.setText(String.valueOf(GlobalData.getBlocked().size()));
 
             // Populate edit fields if not currently editing to avoid overwriting user input
             if (!editable) {
@@ -256,6 +258,11 @@ public class CrMainActivity extends AppCompatActivity {
 
     public void openAddFriends(View v) {
         Intent intent = new Intent(this, AddFriendsActivity.class);
+        startActivity(intent);
+    }
+
+    public void openBlockedUsers(View v) {
+        Intent intent = new Intent(this, CrBlockListActivity.class);
         startActivity(intent);
     }
 

@@ -5,17 +5,22 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.doscord.R;
 import com.example.doscord.activities.chatroom.CrChatActivity;
 import com.example.doscord.api.BlockFriendRequest;
+import com.example.doscord.api.LeaveGroupRequest;
+import com.example.doscord.api.RenameGroupRequest;
 import com.example.doscord.api.RemoveFriendRequest;
 import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.api.UpdateNicknameRequest;
@@ -23,6 +28,7 @@ import com.example.doscord.models.Channel;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.utils.Helpers;
 import com.example.doscord.utils.PfpUtils;
+import com.example.doscord.utils.SessionManager;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -178,9 +184,21 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
             username.setVisibility(View.GONE);
             PfpUtils.loadGroupPfp(context, channel.getGroupPfp(), pfp);
 
-            bottomSheetView.findViewById(R.id.bsLeaveGroup).setOnClickListener(v -> {
-                // For now just close the bottom sheet
+            bottomSheetView.findViewById(R.id.bsRenameGroup).setOnClickListener(v -> {
                 bottomSheetDialog.dismiss();
+                showRenameGroupDialog(channel);
+            });
+
+            bottomSheetView.findViewById(R.id.bsLeaveGroup).setOnClickListener(v -> {
+                new MaterialAlertDialogBuilder(v.getContext())
+                        .setTitle("Leave Group")
+                        .setMessage("Are you sure you want to leave this group?")
+                        .setPositiveButton("Leave", (dialog, which) -> {
+                            leaveGroup(channel.getChannelId());
+                            bottomSheetDialog.dismiss();
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
             });
         } else {
             dmOptions.setVisibility(View.VISIBLE);
@@ -196,13 +214,29 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
             });
 
             bottomSheetView.findViewById(R.id.bsRemoveFriend).setOnClickListener(v -> {
-                handleFriendAction(channel.getDmRecipientId(), false);
-                bottomSheetDialog.dismiss();
+                String name = channel.getDmDisplayNameOrNickname();
+                new MaterialAlertDialogBuilder(v.getContext())
+                        .setTitle("Remove Friend")
+                        .setMessage("Are you sure you want to remove " + name + " from your friends?")
+                        .setPositiveButton("Remove", (dialog, which) -> {
+                            handleFriendAction(channel.getDmRecipientId(), false);
+                            bottomSheetDialog.dismiss();
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
             });
 
             bottomSheetView.findViewById(R.id.bsBlock).setOnClickListener(v -> {
-                handleFriendAction(channel.getDmRecipientId(), true);
-                bottomSheetDialog.dismiss();
+                String name = channel.getDmDisplayNameOrNickname();
+                new MaterialAlertDialogBuilder(v.getContext())
+                        .setTitle("Block User")
+                        .setMessage("Are you sure you want to block " + name + "? They will no longer be able to add you.")
+                        .setPositiveButton("Block", (dialog, which) -> {
+                            handleFriendAction(channel.getDmRecipientId(), true);
+                            bottomSheetDialog.dismiss();
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
             });
         }
 
@@ -235,19 +269,63 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
     }
 
     private void showNicknameDialog(Channel channel) {
-        android.widget.EditText input = new android.widget.EditText(context);
-        input.setHint("Enter nickname");
-        input.setText(channel.getDmDisplayNameOrNickname());
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_nickname, null);
+        EditText input = dialogView.findViewById(R.id.etNickname);
+        Button btnSave = dialogView.findViewById(R.id.btnSave);
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
 
-        new MaterialAlertDialogBuilder(context)
-                .setTitle("Set Nickname")
-                .setView(input)
-                .setPositiveButton("Save", (dialog, which) -> {
-                    String nickname = input.getText().toString().trim();
-                    updateNickname(channel.getDmRecipientId(), nickname);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+        String currentNickname = channel.getDmRecipientNickname();
+        if (currentNickname != null && !currentNickname.isEmpty()) {
+            input.setText(currentNickname);
+            input.setSelection(input.getText().length());
+        } else {
+            String displayName = channel.getDmRecipientDisplayName();
+            if (displayName != null && !displayName.isEmpty()) {
+                input.setHint(displayName);
+            } else {
+                input.setHint(channel.getDmRecipientUsername());
+            }
+        }
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .setBackground(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+                .create();
+
+        btnSave.setOnClickListener(v -> {
+            String nickname = input.getText().toString().trim();
+            updateNickname(channel.getDmRecipientId(), nickname);
+            dialog.dismiss();
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    private void showRenameGroupDialog(Channel channel) {
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_rename_group, null);
+        EditText input = dialogView.findViewById(R.id.etGroupName);
+        Button btnSave = dialogView.findViewById(R.id.btnSave);
+        Button btnCancel = dialogView.findViewById(R.id.btnCancel);
+
+        input.setText(channel.getGroupName());
+        input.setSelection(input.getText() != null ? input.getText().length() : 0);
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .setBackground(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+                .create();
+
+        btnSave.setOnClickListener(v -> {
+            String newName = input.getText().toString().trim();
+            updateGroupName(channel.getChannelId(), newName);
+            dialog.dismiss();
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     private void updateNickname(int friendId, String nickname) {
@@ -266,6 +344,38 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
                     @Override
                     public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     }
+                });
+    }
+
+    private void leaveGroup(int channelId) {
+        String token = new SessionManager(context).getToken();
+        RetrofitClient.getApiService().leaveGroup(new LeaveGroupRequest(token, channelId))
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                        if (response.isSuccessful() && updateListener != null) {
+                            updateListener.onUpdateRequired();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+                });
+    }
+
+    private void updateGroupName(int channelId, String newName) {
+        int userId = GlobalData.getActiveUserId();
+        RetrofitClient.getApiService().renameGroup(new RenameGroupRequest(userId, channelId, newName))
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                        if (response.isSuccessful() && updateListener != null) {
+                            updateListener.onUpdateRequired();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
                 });
     }
 

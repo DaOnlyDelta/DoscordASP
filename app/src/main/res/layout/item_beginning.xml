@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="16dp">
+    android:paddingHorizontal="16dp"
+    android:paddingTop="20dp">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/itemBeginPfpContainer"
@@ -75,9 +76,9 @@
         app:cardCornerRadius="45dp"
         app:cardElevation="0dp"
         app:cardMaxElevation="0dp"
-        app:rippleColor="@android:color/transparent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/itemBeginLabel"
+        app:rippleColor="@android:color/transparent"
         app:strokeWidth="0dp">
 
         <TextView
@@ -106,9 +107,9 @@
         app:cardCornerRadius="45dp"
         app:cardElevation="0dp"
         app:cardMaxElevation="0dp"
-        app:rippleColor="@android:color/transparent"
         app:layout_constraintStart_toEndOf="@id/itemBeginRemoveBtnContainer"
         app:layout_constraintTop_toBottomOf="@id/itemBeginLabel"
+        app:rippleColor="@android:color/transparent"
         app:strokeWidth="0dp">
 
         <TextView

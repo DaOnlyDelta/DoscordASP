@@ -85,4 +85,13 @@ public interface ApiService {
 
     @POST("update-nickname")
     Call<Void> updateNickname(@Body UpdateNicknameRequest request);
+
+    @POST("groups/leave")
+    Call<Void> leaveGroup(@Body LeaveGroupRequest request);
+
+    @POST("groups/rename")
+    Call<Void> renameGroup(@Body RenameGroupRequest request);
+
+    @POST("unblock")
+    Call<Void> unblock(@Body UnblockUserRequest request);
 }

@@ -25,6 +25,7 @@ import com.example.doscord.models.User;
 import com.example.doscord.utils.GlobalData;
 import com.example.doscord.models.Message;
 import com.example.doscord.utils.PfpUtils;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -144,13 +145,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         Message previous = null;
-        for (int i = position - 1; i >= 0; i--) {
-            // Ensure sequential processing skips over system row objects gracefully
-            if (displayList.get(i) instanceof Message) {
-                Message temp = (Message) displayList.get(i);
+        if (position > 0) {
+            Object prevItem = displayList.get(position - 1);
+            if (prevItem instanceof Message) {
+                Message temp = (Message) prevItem;
                 if (!"system".equalsIgnoreCase(temp.getType())) {
                     previous = temp;
-                    break;
                 }
             }
         }
@@ -234,13 +234,30 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             sysHolder.text.setText(msg.getMessageText());
             sysHolder.date.setText(formattedTime(msg.getSentAt()));
 
-            // Check for red action
-            if (msg.getMessageText().split(" ")[1].equals("removed")) {
-                sysHolder.arrow.setRotationY(0f);
-                // Fetch the color from your resources and apply it as a tint list
-                sysHolder.arrow.setImageTintList(android.content.res.ColorStateList.valueOf(
-                        context.getColor(R.color.red)
-                ));
+            String messageText = msg.getMessageText();
+            if (messageText != null) {
+                if (messageText.contains("left")) {
+                    // Red action: User left
+                    sysHolder.arrow.setRotationY(0f);
+                    sysHolder.arrow.setImageResource(R.drawable.back_arrow);
+                    sysHolder.arrow.setImageTintList(android.content.res.ColorStateList.valueOf(
+                            context.getColor(R.color.red)
+                    ));
+                } else if (messageText.contains("group name")) {
+                    // White action: Group name changed or reset
+                    sysHolder.arrow.setRotationY(0f);
+                    sysHolder.arrow.setImageResource(R.drawable.pencil);
+                    sysHolder.arrow.setImageTintList(android.content.res.ColorStateList.valueOf(
+                            context.getColor(R.color.white)
+                    ));
+                } else {
+                    // Green action: User joined or other positive log
+                    sysHolder.arrow.setRotationY(180f);
+                    sysHolder.arrow.setImageResource(R.drawable.back_arrow);
+                    sysHolder.arrow.setImageTintList(android.content.res.ColorStateList.valueOf(
+                            context.getColor(R.color.green)
+                    ));
+                }
             }
         } else if (holder instanceof SequentialViewHolder) {
             ((SequentialViewHolder) holder).content.setText(((Message) item).getMessageText());
@@ -256,11 +273,9 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             bottomPadding = (int) (2 * density);
         }
 
-        // SystemViewHolder only gets padding if it's the last item
+        // SystemViewHolder must also have padding applied to reset dynamic changes if it's no longer the last item
         if (holder instanceof SystemViewHolder) {
-            if (position == getItemCount() - 1) {
-                holder.itemView.setPadding(holder.itemView.getPaddingLeft(), topPadding, holder.itemView.getPaddingRight(), bottomPadding);
-            }
+            holder.itemView.setPadding(holder.itemView.getPaddingLeft(), topPadding, holder.itemView.getPaddingRight(), bottomPadding);
         } else {
             holder.itemView.setPadding(horizontalPadding, topPadding, horizontalPadding, bottomPadding);
         }
@@ -316,54 +331,64 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             // Set up click listeners for your new group action buttons
             if (holder.removeBtn != null) {
                 holder.removeBtn.setOnClickListener(v -> {
-                    if (currentChannel != null && currentChannel.getDmRecipientId() != null) {
-                        int activeUserId = GlobalData.getActiveUserId();
-                        int friendId = currentChannel.getDmRecipientId();
+                    String name = currentChannel.getDmDisplayNameOrNickname();
+                    new MaterialAlertDialogBuilder(v.getContext())
+                            .setTitle("Remove Friend")
+                            .setMessage("Are you sure you want to remove " + name + " from your friends?")
+                            .setPositiveButton("Remove", (dialog, which) -> {
+                                if (currentChannel != null && currentChannel.getDmRecipientId() != null) {
+                                    int activeUserId = GlobalData.getActiveUserId();
+                                    int friendId = currentChannel.getDmRecipientId();
 
-                        RemoveFriendRequest req = new RemoveFriendRequest(activeUserId, friendId);
-                        Call<Void> call = RetrofitClient.getApiService().removeFriend(req);
-                        call.enqueue(new Callback<>() {
-                            @Override
-                            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                                if (response.isSuccessful()) {
-                                    Activity activity = getActivity(v.getContext());
-                                    if (activity != null) {
-                                        activity.finish();
-                                    }
+                                    RemoveFriendRequest req = new RemoveFriendRequest(activeUserId, friendId);
+                                    Call<Void> call = RetrofitClient.getApiService().removeFriend(req);
+                                    call.enqueue(new Callback<Void>() {
+                                        @Override
+                                        public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                                            if (response.isSuccessful()) {
+                                                Activity activity = getActivity(v.getContext());
+                                                if (activity != null) activity.finish();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+                                    });
                                 }
-                            }
-
-                            @Override
-                            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                            }
-                        });
-                    }
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .show();
                 });
             }
             if (holder.blockBtn != null) {
                 holder.blockBtn.setOnClickListener(v -> {
-                    if (currentChannel != null && currentChannel.getDmRecipientId() != null) {
-                        int activeUserId = GlobalData.getActiveUserId();
-                        int friendId = currentChannel.getDmRecipientId();
+                    String name = currentChannel.getDmDisplayNameOrNickname();
+                    new MaterialAlertDialogBuilder(v.getContext())
+                            .setTitle("Block User")
+                            .setMessage("Are you sure you want to block " + name + "? They will no longer be able to add you.")
+                            .setPositiveButton("Block", (dialog, which) -> {
+                                if (currentChannel != null && currentChannel.getDmRecipientId() != null) {
+                                    int activeUserId = GlobalData.getActiveUserId();
+                                    int friendId = currentChannel.getDmRecipientId();
 
-                        BlockFriendRequest req = new BlockFriendRequest(activeUserId, friendId);
-                        Call<Void> call = RetrofitClient.getApiService().blockFriend(req);
-                        call.enqueue(new Callback<>() {
-                            @Override
-                            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                                if (response.isSuccessful()) {
-                                    Activity activity = getActivity(v.getContext());
-                                    if (activity != null) {
-                                        activity.finish();
-                                    }
+                                    BlockFriendRequest req = new BlockFriendRequest(activeUserId, friendId);
+                                    Call<Void> call = RetrofitClient.getApiService().blockFriend(req);
+                                    call.enqueue(new Callback<Void>() {
+                                        @Override
+                                        public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                                            if (response.isSuccessful()) {
+                                                Activity activity = getActivity(v.getContext());
+                                                if (activity != null) activity.finish();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {}
+                                    });
                                 }
-                            }
-
-                            @Override
-                            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                            }
-                        });
-                    }
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .show();
                 });
             }
         }

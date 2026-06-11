@@ -11,6 +11,7 @@ public class TokenLoginResponse {
     private List<Channel> channels;
     private List<User> pendingRequests;
     private List<User> friends;
+    private List<User> blocked;
     private long sync_timestamp;
 
     public Integer getErrorCode() { return errorCode; }
@@ -19,5 +20,6 @@ public class TokenLoginResponse {
     public List<Channel> getChannels() { return channels; }
     public List<User> getPendingRequests() { return pendingRequests; }
     public List<User> getFriends() { return friends; }
+    public List<User> getBlocked() { return blocked; }
     public long getSyncTimestamp() { return sync_timestamp; }
 }

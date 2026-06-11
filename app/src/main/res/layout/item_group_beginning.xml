@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="16dp">
+    android:paddingHorizontal="16dp"
+    android:paddingTop="20dp">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/itemGroupBeginPfpContainer"
@@ -70,10 +71,10 @@
         app:cardCornerRadius="10dp"
         app:cardElevation="0dp"
         app:cardMaxElevation="0dp"
-        app:rippleColor="@android:color/transparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/itemGroupBeginLabel"
+        app:rippleColor="@android:color/transparent"
         app:strokeWidth="0dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
