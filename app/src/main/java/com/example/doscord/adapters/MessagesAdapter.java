@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.airbnb.lottie.LottieAnimationView;
 import com.example.doscord.R;
 import com.example.doscord.activities.chatroom.CrNewGroupActivity;
+import com.example.doscord.api.BlockFriendRequest;
 import com.example.doscord.api.RemoveFriendRequest;
 import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.models.Channel;
@@ -313,7 +314,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
                         RemoveFriendRequest req = new RemoveFriendRequest(activeUserId, friendId);
                         Call<Void> call = RetrofitClient.getApiService().removeFriend(req);
-                        call.enqueue(new Callback<Void>() {
+                        call.enqueue(new Callback<>() {
                             @Override
                             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                                 if (response.isSuccessful()) {
@@ -334,7 +335,29 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
             if (holder.blockBtn != null) {
                 holder.blockBtn.setOnClickListener(v -> {
-                    // Handle block button click
+                    if (currentChannel != null && currentChannel.getDmRecipientId() != null) {
+                        int activeUserId = GlobalData.getActiveUserId();
+                        int friendId = currentChannel.getDmRecipientId();
+
+                        BlockFriendRequest req = new BlockFriendRequest(activeUserId, friendId);
+                        Call<Void> call = RetrofitClient.getApiService().removeFriend(req);
+                        call.enqueue(new Callback<>() {
+                            @Override
+                            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                                if (response.isSuccessful()) {
+                                    Activity activity = getActivity(v.getContext());
+                                    if (activity != null) {
+                                        activity.finish();
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                                Toast.makeText(context, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
                 });
             }
         }

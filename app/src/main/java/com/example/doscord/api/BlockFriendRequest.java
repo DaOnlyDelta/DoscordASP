@@ -1,10 +1,10 @@
 package com.example.doscord.api;
 
-public class RemoveFriendRequest {
+public class BlockFriendRequest {
     private int userId;
     private int friendId;
 
-    public RemoveFriendRequest(int userId, int friendId) {
+    public BlockFriendRequest(int userId, int friendId) {
         this.userId = userId;
         this.friendId = friendId;
     }
