@@ -32,12 +32,15 @@ public class Channel {
     public String getDmRecipientPfp() { return dm_recipient_pfp; }
     public boolean isDmRecipientOnline() { return dm_recipient_online != null && dm_recipient_online == 1; }
 
-    // Helper getter to prioritize custom nickname over display name
+    // Helper getter to prioritize custom nickname over display name and username
     public String getDmDisplayNameOrNickname() {
         if (dm_recipient_nickname != null && !dm_recipient_nickname.trim().isEmpty()) {
             return dm_recipient_nickname;
         }
-        return dm_recipient_display_name;
+        if (dm_recipient_display_name != null && !dm_recipient_display_name.trim().isEmpty()) {
+            return dm_recipient_display_name;
+        }
+        return dm_recipient_username;
     }
 
     public String getDmRecipientNickname() { return dm_recipient_nickname; }

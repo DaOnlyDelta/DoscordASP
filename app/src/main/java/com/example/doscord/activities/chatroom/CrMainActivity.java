@@ -228,6 +228,7 @@ public class CrMainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         ChatsAdapter adapter = new ChatsAdapter(channels, this);
+        adapter.setUpdateListener(this::fetchData);
         recyclerView.setAdapter(adapter);
 
         // 2. Load dedicated complete pending User arrays straight to notifications matching fragment layout

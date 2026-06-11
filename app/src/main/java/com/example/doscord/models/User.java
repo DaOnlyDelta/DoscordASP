@@ -10,11 +10,20 @@ public class User {
     private int is_online;
     private String friends_since;
     private String created_at;
+    private String nickname;
 
     // Getters
     public int getId() { return id; }
     public String getUsername() { return username; }
     public String getDisplayName() { return display_name; }
+    public String getNickname() { return nickname; }
+
+    public String getNameToDisplay() {
+        if (nickname != null && !nickname.isEmpty()) return nickname;
+        if (display_name != null && !display_name.isEmpty()) return display_name;
+        return username;
+    }
+
     public String getEmail() { return email; }
     public String getPhone() { return phone; }
     public String getPfp() { return pfp; }
@@ -45,5 +54,9 @@ public class User {
 
     public void setPfp(String pfp) {
         this.pfp = pfp;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 }

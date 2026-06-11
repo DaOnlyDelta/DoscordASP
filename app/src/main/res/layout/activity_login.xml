@@ -41,7 +41,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logIdentifierInput" />
+        app:layout_constraintTop_toBottomOf="@id/logIdentifierInputContainer" />
 
     <TextView
         android:id="@+id/logPassWarning"
@@ -120,22 +120,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logSubtitle" />
 
-    <EditText
-        android:id="@+id/logIdentifierInput"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/logIdentifierInputContainer"
         android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="5dp"
         android:layout_marginEnd="20dp"
-        android:autofillHints="email, phone_number"
-        android:background="@drawable/input_background"
-        android:inputType="text"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:textSize="16sp"
+        android:stateListAnimator="@null"
+        app:cardBackgroundColor="#131418"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:cardMaxElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logUserLabel" />
+        app:layout_constraintTop_toBottomOf="@+id/logUserLabel"
+        app:strokeWidth="0dp">
+
+        <EditText
+            android:id="@+id/logIdentifierInput"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:autofillHints="email, phone_number"
+            android:background="@null"
+            android:inputType="text"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
         android:id="@+id/logPassLabel"
@@ -151,56 +165,55 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logIdentifierWarning" />
 
-    <RelativeLayout
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/logPassContainer"
         android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="5dp"
         android:layout_marginEnd="20dp"
+        android:stateListAnimator="@null"
+        app:cardBackgroundColor="#131418"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:cardMaxElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logPassLabel">
+        app:layout_constraintTop_toBottomOf="@id/logPassLabel"
+        app:strokeWidth="0dp">
 
-        <EditText
-            android:id="@+id/logPassInput"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:autofillHints="password"
-            android:background="@drawable/input_background"
-            android:inputType="textPassword"
-            android:paddingStart="15dp"
-            android:paddingEnd="48dp"
-            android:textSize="16sp" />
+            android:layout_height="50dp">
 
-        <ImageButton
-            android:id="@+id/logPassEyeBtn"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="8dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/toggle_password_visibility"
-            android:onClick="logSwitchEye"
-            android:src="@drawable/eye_closed" />
-    </RelativeLayout>
+            <EditText
+                android:id="@+id/logPassInput"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:autofillHints="password"
+                android:background="@null"
+                android:inputType="textPassword"
+                android:paddingStart="15dp"
+                android:paddingEnd="48dp"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
 
-    <TextView
-        android:id="@+id/logForgotPass"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="5dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center|left"
-        android:onClick="forgotPassword"
-        android:text="@string/forgot_your_password"
-        android:textColor="#3B9FDC"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logPassWarning"
-        tools:ignore="RtlHardcoded" />
+            <ImageButton
+                android:id="@+id/logPassEyeBtn"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/toggle_password_visibility"
+                android:onClick="logSwitchEye"
+                android:padding="12dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/eye_closed"
+                app:tint="@color/white" />
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <FrameLayout
         android:id="@+id/logBtnContainer"
@@ -211,7 +224,7 @@
         android:layout_marginEnd="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logForgotPass">
+        app:layout_constraintTop_toBottomOf="@+id/logPassContainer">
 
         <Button
             android:id="@+id/logBtn"
@@ -219,7 +232,7 @@
             android:layout_height="match_parent"
             android:backgroundTint="#5865f2"
             android:onClick="loginReq"
-            android:text="@string/loginTogether"
+            android:text="@string/login"
             android:textColor="@color/white"
             android:textSize="18sp" />
 

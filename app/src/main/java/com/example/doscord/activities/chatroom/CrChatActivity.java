@@ -115,6 +115,7 @@ public class CrChatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
 
         adapter = new MessagesAdapter(messagesList, this);
+        adapter.setUpdateListener(this::fetchData);
         recyclerView.setAdapter(adapter);
 
         // Find the current channel context from our repository
@@ -140,7 +141,7 @@ public class CrChatActivity extends AppCompatActivity {
             chatTitle.setText(chatName);
         }
 
-        micBtn.setOnClickListener(v -> Toast.makeText(this, "Voice messages coming soon!", Toast.LENGTH_SHORT).show());
+        micBtn.setOnClickListener(v -> {});
     }
 
     private void loadMessages() {
@@ -413,6 +414,8 @@ public class CrChatActivity extends AppCompatActivity {
                         adapter.setChannelContext(currentChannel);
                         if (currentChannel.isGroup()) {
                             chatTitle.setText(currentChannel.getGroupName());
+                        } else {
+                            chatTitle.setText(currentChannel.getDmDisplayNameOrNickname());
                         }
                     }
                 }

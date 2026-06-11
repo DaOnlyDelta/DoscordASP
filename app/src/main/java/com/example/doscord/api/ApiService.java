@@ -76,4 +76,13 @@ public interface ApiService {
 
     @POST("update-user")
     Call<UpdateUserResponse> updateUser(@Body UpdateUserRequest request);
+
+    @POST("remove-friend")
+    Call<Void> removeFriend(@Body RemoveFriendRequest request);
+
+    @POST("block-friend")
+    Call<Void> blockFriend(@Body BlockFriendRequest request);
+
+    @POST("update-nickname")
+    Call<Void> updateNickname(@Body UpdateNicknameRequest request);
 }

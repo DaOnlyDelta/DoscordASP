@@ -26,23 +26,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/regBdayBtnContainer" />
 
-    <TextView
-        android:id="@+id/regBdayWarning"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="7dp"
-        android:layout_marginEnd="20dp"
-        android:letterSpacing="0.02"
-        android:text="@string/must_be_at_least_13_years_old_to_create_an_account"
-        android:textColor="@color/red"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/regBdayInput" />
-
     <ImageButton
         android:id="@+id/backBtn"
         android:layout_width="48dp"
@@ -88,29 +71,56 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/regBdayTitle" />
 
-    <EditText
-        android:id="@+id/regBdayInput"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/regBdayInputContainer"
         android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginHorizontal="20dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="5dp"
         android:layout_marginEnd="20dp"
-        android:autofillHints="birthday"
-        android:background="@drawable/input_background_transparent"
-        android:clickable="true"
-        android:focusable="false"
-        android:inputType="none"
-        android:paddingHorizontal="15dp"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#767676"
-        android:textSize="16sp"
+        android:stateListAnimator="@null"
+        app:cardBackgroundColor="#131418"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:cardMaxElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/regBdayLabel"
-        tools:ignore="KeyboardInaccessibleWidget" />
+        app:strokeWidth="0dp">
+
+        <EditText
+            android:id="@+id/regBdayInput"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:autofillHints="birthday"
+            android:background="@null"
+            android:clickable="true"
+            android:focusable="false"
+            android:inputType="none"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#767676"
+            android:textSize="16sp" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/regBdayWarning"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="20dp"
+        android:letterSpacing="0.02"
+        android:text="@string/must_be_at_least_13_years_old_to_create_an_account"
+        android:textColor="@color/red"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/regBdayInputContainer" />
 
     <FrameLayout
         android:id="@+id/regBdayBtnContainer"

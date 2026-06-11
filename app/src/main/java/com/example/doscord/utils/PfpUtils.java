@@ -38,7 +38,8 @@ public class PfpUtils {
                     .load(fullPath)
                     .placeholder(R.drawable.icon)
                     .error(R.drawable.icon)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
                     .centerCrop()
                     .circleCrop()
                     .into(imageView);
@@ -64,7 +65,8 @@ public class PfpUtils {
                 .load(fullPath)
                 .placeholder(R.drawable.pfp_group_placeholder)
                 .error(R.drawable.pfp_group_placeholder)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .centerCrop()
                 .circleCrop()
                 .into(imageView);

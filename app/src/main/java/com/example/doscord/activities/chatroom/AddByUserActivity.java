@@ -120,6 +120,9 @@ public class AddByUserActivity extends AppCompatActivity {
             case 3:
                 message = "Friend request already pending.";
                 break;
+            case 4:
+                message = "You cannot send a friend request to this user.";
+                break;
             case 97:
                 message = "You cannot send a friend request to yourself.";
                 break;

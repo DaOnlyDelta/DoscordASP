@@ -1,7 +1,9 @@
 package com.example.doscord.adapters;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +16,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.example.doscord.R;
-import com.example.doscord.activities.chatroom.CrMainActivity;
 import com.example.doscord.activities.chatroom.CrNewGroupActivity;
+import com.example.doscord.api.BlockFriendRequest;
+import com.example.doscord.api.RemoveFriendRequest;
+import com.example.doscord.api.RetrofitClient;
 import com.example.doscord.models.Channel;
 import com.example.doscord.models.User;
 import com.example.doscord.utils.GlobalData;
@@ -29,18 +33,28 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    public interface UpdateListener {
+        void onUpdateRequired();
+    }
 
     private static final int VIEW_TYPE_LOADER = 0;
     private static final int VIEW_TYPE_NORMAL = 1;
     private static final int VIEW_TYPE_SEQUENTIAL = 2;
     private static final int VIEW_TYPE_SPLITTER = 3;
-    private static final int VIEW_TYPE_BEGINNING = 4;
-    private static final int VIEW_TYPE_SYSTEM = 5;
+    private static final int VIEW_TYPE_BEGINNING_DM = 4;
+    private static final int VIEW_TYPE_BEGINNING_GROUP = 5;
+    private static final int VIEW_TYPE_SYSTEM = 6;
 
     private List<Message> messagesList;
     private final List<Object> displayList = new ArrayList<>();
     private Context context;
+    private UpdateListener updateListener;
 
     private Channel currentChannel;
     private boolean showLoader = false;
@@ -50,6 +64,10 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         this.messagesList = messagesList;
         this.context = context;
         updateDisplayList();
+    }
+
+    public void setUpdateListener(UpdateListener updateListener) {
+        this.updateListener = updateListener;
     }
 
     public void setShowLoader(boolean showLoader) {
@@ -110,7 +128,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         if (item instanceof String) {
             if (item.equals("LOADER")) return VIEW_TYPE_LOADER;
-            if (item.equals("BEGINNING")) return VIEW_TYPE_BEGINNING;
+            if (item.equals("BEGINNING")) {
+                if (currentChannel != null && currentChannel.isGroup()) {
+                    return VIEW_TYPE_BEGINNING_GROUP;
+                }
+                return VIEW_TYPE_BEGINNING_DM;
+            }
             return VIEW_TYPE_SPLITTER;
         }
 
@@ -166,15 +189,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } else if (viewType == VIEW_TYPE_SPLITTER) {
             View view = inflater.inflate(R.layout.item_message_splitter, parent, false);
             return new SplitterViewHolder(view);
-        } else if (viewType == VIEW_TYPE_BEGINNING) {
-            // Dynamically select the layout file based on group status
-            if (currentChannel != null && currentChannel.isGroup()) {
-                View view = inflater.inflate(R.layout.item_group_beginning, parent, false);
-                return new BeginningViewHolder(view, true);
-            } else {
-                View view = inflater.inflate(R.layout.item_beginning, parent, false);
-                return new BeginningViewHolder(view, false);
-            }
+        } else if (viewType == VIEW_TYPE_BEGINNING_GROUP) {
+            View view = inflater.inflate(R.layout.item_group_beginning, parent, false);
+            return new BeginningViewHolder(view, true);
+        } else if (viewType == VIEW_TYPE_BEGINNING_DM) {
+            View view = inflater.inflate(R.layout.item_beginning, parent, false);
+            return new BeginningViewHolder(view, false);
         } else if (viewType == VIEW_TYPE_SYSTEM) {
             View view = inflater.inflate(R.layout.item_system_message, parent, false);
             return new SystemViewHolder(view);
@@ -288,12 +308,64 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 holder.username.setVisibility(View.VISIBLE);
                 holder.username.setText("@" + currentChannel.getDmRecipientUsername());
             }
-            holder.label.setText("This is the very beginning of your legendary conversation with " + dName + ".");
-
-            if (holder.removeBtn != null) holder.removeBtn.setVisibility(View.VISIBLE);
-            if (holder.blockBtn != null) holder.blockBtn.setVisibility(View.VISIBLE);
+            String sTitle = "This is the very beginning of your legendary conversation with " + dName + ".";
+            holder.label.setText(sTitle);
 
             PfpUtils.loadPfp(context, currentChannel.getDmRecipientPfp(), holder.pfp);
+
+            // Set up click listeners for your new group action buttons
+            if (holder.removeBtn != null) {
+                holder.removeBtn.setOnClickListener(v -> {
+                    if (currentChannel != null && currentChannel.getDmRecipientId() != null) {
+                        int activeUserId = GlobalData.getActiveUserId();
+                        int friendId = currentChannel.getDmRecipientId();
+
+                        RemoveFriendRequest req = new RemoveFriendRequest(activeUserId, friendId);
+                        Call<Void> call = RetrofitClient.getApiService().removeFriend(req);
+                        call.enqueue(new Callback<>() {
+                            @Override
+                            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                                if (response.isSuccessful()) {
+                                    Activity activity = getActivity(v.getContext());
+                                    if (activity != null) {
+                                        activity.finish();
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                            }
+                        });
+                    }
+                });
+            }
+            if (holder.blockBtn != null) {
+                holder.blockBtn.setOnClickListener(v -> {
+                    if (currentChannel != null && currentChannel.getDmRecipientId() != null) {
+                        int activeUserId = GlobalData.getActiveUserId();
+                        int friendId = currentChannel.getDmRecipientId();
+
+                        BlockFriendRequest req = new BlockFriendRequest(activeUserId, friendId);
+                        Call<Void> call = RetrofitClient.getApiService().blockFriend(req);
+                        call.enqueue(new Callback<>() {
+                            @Override
+                            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                                if (response.isSuccessful()) {
+                                    Activity activity = getActivity(v.getContext());
+                                    if (activity != null) {
+                                        activity.finish();
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                            }
+                        });
+                    }
+                });
+            }
         }
     }
 
@@ -305,11 +377,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         User sender = GlobalData.findUserById(message.getSenderId());
 
         if (sender != null) {
-            String nameToDisplay = sender.getDisplayName() != null && !sender.getDisplayName().isEmpty()
-                    ? sender.getDisplayName()
-                    : sender.getUsername();
-
-            holder.username.setText(nameToDisplay);
+            holder.username.setText(sender.getNameToDisplay());
             PfpUtils.loadPfp(context, sender.getPfp(), holder.pfp);
         } else {
             // Fallback layout state if the user profile isn't cached anywhere locally yet
@@ -459,5 +527,11 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             e.printStackTrace();
             return rawTime;
         }
+    }
+
+    private Activity getActivity(Context context) {
+        if (context instanceof Activity) return (Activity) context;
+        if (context instanceof ContextWrapper) return getActivity(((ContextWrapper) context).getBaseContext());
+        return null;
     }
 }
