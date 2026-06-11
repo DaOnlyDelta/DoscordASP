@@ -20,12 +20,31 @@ public class GlobalData {
         pendingRequests = response.getPendingRequests();
         friendList = response.getFriends();
 
-        channelList.clear();
         List<Channel> incomingChannels = response.getChannels();
-
         if (incomingChannels != null) {
-            // Sort channels based on activity or creation time
-            incomingChannels.sort((c1, c2) -> {
+            List<Channel> filteredChannels = new ArrayList<>();
+            for (Channel channel : incomingChannels) {
+                if (channel.isGroup()) {
+                    filteredChannels.add(channel);
+                } else {
+                    // For DMs, only include if the recipient is in the friend list
+                    boolean isFriend = false;
+                    if (friendList != null) {
+                        for (User friend : friendList) {
+                            if (friend.getId() == channel.getDmRecipientId()) {
+                                isFriend = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (isFriend) {
+                        filteredChannels.add(channel);
+                    }
+                }
+            }
+
+            // Sort filtered channels based on activity or creation time
+            filteredChannels.sort((c1, c2) -> {
                 String s1 = c1.getLastMessageTime();
                 String s2 = c2.getLastMessageTime();
 
@@ -48,7 +67,9 @@ public class GlobalData {
                 // Descending order (newest activity/creation first)
                 return Long.compare(t2, t1);
             });
-            channelList = incomingChannels;
+            channelList = filteredChannels;
+        } else {
+            channelList.clear();
         }
     }
 

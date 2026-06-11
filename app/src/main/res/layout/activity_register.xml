@@ -125,26 +125,39 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/regBar" />
 
-    <EditText
-        android:id="@+id/regIdentifierInput"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/regIdentifierInputContainer"
         android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="5dp"
         android:layout_marginEnd="20dp"
-        android:autofillHints="email, phone_number"
-        android:background="@drawable/input_background"
-        android:hint="@string/phone_number"
-        android:inputType="phone"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#767676"
-        android:textSize="16sp"
+        android:stateListAnimator="@null"
+        app:cardBackgroundColor="#131418"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:cardMaxElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/regLabel"
-        tools:ignore="TextFields" />
+        app:strokeWidth="0dp">
+
+        <EditText
+            android:id="@+id/regIdentifierInput"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:autofillHints="email, phone_number"
+            android:background="@null"
+            android:hint="@string/phone_number"
+            android:inputType="phone"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#767676"
+            android:textSize="16sp"
+            tools:ignore="TextFields" />
+
+    </com.google.android.material.card.MaterialCardView>
 
     <FrameLayout
         android:id="@+id/regNextBtnContainer"
@@ -155,7 +168,7 @@
         android:layout_marginEnd="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/regIdentifierInput">
+        app:layout_constraintTop_toBottomOf="@id/regIdentifierInputContainer">
 
         <Button
             android:id="@+id/regNextBtn"
