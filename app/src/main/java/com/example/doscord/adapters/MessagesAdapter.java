@@ -5,15 +5,28 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.media.AudioAttributes;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.airbnb.lottie.LottieAnimationView;
 import com.example.doscord.R;
 import com.example.doscord.activities.chatroom.CrNewGroupActivity;
@@ -31,8 +44,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -51,6 +66,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int VIEW_TYPE_BEGINNING_DM = 4;
     private static final int VIEW_TYPE_BEGINNING_GROUP = 5;
     private static final int VIEW_TYPE_SYSTEM = 6;
+    private static final int VIEW_TYPE_VOICE = 7;
+    private static final int VIEW_TYPE_VOICE_SEQUENTIAL = 8;
 
     private List<Message> messagesList;
     private final List<Object> displayList = new ArrayList<>();
@@ -60,6 +77,15 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private Channel currentChannel;
     private boolean showLoader = false;
     private boolean isLoaderPlaying = false;
+
+    private MediaPlayer mediaPlayer;
+    private String currentlyPlayingUrl = null;
+    private int currentlyPlayingPosition = -1;
+    private boolean isPrepared = false;
+    private Handler progressHandler = new Handler(Looper.getMainLooper());
+    private Runnable progressRunnable;
+    private final Map<String, String> durationCache = new HashMap<>();
+    private final Map<String, Integer> positionCache = new HashMap<>();
 
     public MessagesAdapter(List<Message> messagesList, Context context) {
         this.messagesList = messagesList;
@@ -121,6 +147,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
             displayList.add(current);
         }
+        preloadVoiceDurations();
     }
 
     @Override
@@ -139,6 +166,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         Message current = (Message) item;
+        boolean isVoice = "voice".equalsIgnoreCase(current.getType());
 
         if ("system".equalsIgnoreCase(current.getType())) {
             return VIEW_TYPE_SYSTEM;
@@ -155,27 +183,38 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
         }
 
-        if (previous == null) return VIEW_TYPE_NORMAL;
-        if (!current.getSenderId().equals(previous.getSenderId())) return VIEW_TYPE_NORMAL;
+        if (previous == null) return isVoice ? VIEW_TYPE_VOICE : VIEW_TYPE_NORMAL;
+        if (current.getSenderId() == null || previous.getSenderId() == null) return isVoice ? VIEW_TYPE_VOICE : VIEW_TYPE_NORMAL;
+        if (!current.getSenderId().equals(previous.getSenderId())) return isVoice ? VIEW_TYPE_VOICE : VIEW_TYPE_NORMAL;
+
+        String t1 = current.getSentAt();
+        String t2 = previous.getSentAt();
+
+        if (t1 == null || t2 == null) return isVoice ? VIEW_TYPE_VOICE : VIEW_TYPE_NORMAL;
 
         try {
+            // Flexible parsing to handle variations (space vs T separator)
+            String normalizedT1 = t1.replace('T', ' ');
+            String normalizedT2 = t2.replace('T', ' ');
+
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-            Date currentDate = sdf.parse(current.getSentAt());
-            Date previousDate = sdf.parse(previous.getSentAt());
+            Date currentDate = sdf.parse(normalizedT1.substring(0, Math.min(normalizedT1.length(), 19)));
+            Date previousDate = sdf.parse(normalizedT2.substring(0, Math.min(normalizedT2.length(), 19)));
 
             if (currentDate != null && previousDate != null) {
-                long diffMillis = currentDate.getTime() - previousDate.getTime();
+                long diffMillis = Math.abs(currentDate.getTime() - previousDate.getTime());
                 long diffMinutes = diffMillis / (60 * 1000);
 
                 if (diffMinutes < 5) {
-                    return VIEW_TYPE_SEQUENTIAL;
+                    return isVoice ? VIEW_TYPE_VOICE_SEQUENTIAL : VIEW_TYPE_SEQUENTIAL;
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // Fallback: if parsing fails but they are extremely close (same string), group them
+            if (t1.equals(t2)) return isVoice ? VIEW_TYPE_VOICE_SEQUENTIAL : VIEW_TYPE_SEQUENTIAL;
         }
 
-        return VIEW_TYPE_NORMAL;
+        return isVoice ? VIEW_TYPE_VOICE : VIEW_TYPE_NORMAL;
     }
 
     @NonNull
@@ -201,6 +240,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } else if (viewType == VIEW_TYPE_SEQUENTIAL) {
             View view = inflater.inflate(R.layout.item_seq_message, parent, false);
             return new SequentialViewHolder(view);
+        } else if (viewType == VIEW_TYPE_VOICE) {
+            View view = inflater.inflate(R.layout.item_voice_message, parent, false);
+            return new VoiceViewHolder(view);
+        } else if (viewType == VIEW_TYPE_VOICE_SEQUENTIAL) {
+            View view = inflater.inflate(R.layout.item_voice_message_seq, parent, false);
+            return new VoiceSequentialViewHolder(view);
         } else {
             View view = inflater.inflate(R.layout.item_message, parent, false);
             return new NormalViewHolder(view);
@@ -226,7 +271,11 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } else if (holder instanceof SplitterViewHolder) {
             ((SplitterViewHolder) holder).dateText.setText((String) item);
         } else if (holder instanceof NormalViewHolder) {
-            bindNormalMessage((NormalViewHolder) holder, (Message) item);
+            bindNormalMessage((NormalViewHolder) holder, (Message) item, position);
+        } else if (holder instanceof VoiceViewHolder) {
+            bindVoiceMessage((VoiceViewHolder) holder, (Message) item, position);
+        } else if (holder instanceof VoiceSequentialViewHolder) {
+            bindVoiceSequentialMessage((VoiceSequentialViewHolder) holder, (Message) item, position);
         } else if (holder instanceof SystemViewHolder) {
             SystemViewHolder sysHolder = (SystemViewHolder) holder;
             Message msg = (Message) item;
@@ -260,7 +309,36 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 }
             }
         } else if (holder instanceof SequentialViewHolder) {
-            ((SequentialViewHolder) holder).content.setText(((Message) item).getMessageText());
+            SequentialViewHolder seqHolder = (SequentialViewHolder) holder;
+            Message msg = (Message) item;
+            if (msg.isEdited()) {
+                String fullText = msg.getMessageText() + " (Edited)";
+                SpannableString spannable = new SpannableString(fullText);
+                int start = msg.getMessageText().length();
+                int end = fullText.length();
+                spannable.setSpan(new ForegroundColorSpan(context.getColor(R.color.gray)), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannable.setSpan(new RelativeSizeSpan(0.8f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                seqHolder.content.setText(spannable);
+            } else {
+                seqHolder.content.setText(msg.getMessageText());
+            }
+
+            if (msg.getMessageText() == null || msg.getMessageText().trim().isEmpty()) {
+                seqHolder.content.setVisibility(View.GONE);
+            } else {
+                seqHolder.content.setVisibility(View.VISIBLE);
+            }
+
+            if (msg.getMediaUrl() != null && !msg.getMediaUrl().isEmpty()) {
+                seqHolder.imageContainer.setVisibility(View.VISIBLE);
+                String fullUrl = "https://doscord.top/api/uploads/" + msg.getMediaUrl();
+                Glide.with(context)
+                        .load(fullUrl)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(seqHolder.image);
+            } else {
+                seqHolder.imageContainer.setVisibility(View.GONE);
+            }
         }
 
         // Apply message bubbles padding properties, including system alerts if at the end
@@ -394,8 +472,36 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    private void bindNormalMessage(NormalViewHolder holder, Message message) {
-        holder.content.setText(message.getMessageText());
+    private void bindNormalMessage(NormalViewHolder holder, Message message, int position) {
+        if (message.isEdited()) {
+            String fullText = message.getMessageText() + " (Edited)";
+            SpannableString spannable = new SpannableString(fullText);
+            int start = message.getMessageText().length();
+            int end = fullText.length();
+            spannable.setSpan(new ForegroundColorSpan(context.getColor(R.color.gray)), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(new RelativeSizeSpan(0.8f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            holder.content.setText(spannable);
+        } else {
+            holder.content.setText(message.getMessageText());
+        }
+
+        if (message.getMessageText() == null || message.getMessageText().trim().isEmpty()) {
+            holder.content.setVisibility(View.GONE);
+        } else {
+            holder.content.setVisibility(View.VISIBLE);
+        }
+
+        if (message.getMediaUrl() != null && !message.getMediaUrl().isEmpty()) {
+            holder.imageContainer.setVisibility(View.VISIBLE);
+            String fullUrl = "https://doscord.top/api/uploads/" + message.getMediaUrl();
+            Glide.with(context)
+                    .load(fullUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(holder.image);
+        } else {
+            holder.imageContainer.setVisibility(View.GONE);
+        }
+
         holder.time.setText(formattedTime(message.getSentAt()));
 
         // Dynamically resolve the user model from our local GlobalData caches
@@ -409,6 +515,54 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             holder.username.setText("User #" + message.getSenderId());
             holder.pfp.setImageResource(R.drawable.icon);
         }
+    }
+
+    private void bindVoiceMessage(VoiceViewHolder holder, Message message, int position) {
+        String url = message.getMediaUrl();
+        if (url != null && url.equals(currentlyPlayingUrl)) {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                holder.playBtn.setImageResource(R.drawable.pause);
+            } else {
+                holder.playBtn.setImageResource(R.drawable.play);
+            }
+            if (isPrepared) {
+                updateProgressUI(holder.seekBar, holder.timer, url);
+            }
+        } else {
+            holder.playBtn.setImageResource(R.drawable.play);
+            updateProgressUI(holder.seekBar, holder.timer, url);
+        }
+
+        holder.playBtn.setOnClickListener(v -> playVoiceMessage(message.getMediaUrl(), position));
+        holder.time.setText(formattedTime(message.getSentAt()));
+
+        User sender = GlobalData.findUserById(message.getSenderId());
+        if (sender != null) {
+            holder.username.setText(sender.getNameToDisplay());
+            PfpUtils.loadPfp(context, sender.getPfp(), holder.pfp);
+        } else {
+            holder.username.setText("User #" + message.getSenderId());
+            holder.pfp.setImageResource(R.drawable.icon);
+        }
+    }
+
+    private void bindVoiceSequentialMessage(VoiceSequentialViewHolder holder, Message message, int position) {
+        String url = message.getMediaUrl();
+        if (url != null && url.equals(currentlyPlayingUrl)) {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                holder.playBtn.setImageResource(R.drawable.pause);
+            } else {
+                holder.playBtn.setImageResource(R.drawable.play);
+            }
+            if (isPrepared) {
+                updateProgressUI(holder.seekBar, holder.timer, url);
+            }
+        } else {
+            holder.playBtn.setImageResource(R.drawable.play);
+            updateProgressUI(holder.seekBar, holder.timer, url);
+        }
+
+        holder.playBtn.setOnClickListener(v -> playVoiceMessage(message.getMediaUrl(), position));
     }
 
     @Override
@@ -488,8 +642,9 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public static class NormalViewHolder extends RecyclerView.ViewHolder {
-        ImageView pfp;
+        ImageView pfp, image;
         TextView username, content, time;
+        View imageContainer;
 
         public NormalViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -497,14 +652,50 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             username = itemView.findViewById(R.id.itemMsgUsername);
             content = itemView.findViewById(R.id.itemMsgContent);
             time = itemView.findViewById(R.id.itemMsgTime);
+            image = itemView.findViewById(R.id.itemMsgImage);
+            imageContainer = itemView.findViewById(R.id.itemMsgImageContainer);
         }
     }
 
     public static class SequentialViewHolder extends RecyclerView.ViewHolder {
         TextView content;
+        ImageView image;
+        View imageContainer;
+
         public SequentialViewHolder(@NonNull View itemView) {
             super(itemView);
             content = itemView.findViewById(R.id.itemMsgContent);
+            image = itemView.findViewById(R.id.itemMsgImage);
+            imageContainer = itemView.findViewById(R.id.itemMsgImageContainer);
+        }
+    }
+
+    public static class VoiceViewHolder extends RecyclerView.ViewHolder {
+        ImageView pfp, playBtn;
+        ProgressBar seekBar;
+        TextView username, time, timer;
+
+        public VoiceViewHolder(@NonNull View itemView) {
+            super(itemView);
+            pfp = itemView.findViewById(R.id.itemMsgPfp);
+            playBtn = itemView.findViewById(R.id.itemMsgPlayBtn);
+            seekBar = itemView.findViewById(R.id.voiceSeekBar);
+            timer = itemView.findViewById(R.id.voiceTimer);
+            username = itemView.findViewById(R.id.itemMsgUsername);
+            time = itemView.findViewById(R.id.itemMsgTime);
+        }
+    }
+
+    public static class VoiceSequentialViewHolder extends RecyclerView.ViewHolder {
+        ImageView playBtn;
+        ProgressBar seekBar;
+        TextView timer;
+
+        public VoiceSequentialViewHolder(@NonNull View itemView) {
+            super(itemView);
+            playBtn = itemView.findViewById(R.id.itemMsgPlayBtn);
+            seekBar = itemView.findViewById(R.id.voiceSeekBar);
+            timer = itemView.findViewById(R.id.voiceTimer);
         }
     }
 
@@ -518,6 +709,217 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             text = itemView.findViewById(R.id.itemSystemText);
             date = itemView.findViewById(R.id.itemSystemDate);
         }
+    }
+
+    private void playVoiceMessage(String urlPart, int position) {
+        if (urlPart == null || urlPart.isEmpty()) return;
+
+        if (mediaPlayer != null && urlPart.equals(currentlyPlayingUrl)) {
+            if (isPrepared) {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                    positionCache.put(urlPart, mediaPlayer.getCurrentPosition());
+                    stopProgressUpdate();
+                } else {
+                    mediaPlayer.start();
+                    startProgressUpdate();
+                }
+                notifyItemChanged(position);
+            }
+            return;
+        }
+
+        int previousPosition = currentlyPlayingPosition;
+        if (mediaPlayer != null) {
+            positionCache.put(currentlyPlayingUrl, mediaPlayer.getCurrentPosition());
+        }
+        stopAndReleasePlayer();
+
+        currentlyPlayingUrl = urlPart;
+        currentlyPlayingPosition = position;
+        
+        if (previousPosition != -1) notifyItemChanged(previousPosition);
+        notifyItemChanged(position);
+
+        String fullUrl = getVoiceFullUrl(urlPart);
+
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .build());
+
+        try {
+            mediaPlayer.setDataSource(fullUrl);
+            mediaPlayer.setOnPreparedListener(mp -> {
+                isPrepared = true;
+                Integer savedPos = positionCache.get(urlPart);
+                if (savedPos != null) {
+                    mp.seekTo(savedPos);
+                }
+                mp.start();
+                startProgressUpdate();
+                if (currentlyPlayingPosition != -1) notifyItemChanged(currentlyPlayingPosition);
+            });
+            mediaPlayer.setOnCompletionListener(mp -> {
+                int pos = currentlyPlayingPosition;
+                positionCache.put(urlPart, 0); // Reset for this message
+                stopAndReleasePlayer();
+                if (pos != -1) notifyItemChanged(pos);
+            });
+            mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                Toast.makeText(context, "Playback error: " + what, Toast.LENGTH_SHORT).show();
+                int pos = currentlyPlayingPosition;
+                stopAndReleasePlayer();
+                if (pos != -1) notifyItemChanged(pos);
+                return true;
+            });
+            mediaPlayer.prepareAsync();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Failed to load audio", Toast.LENGTH_SHORT).show();
+            stopAndReleasePlayer();
+            notifyItemChanged(position);
+        }
+    }
+
+    private String getVoiceFullUrl(String urlPart) {
+        if (urlPart == null || urlPart.isEmpty()) return "";
+        if (urlPart.startsWith("http")) return urlPart;
+        
+        if (urlPart.startsWith("uploads/")) {
+            return "https://doscord.top/api/" + urlPart;
+        } else if (urlPart.startsWith("attachments/")) {
+            return "https://doscord.top/api/uploads/" + urlPart;
+        } else {
+            return "https://doscord.top/api/uploads/attachments/" + urlPart;
+        }
+    }
+
+    private void preloadVoiceDurations() {
+        for (Message m : messagesList) {
+            if ("voice".equalsIgnoreCase(m.getType())) {
+                String url = m.getMediaUrl();
+                if (url != null && !durationCache.containsKey(url)) {
+                    new Thread(() -> {
+                        try {
+                            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                            retriever.setDataSource(getVoiceFullUrl(url), new HashMap<>());
+                            String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                            long durationMs = Long.parseLong(time);
+                            String formatted = formatDuration((int) durationMs);
+                            retriever.release();
+                            
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                durationCache.put(url, formatted);
+                                // Find all instances of this message in displayList and notify
+                                for (int i = 0; i < displayList.size(); i++) {
+                                    Object obj = displayList.get(i);
+                                    if (obj instanceof Message && url.equals(((Message) obj).getMediaUrl())) {
+                                        notifyItemChanged(i);
+                                    }
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
+                }
+            }
+        }
+    }
+
+    private void stopAndReleasePlayer() {
+        isPrepared = false;
+        if (mediaPlayer != null) {
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
+            } catch (Exception ignored) {}
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+        currentlyPlayingUrl = null;
+        currentlyPlayingPosition = -1;
+        stopProgressUpdate();
+    }
+
+    private void startProgressUpdate() {
+        stopProgressUpdate();
+        progressRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                    if (currentlyPlayingPosition != -1) {
+                        notifyItemChanged(currentlyPlayingPosition, "PAYLOAD_PROGRESS");
+                    }
+                    progressHandler.postDelayed(this, 500);
+                }
+            }
+        };
+        progressHandler.postDelayed(progressRunnable, 0);
+    }
+
+    private void stopProgressUpdate() {
+        if (progressRunnable != null) {
+            progressHandler.removeCallbacks(progressRunnable);
+            progressRunnable = null;
+        }
+    }
+
+    private void updateProgressUI(ProgressBar seekBar, TextView timer, String url) {
+        if (mediaPlayer != null && currentlyPlayingUrl != null && isPrepared && url.equals(currentlyPlayingUrl)) {
+            try {
+                int current = mediaPlayer.getCurrentPosition();
+                int duration = mediaPlayer.getDuration();
+                if (duration > 0) {
+                    seekBar.setMax(duration);
+                    seekBar.setProgress(current);
+                    timer.setText(formatDuration(current) + " / " + formatDuration(duration));
+                }
+            } catch (IllegalStateException e) {
+                // Player was likely released or not in the correct state
+            }
+        } else {
+            // Check if we have a saved position to display
+            Integer savedPos = positionCache.get(url);
+            String total = durationCache.get(url);
+            if (savedPos != null && savedPos > 0) {
+                seekBar.setProgress(savedPos);
+                timer.setText(formatDuration(savedPos) + " / " + (total != null ? total : "0:00"));
+            } else {
+                seekBar.setProgress(0);
+                timer.setText("0:00 / " + (total != null ? total : "0:00"));
+            }
+        }
+    }
+
+    private String formatDuration(int millis) {
+        int seconds = (millis / 1000) % 60;
+        int minutes = (millis / (1000 * 60)) % 60;
+        return String.format(Locale.getDefault(), "%d:%02d", minutes, seconds);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (payloads.contains("PAYLOAD_PROGRESS")) {
+            if (holder instanceof VoiceViewHolder) {
+                VoiceViewHolder vh = (VoiceViewHolder) holder;
+                Message m = (Message) displayList.get(position);
+                updateProgressUI(vh.seekBar, vh.timer, m.getMediaUrl());
+            } else if (holder instanceof VoiceSequentialViewHolder) {
+                VoiceSequentialViewHolder vh = (VoiceSequentialViewHolder) holder;
+                Message m = (Message) displayList.get(position);
+                updateProgressUI(vh.seekBar, vh.timer, m.getMediaUrl());
+            }
+        } else {
+            super.onBindViewHolder(holder, position, payloads);
+        }
+    }
+
+    public void release() {
+        stopAndReleasePlayer();
     }
 
     private String formattedTime(String rawTime) {

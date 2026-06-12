@@ -65,6 +65,14 @@ public interface ApiService {
             @Part List<MultipartBody.Part> files
     );
 
+    @Multipart
+    @POST("send-voice")
+    Call<com.example.doscord.models.Message> sendVoiceMessage(
+            @Part("channel_id") RequestBody channel_id,
+            @Part("sender_id") RequestBody sender_id,
+            @Part MultipartBody.Part voice_file
+    );
+
     @POST("get-updates")
     Call<UpdateResponse> checkUpdates(@Body UpdateRequest request);
 
@@ -94,4 +102,10 @@ public interface ApiService {
 
     @POST("unblock")
     Call<Void> unblock(@Body UnblockUserRequest request);
+
+    @POST("edit-message")
+    Call<Void> editMessage(@Body EditMessageRequest request);
+
+    @POST("delete-message")
+    Call<Void> deleteMessage(@Body DeleteMessageRequest request);
 }

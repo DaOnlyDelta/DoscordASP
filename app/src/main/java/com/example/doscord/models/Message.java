@@ -6,7 +6,9 @@ public class Message {
     private Integer channel_id;
     private String message_text;
     private String sent_at;
-    private String type; // Will be "normal" or "system"
+    private String type; // Will be "normal", "system", or "voice"
+    private String media_url;
+    private int is_edited;
 
     public Message(Integer senderId, String content, String sentAt) {
         this.sender_id = senderId;
@@ -23,4 +25,6 @@ public class Message {
     public String getType() {
         return type != null ? type : "normal";
     }
+    public String getMediaUrl() { return media_url; }
+    public boolean isEdited() { return is_edited == 1; }
 }

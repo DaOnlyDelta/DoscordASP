@@ -9,7 +9,7 @@ import com.example.doscord.R;
 
 public class PfpUtils {
 
-    private static final String BASE_IMAGE_URL = "https://doscord.top/api/images/";
+    private static final String BASE_IMAGE_URL = "https://doscord.top/api/uploads/";
 
     /**
      * Loads a profile picture into an ImageView, handling local mapping for default avatars
