@@ -100,4 +100,4 @@ Contributions are welcome! Please ensure any pull requests adhere to the formatt
 
 ## 📄 License
 
-*(Add your license information here, e.g., MIT, GPLv3, etc.)*
+*MIT License*
